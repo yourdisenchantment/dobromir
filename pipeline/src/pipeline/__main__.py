@@ -10,6 +10,8 @@ from typing import Literal, cast
 import httpx
 
 from pipeline.export import build_news, write_news
+from pipeline.reconcile import fetch_wall
+from pipeline.run import run_sync
 from pipeline.settings import load_settings
 from pipeline.store import Store, open_db
 from pipeline.survey import run_survey
@@ -36,6 +38,8 @@ def main() -> None:
     load.add_argument("files", nargs="+", type=Path, help="JSON-файлы ответов, например из survey")
     sub.add_parser("photos", help="скачать фото живых постов, которых еще нет")
     sub.add_parser("export", help="записать news.json из базы")
+    sub.add_parser("backfill", help="загрузить в базу всю стену VK (первичная загрузка)")
+    sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)  # httpx пишет адреса запросов
@@ -58,6 +62,23 @@ def main() -> None:
             responses = [json.loads(f.read_text(encoding="utf-8")) for f in args.files]
             changes = ingest(store, responses, now)
             logging.info("записано: %s", {c.value: n for c, n in changes.items()} or "ничего")
+        elif args.command in ("backfill", "sync"):
+            with httpx.Client() as http:
+                vk = VkClient(settings.vk(), http)
+                if args.command == "backfill":
+                    changes = ingest(store, [fetch_wall(vk, None, settings.vk_page_size)], now)
+                    logging.info("записано: %s", {c.value: n for c, n in changes.items()} or "ничего")
+                else:
+                    r = run_sync(store, vk, http, settings, now)
+                    logging.info(
+                        "посты: %s; удалено: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
+                        {c.value: n for c, n in r.changes.items()} or "нет",
+                        r.deleted,
+                        "да" if r.full_reconcile else "нет",
+                        r.photos,
+                        "изменился" if r.news_changed else "без изменений",
+                        "нужна" if r.build_now else ("отложена (лимит)" if r.pending else "не нужна"),
+                    )
         elif args.command == "photos":
             with httpx.Client() as http:
                 logging.info("скачано фото: %s", download_photos(store, http, settings.site.media, now))

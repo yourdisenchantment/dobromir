@@ -143,21 +143,22 @@ class VkClient:
             raise VkApiError("wall.get: в ответе нет списка items")
         return resp
 
-    def wall_get_by_id(self, post_ids: list[int], extended: bool = False) -> list[dict[str, Any]]:
+    def wall_get_by_id(self, post_ids: list[int], extended: bool = False) -> dict[str, Any]:
         """Посты группы по их id. Чего нет в ответе - VK не отдал (удален, скрыт или нет прав).
 
         Returns:
-            Список постов; формы ответа в 5.199 бывают две (список или объект с items) -
-            приводим к списку.
+            Ответ в той же форме, что у `wall_get`: `items`, при extended - `groups` и
+            `profiles`. В 5.199 VK отдает либо список, либо объект с items - приводим к объекту.
         """
         if not post_ids:
-            return []
+            return {"items": []}
         resp = self.call(
             "wall.getById",
             posts=",".join(f"{self.owner_id}_{i}" for i in post_ids),
             extended=int(extended),
         )
-        items = resp.get("items") if isinstance(resp, dict) else resp
-        if not isinstance(items, list):
+        if isinstance(resp, list):
+            resp = {"items": resp}
+        if not isinstance(resp, dict) or not isinstance(resp.get("items"), list):
             raise VkApiError("wall.getById: неожиданная форма ответа")
-        return items
+        return resp

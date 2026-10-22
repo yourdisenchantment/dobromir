@@ -108,11 +108,11 @@ def test_wall_get_requires_items() -> None:
 def test_get_by_id_both_shapes(shape: str) -> None:
     posts = [{"id": 1}, {"id": 3}]
     rec = Recorder(ok(posts if shape == "list" else {"items": posts}))
-    assert client(rec).wall_get_by_id([1, 2, 3]) == posts
+    assert client(rec).wall_get_by_id([1, 2, 3])["items"] == posts
     assert b"posts=-242263522_1%2C-242263522_2%2C-242263522_3" in rec.requests[0].content
 
 
 def test_get_by_id_empty_list_makes_no_request() -> None:
     rec = Recorder()
-    assert client(rec).wall_get_by_id([]) == []
+    assert client(rec).wall_get_by_id([]) == {"items": []}
     assert rec.requests == []
