@@ -120,6 +120,11 @@ class Store:
             result.append(StoredPost(post=post, raw=raw, deleted_at=row["deleted_at"]))
         return result
 
+    def counts(self) -> tuple[int, int]:
+        """Сколько постов живых и сколько помечено удаленными."""
+        row = self._db.execute("SELECT COUNT(*) - COUNT(deleted_at), COUNT(deleted_at) FROM posts").fetchone()
+        return int(row[0]), int(row[1])
+
     def live_keys(self) -> list[tuple[int, int]]:
         return [
             (r["owner_id"], r["id"])

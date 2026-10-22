@@ -65,6 +65,9 @@ class FakeWall:
             return httpx.Response(200, json={"response": {"items": items, **names}})
         return httpx.Response(200, json={"error": {"error_code": 3, "error_msg": "Unknown method"}})
 
+    def http(self) -> httpx.Client:
+        return httpx.Client(transport=httpx.MockTransport(self))
+
     def client(self) -> VkClient:
         vk = VkSettings(token="T", group_id=GROUP, api_url="https://api.example/method/")
         return VkClient(vk, httpx.Client(transport=httpx.MockTransport(self)), sleep=lambda s: None)

@@ -3,6 +3,7 @@
 import argparse
 import json
 import logging
+import sys
 import time
 from pathlib import Path
 from typing import Literal, cast
@@ -17,6 +18,7 @@ from pipeline.store import Store, open_db
 from pipeline.survey import run_survey
 from pipeline.sync import download_photos, ingest
 from pipeline.vk.client import VkClient
+from pipeline.worker import EXIT_ERROR, run_worker
 
 
 def main() -> None:
@@ -40,7 +42,10 @@ def main() -> None:
     sub.add_parser("export", help="записать news.json из базы")
     sub.add_parser("backfill", help="загрузить в базу всю стену VK (первичная загрузка)")
     sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
+    sub.add_parser("worker", help="запуск из cron: блокировка, синк, сборка, status.json, коды выхода")
     args = parser.parse_args()
+    if args.command == "worker":
+        sys.exit(worker_main())
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)  # httpx пишет адреса запросов
 
@@ -93,6 +98,17 @@ def main() -> None:
             )
     finally:
         store.close()
+
+
+def worker_main() -> int:
+    """Без логов на экран: из cron любой вывод уходит письмом, поэтому печатается только ошибка."""
+    try:
+        settings = load_settings()
+    except RuntimeError as exc:
+        print(f"Воркер не запущен: неверные настройки. {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    with httpx.Client() as http:
+        return run_worker(settings, http)
 
 
 if __name__ == "__main__":

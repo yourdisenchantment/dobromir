@@ -53,6 +53,11 @@ class DataDirs:
         return self.root / "status.json"
 
     @property
+    def lock_file(self) -> Path:
+        """Блокировка от двух одновременных запусков воркера."""
+        return self.root / "worker.lock"
+
+    @property
     def env_file(self) -> Path:
         """Секреты и настройки сервера."""
         return self.root / ".env"
