@@ -1,0 +1,56 @@
+# Расхождения: отчет о хостинге (18.10.2026) против кода и документов
+
+Дата сверки: 2026-10-19. Сверяли `docs/hosting-report-2026-10-18.md` (источник истины) с `AGENTS.md`, `plan-razrabotki.md`, `tmp/plan-v2-struktura-skripty-operatora.md`, `tmp/tz-struktura-i-kontent.md`, `tmp/vk-check-scenario.md` и кодом `pipeline/`, `site/`. Код не запускали (в облачной сессии нет Python 3.10 с зависимостями и доступа к VK), выводы по коду - из чтения файлов.
+
+Колонка «Решение» - то, что выбрано как допущение, чтобы Claude Code мог работать без вопросов. Если допущение спорное, оно же продублировано в `OPEN-QUESTIONS.md`. Задачи по исправлению - в `BACKLOG.md` (номер задачи указан).
+
+## A. Критичные (ломают запуск на хостинге)
+
+| № | Где | Что в репозитории | Что в отчете | Решение | Задача |
+|---|---|---|---|---|---|
+| 1 | `pipeline/pyproject.toml`, `uv.lock`, `AGENTS.md` («Python 3.14») | `requires-python = ">=3.14"`, `uv.lock` собран под 3.14; в коде `from datetime import UTC` (3.11+) в `parse/model.py`, `fetch/rawlog.py` | На хосте и в cron Python 3.10.12; свой интерпретатор не ставим, `uv` на хосте не проверялся | Целевая версия 3.10: `requires-python = ">=3.10"`, ruff `target-version = "py310"`, mypy `python_version = "3.10"`, `.python-version` = 3.10, `uv lock` заново, `UTC` -> `timezone.utc`. Разработка локально тоже на 3.10, чтобы не поймать 3.11+-синтаксис | P0-1 |
+| 2 | `pipeline/src/pipeline/vk/longpoll.py`, `fetch/source.py` (`LongPollSource`), `sync.run_longpoll`, команда `longpoll` в `__main__.py`, `tests/test_longpoll.py`, часть `tests/test_pipeline.py`, `tmp/commits/06-pipeline-longpoll.txt` | Весь поток построен на Bots Long Poll и событиях Callback API (`wall_post_new`) | Демоны запрещены (п. 6, 22.4 правил), Long Poll не используется. Вместо него `wall.get` окна + суточная `wall.getById` | Удалить Long Poll-код и его тесты (список файлов даем, удаляет Павел - правило `AGENTS.md`). `PostSource` и форму «события Callback» не сохранять: `wall.get` отдает объекты постов, а не события | P0-2 |
+| 3 | `site/bun.lock`, `AGENTS.md`, `plan-razrabotki.md` (раздел 5) | bun как менеджер пакетов, `bun.lock` | На сервере npm и `package-lock.json`; bun у Beget не документирован | Перейти на npm: создать `package-lock.json`, удалить `bun.lock`, заменить команды в `AGENTS.md` (сделано) и в хуках `.pre-commit-config.yaml` (файла нет в общей папке, см. п. 14) | P0-3 |
+| 4 | `pipeline/` зависимости: `uv`, `uv.lock` | Зависимости ставит `uv sync --frozen` | На сервере `python3 -m venv` + `pip` с точными версиями; `uv` на хосте не проверялся | Локально `uv` остается. Для сервера порождать `requirements.txt` с точными версиями командой `uv export --frozen --no-dev --no-hashes -o requirements.txt` и коммитить его; `deploy.sh` ставит через `pip install -r`. Проверка на хосте - блокер P1-7 | P0-1, P1-7 |
+| 5 | `pipeline/src/pipeline/settings.py` (`DataDirs`) | Раскладка `raw/`, `state.sqlite`, `media/`, `content/` внутри `$DOBROMIR_DATA`; секреты читаются из `~/.env.local` | `~/dobromir-data/{db/dobromir.sqlite, export/news.json, logs/worker.log, status.json, .env}`; **media и releases внутри `~/a978879k.beget.tech`**, не внутри каталога данных | Переписать `DataDirs`: `db`, `export`, `logs`, `status_json`, `env_file` внутри `DOBROMIR_DATA`; отдельные переменные `MEDIA_DIR` и `RELEASES_DIR` (или `SITE_ROOT`, из которого они выводятся). Локально `DOBROMIR_DATA` и `SITE_ROOT` указывают на песочницу вне репозитория | P0-4 |
+| 6 | `pipeline/src/pipeline/vk/client.py` | Токен идет в заголовке `Authorization: Bearer`, хост `api.vk.ru`, `v=5.199`; токен - ключ сообщества (`VK_COMMUNITY_TOKEN`) | `wall.get` разрешен только пользовательскому и сервисному ключу (`vk-api/schema/methods-access.tsv`); в отчете хост `api.vk.com` не проверен с хостинга. Память проекта: сервисный ключ проверен на `api.vk.ru`, не на `.com` | Читать стену сервисным ключом (`VK_SERVICE_TOKEN`). Хост - из переменной `VK_API_URL`, по умолчанию `https://api.vk.ru/method/`. Что сервисный ключ принимается в `Authorization: Bearer`, **не проверено** (проверяли параметром `access_token`): в клиенте сделать проверяемым и закрыть тестом на тестовой группе | P0-5, P1-1 |
+
+## B. Логика, которой нет вовсе
+
+| № | Что нужно по отчету (разд. 9) | Что есть | Задача |
+|---|---|---|---|
+| 7 | Хэш отображаемого содержимого, `edited_at`, мягкое удаление `deleted_at`, защита от массового удаления, статус `pending` и `MAX_BUILDS_PER_DAY`, суточная сверка | Только `Store` из двух колонок ключ-значение (`store/state.py`); таблиц `posts` нет | P1-2, P1-3, P1-4 |
+| 8 | `fcntl`-блокировка, `status.json`, ненулевой код выхода и сообщения в stderr, ротация лога, отдельное сообщение об ошибке токена | Нет. `__main__.py` не различает типы ошибок | P1-5 |
+| 9 | Сборка в `releases/<ts>/`, проверки релиза, атомарная смена `public_html`, чистка до 5 релизов, откат | Нет (`sync.process` только пишет `content/`) | P1-6, P2-1 |
+| 10 | Экспорт: один `export/news.json` для Astro (`NEWS_JSON`) | Экспорт - папка на пост `content/news/<дата>-vk<id>/meta.json` и жесткие ссылки на фото (`export/news.py`) | P1-3 |
+| 11 | Скачивание картинок один раз; удаление неиспользуемых медиа через 30 дней | Скачивание есть и хорошее (`media/photos.py`: EXIF/GPS, ориентация). Удаления нет. Хранение: `media/photos/<uid>.jpg` | P1-3 (сохранить логику, поменять корень), P2-2 |
+| 12 | Репосты (`copy_history`) и вложения разных типов - в тестах отчета (п. 16) | `parse/posts.py` игнорирует `copy_history`; все не-фото/не-ссылки идут в `skipped`; закрепленный пост берется по `is_pinned` | P1-2 (после P1-1: форма реального ответа) |
+| 13 | Разметка VK (`[club123\|текст]`, хэштеги) и экранирование, XSS | Нет (текст кладется как есть, `description` = полный текст) | P1-2, P3-1 |
+
+## C. Структура и имена
+
+| № | Где | Расхождение | Решение |
+|---|---|---|---|
+| 14 | Корень репозитория | `AGENTS.md` и `tmp/OVERVIEW.md` ссылаются на `.pre-commit-config.yaml`, `.cz.toml`, `.gitignore`, `.gitattributes`, `.env.example`; **в общей папке проекта этих файлов нет** (точечные файлы, вероятно, не синхронизируются). Репозиторий не git-инициализирован, GitVerse-репозитория тоже нет | Проверить наличие у Павла локально. Если файлы есть, они уже нужны к первому коммиту (хуки bun -> npm правятся в P0-3). Если нет - восстановить по описанию в `AGENTS.md` (три хука, запрет подписей, закрепленные ревизии) |
+| 15 | Каталоги | Отчет: `backend/`, `frontend/`, `deploy/`, `docs/`. Репозиторий: `pipeline/`, `site/`, и `infra/` (systemd, nginx) в плане | Оставляем `pipeline/` и `site/` (там есть код и зеленые проверки, переименование ради имен в отчете не окупается). `infra/` заменить на `deploy/` с содержимым из отчета разд. 8. `docs/` создан. Папки `scripts/` с меню оператора из `plan-v2` пока **не создавать** (см. п. 20). Точка входа воркера: `python -m pipeline worker`, `deploy/run-worker.sh` вызывает ее |
+| 16 | `site/astro.config.mjs` | `site: "https://dobromir.ru"` зашит; нет `outDir` из `ASTRO_OUT_DIR`; нет чтения `NEWS_JSON`; нет `SITE_ENV` (noindex для staging) | `site` из `SITE_URL`, `outDir` из `ASTRO_OUT_DIR`, `trailingSlash` согласовать со старыми адресами (WordPress заканчивал на `/`). P1-8 |
+| 17 | `site/package.json` | `engines.node >= 22.12.0`, зависимости `latest` | Node на сервере 24.15.0, `engines` оставить; `latest` допустимо только при коммите `package-lock.json` и установке на сервере через `npm ci` (иначе версии поплывут) |
+| 18 | Домен | `AGENTS.md`, `plan-razrabotki.md`, `astro.config.mjs`: `dobromir.ru` (решено 2026-09). Отчет: у владельца только `добромир-крым.рф`, оплачен до 26.02.2027 | **Решено 2026-10-19: основной домен `добромир-крым.рф`**, `dobromir.ru` была пожеланием Павла. `SITE_URL` из окружения, по умолчанию punycode-форма без `www` (допущение О1); один канонический вариант, остальные 301, адреса со слэшем в конце |
+| 19 | `parse/model.py` | `LOCAL_TZ` = фиксированное UTC+3 | Отчет требует `Europe/Simferopol`. Для 2026 года результат совпадает, но решение «пост 23:30 не меняет дату» лучше строить на `zoneinfo.ZoneInfo("Europe/Simferopol")`. На хосте нужна база tz (`tzdata` в системе или пакет `tzdata` в зависимостях) - проверить в P1-7 |
+
+## D. Устаревшие документы и решения
+
+| № | Документ | Что устарело |
+|---|---|---|
+| 20 | `tmp/plan-v2-struktura-skripty-operatora.md`, `tmp/plan-struktura-skripty-zapusk.md`, `tmp/tz-struktura-i-kontent.md` | Построены на VPS: systemd-службы (слушатель Long Poll, таймеры), nginx, `current`-ссылка, Telegram-уведомления, бот, пользователь `operator` через SSH, `justfile`. На Beget этого нет. Оператор без техзнаний не будет работать с меню по SSH: ему остаются письмо cron, `status.json` и `README-for-hosting-admin.md`. Что из этих планов остается: **идея** «светофор» для `status.json`/письма, защита белым списком при очистке, русские сообщения об ошибках, `docs-check`. Меню `dobromir` и `scripts/` - в P3, если вообще понадобятся |
+| 21 | `plan-razrabotki.md` | Разделы 5 (systemd, Docker), 6 (Long Poll, один цикл), 9 (Telegram), 11 (инфраструктура: systemd, nginx, `infra/`, `bun install` в деплое), 14 («роль базы» - решена) устарели. В начало плана добавлена пометка (2026-10-19) |
+| 22 | `tmp/vk-check-scenario.md` | Актуален: это ручная проверка п. 14.10 отчета. Упоминает `deploy/run-worker.sh`, `pipeline/sync.py` и скрипт `vk_check.py` (его надо положить локально, его нет в репозитории - он встроен в сам документ). Используется как раздел «Проверка VK API» BACKLOG (P1-1). `spike/` по назначению заменен этим сценарием; удалить после P1-1 |
+| 23 | `tmp/test-posts/publish.py` | Использует `api.vk.com`, `access_token` в теле и `requires-python >=3.12` (для разового скрипта на ноутбуке допустимо) |
+| 24 | Память проекта | Остается верной; не сходится только строка «Справочник VK API: Long Poll УСТАРЕЛ» - согласуется с отчетом |
+
+## E. Конфликт инструментальных правил
+
+| № | Что | Как поступить |
+|---|---|---|
+| 25 | `AGENTS.md` запрещает `Co-Authored-By`, `Signed-off-by` и «Generated with» в коммитах и PR, проверяется хуком `commit-msg`. Некоторые инструменты (в том числе облачные сессии Claude) добавляют такие строки сами | Правило `AGENTS.md` сильнее умолчаний инструмента. Claude Code локально у Павла: не добавлять подписей |
+| 26 | `AGENTS.md`: «Не создавать файлы вне таблицы "Где что лежит"» против потребности создавать `deploy/`, `docs/` | Таблица обновлена (2026-10-19): добавлены `deploy/`, `docs/`. Новые каталоги дальше - только после правки таблицы |

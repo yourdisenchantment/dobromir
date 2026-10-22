@@ -1,0 +1,98 @@
+# Только механические проверки. Суть изменения (одна тема на коммит, "почему" в
+# теле, формулировки) проверяет человек, читая черновик в tmp/commits/:
+# автоматизация суждения дает ложные срабатывания и приучает к --no-verify.
+#
+# Хуки ставятся один раз после git init (все три вида нужны):
+#   uv run --project pipeline pre-commit install
+#   uv run --project pipeline pre-commit install --hook-type commit-msg
+#   uv run --project pipeline pre-commit install --hook-type pre-push
+
+exclude: "^(spike/out/|tmp/)"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        # В TSV-схеме VK хвостовая табуляция - это пустая последняя колонка:
+        # "починка" срезала бы колонку у сотен строк.
+        exclude: ^vk-api/
+      - id: end-of-file-fixer
+      - id: check-toml
+      - id: check-yaml
+      - id: check-merge-conflict
+      # macOS и Windows не различают регистр, Linux различает: пара файлов с
+      # разницей только в регистре ломает checkout на остальных.
+      - id: check-case-conflict
+      - id: detect-private-key
+      # Фото детей в репозиторий попасть не должны. Лимит ловит случайно
+      # добавленные медиафайлы и дампы данных.
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      # no-commit-to-branch нет намеренно: ветка одна, main, коммиты идут в нее
+      # напрямую (решено 2026-10-22).
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^pipeline/
+      - id: ruff-format
+        files: ^pipeline/
+
+  - repo: local
+    hooks:
+      - id: site-lint
+        name: site - eslint
+        entry: npm --prefix site run lint
+        language: system
+        files: ^site/
+        pass_filenames: false
+
+      - id: site-format
+        name: site - prettier --check
+        entry: npm --prefix site run format:check
+        language: system
+        files: ^site/
+        pass_filenames: false
+
+      - id: commitizen
+        name: commitizen check
+        entry: uv run --project pipeline cz check --allow-abort --commit-msg-file
+        language: system
+        stages: [commit-msg]
+
+      # Агенты не должны числиться контрибьюторами: в сообщении коммита только
+      # текст. Правило не требует толкования, поэтому оно автоматизировано.
+      - id: no-attribution-trailer
+        name: no attribution trailers
+        language: pygrep
+        entry: '(?i)^\s*(co-authored-by|signed-off-by)\s*:|generated with .*claude'
+        stages: [commit-msg]
+
+      # Медленнее, чем нужно на каждый коммит, поэтому на push. Хук, который
+      # пропускают, хуже медленного.
+      - id: pipeline-mypy
+        name: pipeline - mypy
+        entry: uv run --directory pipeline mypy
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: pipeline-pytest
+        name: pipeline - pytest
+        entry: uv run --directory pipeline pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: site-astro-check
+        name: site - astro check
+        entry: npm --prefix site run check
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

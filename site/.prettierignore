@@ -1,0 +1,5 @@
+dist/
+.astro/
+node_modules/
+# Lock-файл пишет npm в своем формате, prettier его не трогает.
+package-lock.json

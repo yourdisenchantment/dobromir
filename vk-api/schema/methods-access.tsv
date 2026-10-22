@@ -1,0 +1,569 @@
+account.ban	user		
+account.changePassword	user		
+account.getActiveOffers	user	100/100	
+account.getAppPermissions	user		
+account.getBanned	user	20/200	
+account.getCounters	user		
+account.getInfo	user		
+account.getProfileInfo	user		
+account.getPushSettings	user		
+account.registerDevice	user		
+account.saveProfileInfo	user		
+account.setInfo	user		
+account.setOffline	user		
+account.setOnline	user		
+account.setPushSettings	user		
+account.setSilenceMode	user		
+account.unban	user		
+account.unregisterDevice	user		
+ads.addOfficeUsers	user		
+ads.checkLink	user		
+ads.createAds	user		
+ads.createCampaigns	user		
+ads.createClients	user		
+ads.createLookalikeRequest	user		
+ads.createTargetGroup	user		
+ads.createTargetPixel	user		
+ads.deleteAds	user		
+ads.deleteCampaigns	user		
+ads.deleteClients	user		
+ads.deleteTargetGroup	user		
+ads.deleteTargetPixel	user		
+ads.getAccounts	user		
+ads.getAds	user		campaign_ids:-,ad_ids:-
+ads.getAdsLayout	user		campaign_ids:-,ad_ids:-
+ads.getAdsTargeting	user		campaign_ids:-,ad_ids:-
+ads.getBudget	user		
+ads.getCampaigns	user		campaign_ids:-
+ads.getCategories	user		
+ads.getClients	user		
+ads.getDemographics	user		
+ads.getFloodStats	user		
+ads.getLookalikeRequests	user		requests_ids:-
+ads.getMusicians	user		
+ads.getMusiciansByIds	user		
+ads.getOfficeUsers	user		
+ads.getPostsReach	user		
+ads.getRejectionReason	user		
+ads.getStatistics	user		
+ads.getSuggestions	user		
+ads.getTargetGroups	user		
+ads.getTargetPixels	user		
+ads.getTargetingStats	user		
+ads.getUploadURL	user		
+ads.getVideoUploadURL	user		
+ads.importTargetContacts	user		
+ads.removeOfficeUsers	user		
+ads.removeTargetContacts	user		
+ads.saveLookalikeRequestResult	user		
+ads.shareTargetGroup	user		
+ads.updateAds	user		
+ads.updateCampaigns	user		
+ads.updateClients	user		
+ads.updateOfficeUsers	user		
+ads.updateTargetGroup	user		
+ads.updateTargetPixel	user		
+appWidgets.getAppImageUploadServer	service		
+appWidgets.getAppImages	user+group+service	20/100	
+appWidgets.getGroupImageUploadServer	group		
+appWidgets.getGroupImages	group	20/100	
+appWidgets.getImagesById	user+group+service		
+appWidgets.saveAppImage	service		
+appWidgets.saveGroupImage	group		
+appWidgets.update	group		
+apps.addSnippet	service		
+apps.addUsersToTestingGroup	service		user_ids:-
+apps.deleteAppRequests	user		
+apps.deleteSnippet	service		
+apps.get	user+service		app_ids:100
+apps.getCatalog	user+service	100/-	
+apps.getFriendsList	user	20/5000	
+apps.getLeaderboard	user		
+apps.getMiniAppPolicies	user		
+apps.getScopes	user		
+apps.getScore	user		
+apps.getSnippets	service		
+apps.getTestingGroups	service		
+apps.isNotificationsAllowed	user+service		
+apps.promoHasActiveGift	user+service		
+apps.promoUseGift	user+service		
+apps.removeTestingGroup	service		
+apps.removeUsersFromTestingGroups	service		user_ids:-
+apps.sendRequest	user		
+apps.updateMetaForTestingGroup	service		user_ids:-
+auth.restore	user+open+service		
+board.addTopic	user		
+board.closeTopic	user		
+board.createComment	user		
+board.deleteComment	user+group		
+board.deleteTopic	user		
+board.editComment	user		
+board.editTopic	user		
+board.fixTopic	user		
+board.getComments	user+service	20/100	
+board.getTopics	user+service	40/100	topic_ids:-
+board.openTopic	user		
+board.restoreComment	user+group		
+board.unfixTopic	user		
+bugtracker.addCompanyGroupsMembers			user_ids:1000,company_group_ids:1000
+bugtracker.addCompanyMembers			user_ids:1000
+bugtracker.changeBugreportStatus			
+bugtracker.createComment			
+bugtracker.getBugreportById			
+bugtracker.getCompanyGroupMembers		10/100	
+bugtracker.getCompanyMembers		10/100	filter_member_ids:-
+bugtracker.getDownloadVersionUrl			
+bugtracker.getProductBuildUploadServer			
+bugtracker.removeCompanyGroupMember			
+bugtracker.removeCompanyMember			
+bugtracker.saveProductVersion			
+bugtracker.setCompanyMemberRole			
+bugtracker.setProductIsOver			
+calls.forceFinish	user		
+calls.start	user		
+database.getChairs	user+service	100/10000	
+database.getCities	user	100/1000	
+database.getCitiesById	user+service		city_ids:1000
+database.getCountries	user	100/1000	
+database.getCountriesById	user+service		country_ids:1000
+database.getFaculties	user+service	100/10000	
+database.getMetroStations	user+service	100/500	
+database.getMetroStationsById	user+service		station_ids:30
+database.getRegions	user+service	100/1000	
+database.getSchoolClasses	user+service		
+database.getSchools	user+service	100/10000	
+database.getUniversities	user+service	100/10000	
+docs.add	user		
+docs.delete	user		
+docs.edit	user		
+docs.get	user	-/-	
+docs.getById	user+group		
+docs.getMessagesUploadServer	user+group		
+docs.getTypes	user		
+docs.getUploadServer	user		
+docs.getWallUploadServer	user+group		
+docs.restore	user		
+docs.save	user+group		
+docs.search	user+group	20/-	
+donut.getFriends	user	10/100	
+donut.getSubscription	user		
+donut.getSubscriptions	user	10/100	
+donut.isDon	user		
+downloadedGames.getPaidStatus	user		
+execute	user+group		
+fave.addArticle	user		
+fave.addLink	user		
+fave.addPage	user		
+fave.addPost	user		
+fave.addProduct	user		
+fave.addTag	user		
+fave.addVideo	user		
+fave.editTag	user		
+fave.get	user	50/100	
+fave.getPages	user	50/500	
+fave.getTags	user		
+fave.markSeen	user		
+fave.removeArticle	user		
+fave.removeLink	user		
+fave.removePage	user		
+fave.removePost	user		
+fave.removeProduct	user		
+fave.removeTag	user		
+fave.removeVideo	user		
+fave.reorderTags	user		
+fave.setPageTags	user		tag_ids:-
+fave.setTags	user		tag_ids:-
+fave.trackPageInteraction	user		
+friends.add	user		
+friends.addList	user		user_ids:-
+friends.areFriends	user		user_ids:1000
+friends.delete	user		
+friends.deleteAllRequests	user		
+friends.deleteList	user		
+friends.edit	user		list_ids:-
+friends.editList	user		user_ids:-,add_user_ids:-,delete_user_ids:-
+friends.get	user+service	5000/-	
+friends.getAppUsers	user		
+friends.getLists	user		
+friends.getMutual	user	-/-	
+friends.getOnline	user	-/-	
+friends.getRecent	user	100/1000	
+friends.getRequests	user	100/1000	
+friends.getSuggestions	user	100/100	
+friends.search	user	20/1000	
+gifts.get	user	-/-	
+groups.addAddress	user+group		
+groups.addCallbackServer	user+group		
+groups.addLink	user		
+groups.approveRequest	user		
+groups.ban	user		
+groups.create	user		
+groups.deleteAddress	user+group		
+groups.deleteCallbackServer	user+group		
+groups.deleteLink	user		
+groups.disableOnline	user+group		
+groups.edit	user+group		photos:-
+groups.editAddress	user+group		
+groups.editCallbackServer	user+group		
+groups.editLink	user		
+groups.editManager	user		
+groups.enableOnline	user+group		
+groups.get	user+service	-/1000	
+groups.getAddresses	user+service	10/-	address_ids:100
+groups.getBanned	user+group	20/200	
+groups.getById	user+group+service		group_ids:-
+groups.getCallbackConfirmationCode	user+group		
+groups.getCallbackServers	user+group		server_ids:-
+groups.getCallbackSettings	user+group		
+groups.getCatalogInfo	user		
+groups.getInvitedUsers	user	20/-	
+groups.getInvites	user	20/-	
+groups.getLongPollServer	user+group		
+groups.getLongPollSettings	user+group		
+groups.getMembers	user+group+service	1000/1000	
+groups.getOnlineStatus	user+group		
+groups.getRequests	user	20/200	
+groups.getSettings	user		
+groups.getTagList	user+group		
+groups.getTokenPermissions	group		
+groups.invite	user		
+groups.isMember	user+group+service		user_ids:-
+groups.join	user		
+groups.leave	user		
+groups.removeUser	user		
+groups.reorderLink	user		
+groups.search	user	20/1000	
+groups.setCallbackSettings	user+group		
+groups.setLongPollSettings	user+group		
+groups.setSettings	user+group		
+groups.setUserNote	user+group		
+groups.tagAdd	user+group		
+groups.tagBind	user+group		
+groups.tagDelete	user+group		
+groups.tagUpdate	user+group		
+groups.toggleMarket	user		
+groups.unban	user		
+leadForms.create	user		
+leadForms.delete	user		
+leadForms.get	user		
+leadForms.getLeads	user		
+leadForms.getUploadURL	user		
+leadForms.list	user		
+leadForms.update	user		
+likes.add	user		
+likes.delete	user		
+likes.getList	user+service	-/1000	
+likes.isLiked	user		
+market.add	user		photo_ids:4,video_ids:2,variant_ids:2
+market.addAlbum	user		
+market.addProperty	user		
+market.addPropertyVariant	user		
+market.addToAlbum	user		item_ids:-,album_ids:-
+market.createComment	user		
+market.delete	user		
+market.deleteAlbum	user		
+market.deleteComment	user		
+market.deleteProperty	user		
+market.deletePropertyVariant	user		
+market.edit	user		photo_ids:4,video_ids:2,variant_ids:2
+market.editAlbum	user		
+market.editComment	user		
+market.editOrder	user+group		
+market.editProperty	user		
+market.editPropertyVariant	user		
+market.filterCategories	user	20/1000	
+market.get	user	100/200	
+market.getAlbumById	user		album_ids:-
+market.getAlbums	user	50/100	
+market.getById	user		item_ids:100
+market.getCategories	user		
+market.getComments	user	20/100	
+market.getFavesForAttach	user	50/100	
+market.getGroupOrders	user+group	10/50	
+market.getOrderById	user+group		
+market.getOrderItems	user+group	50/-	
+market.getOrders	user	10/10	
+market.getProductPhotoUploadServer	user		
+market.getProperties	user		
+market.groupItems	user		item_ids:-
+market.removeFromAlbum	user		album_ids:-
+market.reorderAlbums	user		
+market.reorderItems	user		
+market.report	user		
+market.reportComment	user		
+market.restore	user		
+market.restoreComment	user		
+market.saveProductPhoto	user		
+market.saveProductPhotoBulk	user		
+market.search	user	20/200	
+market.searchItems	user	30/300	
+market.searchItemsBasic	user	30/300	
+market.ungroupItems	user		
+messages.addChatUser	user		
+messages.addChatUsers	user		
+messages.allowMessagesFromGroup	user		
+messages.createChat	user+group		user_ids:-
+messages.delete	user+group		message_ids:1000
+messages.deleteChatPhoto	user+group		
+messages.deleteConversation	user+group		
+messages.deleteReaction	user+group		
+messages.denyMessagesFromGroup	user		
+messages.edit	user+group		
+messages.editChat	user+group		
+messages.getByConversationMessageId	user+group		conversation_message_ids:100
+messages.getById	user+group		message_ids:100
+messages.getChat	user		chat_ids:-
+messages.getChatPreview	user		
+messages.getConversationMembers	user+group	20/1000	member_ids:-
+messages.getConversations	user+group	20/200	
+messages.getConversationsById	user+group		peer_ids:100
+messages.getHistory	user+group	20/200	
+messages.getHistoryAttachments	user+group	30/200	
+messages.getImportantMessages	user+group	20/200	
+messages.getIntentUsers	group	20/200	
+messages.getInviteLink	user+group		
+messages.getLastActivity	user		
+messages.getLongPollHistory	user+group		
+messages.getLongPollServer	user+group		
+messages.getMessagesReactions	user+group		
+messages.getReactedPeers	user+group		
+messages.getReactionsAssets	user		
+messages.isMessagesFromGroupAllowed	user+group		
+messages.joinChatByInviteLink	user		
+messages.markAsAnsweredConversation	user+group		
+messages.markAsImportant	user		message_ids:-
+messages.markAsImportantConversation	user+group		
+messages.markAsRead	user+group		message_ids:-
+messages.markReactionsAsRead	user		
+messages.muteChatMentions	user		
+messages.pin	user+group		
+messages.removeChatUser	user+group		
+messages.restore	user+group		
+messages.search	user+group	20/100	
+messages.searchConversations	user+group	20/255	
+messages.send	user+group		peer_ids:100
+messages.sendMessageEventAnswer	group		
+messages.sendReaction	user+group		
+messages.setActivity	user+group		
+messages.setChatPhoto	user+group		
+messages.unpin	user+group		
+newsfeed.addBan	user		user_ids:-,group_ids:-
+newsfeed.deleteBan	user		user_ids:-,group_ids:-
+newsfeed.deleteList	user		
+newsfeed.get	user	-/-	source_ids:-
+newsfeed.getBanned	user		
+newsfeed.getComments	user	30/100	
+newsfeed.getLists	user		list_ids:-
+newsfeed.getMentions	user	20/50	
+newsfeed.getRecommended	user	-/-	
+newsfeed.getSuggestedSources	user	20/1000	
+newsfeed.ignoreItem	user		
+newsfeed.saveList	user		source_ids:-
+newsfeed.search	user+service	30/200	
+newsfeed.unignoreItem	user		
+newsfeed.unsubscribe	user		
+notes.add	user		
+notes.createComment	user		
+notes.delete	user		
+notes.deleteComment	user		
+notes.edit	user		
+notes.editComment	user		
+notes.get	user	20/100	note_ids:-
+notes.getById	user		
+notes.getComments	user	20/100	
+notes.restoreComment	user		
+notifications.get	user	30/100	
+notifications.markAsViewed	user		
+notifications.sendMessage	service		user_ids:100
+orders.cancelSubscription	service		
+orders.changeState	service		
+orders.get	service	100/1000	
+orders.getAmount	user		
+orders.getById	user+service		order_ids:500
+orders.getUserSubscriptionById	service		
+orders.getUserSubscriptions	service		
+pages.clearCache	user+service		
+pages.get	user		
+pages.getHistory	user		
+pages.getTitles	user		
+pages.getVersion	user		
+pages.parseWiki	user		
+pages.save	user		
+pages.saveAccess	user		
+photos.confirmTag	user		
+photos.copy	user		
+photos.createAlbum	user		
+photos.createComment	user		
+photos.delete	user		photos:100
+photos.deleteAlbum	user		
+photos.deleteComment	user		
+photos.edit	user		
+photos.editAlbum	user		
+photos.editComment	user		
+photos.get	user+service	50/1000	photo_ids:-
+photos.getAlbums	user+service	-/-	album_ids:1000
+photos.getAlbumsCount	user		
+photos.getAll	user	20/200	
+photos.getAllComments	user	-/-	
+photos.getById	user+service		photos:500
+photos.getChatUploadServer	user+group		
+photos.getComments	user	20/100	
+photos.getMarketAlbumUploadServer	user		
+photos.getMessagesUploadServer	user+group		
+photos.getNewTags	user	20/100	
+photos.getOwnerCoverPhotoUploadServer	user+group		
+photos.getOwnerPhotoUploadServer	user		
+photos.getTags	user		
+photos.getUploadServer	user		
+photos.getUserPhotos	user	20/1000	
+photos.getWallUploadServer	user		
+photos.makeCover	user		
+photos.move	user		photo_ids:100
+photos.putTag	user		
+photos.removeTag	user		
+photos.reorderAlbums	user		
+photos.reorderPhotos	user		
+photos.report	user		
+photos.reportComment	user		
+photos.restore	user		
+photos.restoreComment	user		
+photos.save	user		
+photos.saveMarketAlbumPhoto	user		
+photos.saveMessagesPhoto	user+group		
+photos.saveOwnerCoverPhoto	user+group		
+photos.saveOwnerPhoto	user		
+photos.saveWallPhoto	user		
+photos.search	user+service	100/1000	
+podcasts.searchPodcast	user+group	20/1000	
+polls.addVote	user		answer_ids:-
+polls.create	user		
+polls.deleteVote	user		
+polls.edit	user		
+polls.getBackgrounds	user		
+polls.getById	user		
+polls.getPhotoUploadServer	user		
+polls.getVoters	user	-/-	answer_ids:-
+polls.savePhoto	user		
+prettyCards.create	user		
+prettyCards.delete	user		
+prettyCards.edit	user		
+prettyCards.get	user	10/100	
+prettyCards.getById	user		card_ids:10
+prettyCards.getUploadURL	user		
+search.getHints	user		
+secure.addAppEvent	service		
+secure.checkToken	service		
+secure.getAppBalance	service		
+secure.getSMSHistory	service		
+secure.getTransactionsHistory	service		
+secure.getUserLevel	service		user_ids:-
+secure.giveEventSticker	service		user_ids:-
+secure.sendNotification	service		user_ids:-
+secure.sendSMSNotification	service		
+secure.setCounter	service		
+stats.get	user		
+stats.getPostReach	user		post_ids:30
+stats.trackVisitor	user		
+status.get	user		
+status.set	user		
+storage.get	user+group+service		
+storage.getKeys	user+group+service	100/1000	
+storage.set	user+group+service		
+store.addStickersToFavorite	user		sticker_ids:-
+store.getFavoriteStickers	user		
+store.getProducts	user		product_ids:-
+store.getStickersKeywords	user		stickers_ids:-,products_ids:-
+store.removeStickersFromFavorite	user		sticker_ids:-
+stories.banOwner	user		owners_ids:200
+stories.delete	user+group		
+stories.get	user+group		
+stories.getBanned	user		
+stories.getById	user+group		
+stories.getPhotoUploadServer	user+group		user_ids:-
+stories.getReplies	user+group		
+stories.getStats	user+group		
+stories.getVideoUploadServer	user+group		user_ids:-
+stories.getViewers	user+group	100/-	
+stories.hideAllReplies	user+group		
+stories.hideReply	user+group		
+stories.save	user+group		
+stories.search	user	20/1000	
+stories.sendInteraction	service		
+stories.unbanOwner	user		owners_ids:200
+streaming.getServerUrl	service		
+streaming.getStats	service		
+streaming.getStem	service		
+translations.translate	user+service		
+users.get	user+group+service		user_ids:1000
+users.getFollowers	user+service	100/1000	
+users.getSubscriptions	user+service	20/200	
+users.report	user		
+users.search	user	20/1000	
+utils.checkLink	user+group+service		
+utils.deleteFromLastShortened	user		
+utils.getLastShortenedLinks	user	10/-	
+utils.getLinkStats	user+group+service		
+utils.getServerTime	user+group+service		
+utils.getShortLink	user+group+service		
+utils.resolveScreenName	user+group+service		
+video.add	user		
+video.addAlbum	user		
+video.addToAlbum	user		album_ids:-
+video.createComment	user		
+video.delete	user		
+video.deleteAlbum	user		
+video.deleteComment	user		
+video.deleteThread	user		
+video.edit	user		
+video.editAlbum	user		
+video.editComment	user		
+video.get	user	100/200	videos:-
+video.getAlbumById	user		
+video.getAlbums	user	50/100	
+video.getAlbumsByVideo	user		
+video.getComments	user	20/100	
+video.getLongPollServer	user		
+video.getOembed	user+open+service		
+video.getThumbUploadUrl	user		
+video.liveGetCategories	user		
+video.removeFromAlbum	user		album_ids:-
+video.reorderAlbums	user		
+video.reorderVideos	user		
+video.report	user		
+video.reportComment	user		
+video.restore	user		
+video.restoreComment	user		
+video.restoreThread	user		
+video.save	user		
+video.saveUploadedThumb	user		
+video.search	user	20/200	
+video.startStreaming	user		
+video.stopStreaming	user		
+video.unpinComment	user		
+wall.checkCopyrightLink	user		
+wall.closeComments	user+group		
+wall.createComment	user+group		
+wall.delete	user		
+wall.deleteComment	user		
+wall.edit	user		
+wall.editAdsStealth	user		
+wall.editComment	user		
+wall.get	user+service	-/-	
+wall.getById	user+service		posts:-
+wall.getComment	user		
+wall.getComments	user+service	-/-	
+wall.getReposts	user+service	20/1000	
+wall.openComments	user+group		
+wall.parseAttachedLink	user		
+wall.pin	user		
+wall.post	user		
+wall.postAdsStealth	user		
+wall.reportComment	user		
+wall.reportPost	user		
+wall.repost	user		
+wall.restore	user		
+wall.restoreComment	user		
+wall.search	user+service	20/100	
+wall.unpin	user		
+widgets.getComments	user+service	10/200	
+widgets.getPages	user+service	10/200	

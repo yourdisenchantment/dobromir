@@ -1,0 +1,43 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Data about children never goes into git: raw VK responses, the database,
+# downloaded media. The real data lives in $DOBROMIR_DATA outside the repo;
+# these entries guard against a data directory set inside it by mistake.
+data/
+*.sqlite
+*.sqlite3
+*.db
+spike/out/
+
+# Session artifacts (working notes, commit drafts)
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Node / Astro
+node_modules/
+dist/
+.astro/
+
+# Editors and OS
+.idea/
+.vscode/
+*~
+*.swp
+.DS_Store
+
+# Local agent tooling. AGENTS.md and the CLAUDE.md pointer are tracked on
+# purpose, everything else a local setup creates stays out.
+.claude/
+.opencode/
+.cursor/
+.mcp.json

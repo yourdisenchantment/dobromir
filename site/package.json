@@ -1,0 +1,39 @@
+{
+    "name": "dobromir-site",
+    "type": "module",
+    "version": "0.0.0",
+    "private": true,
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "check": "astro check",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "astro": "latest",
+        "zod": "latest"
+    },
+    "devDependencies": {
+        "@astrojs/check": "latest",
+        "@eslint/js": "latest",
+        "@typescript-eslint/parser": "latest",
+        "eslint": "latest",
+        "eslint-plugin-astro": "latest",
+        "eslint-plugin-jsx-a11y": "latest",
+        "prettier": "latest",
+        "prettier-plugin-astro": "latest",
+        "typescript": "^6.0.3"
+    },
+    "overrides": {
+        "eslint-plugin-jsx-a11y": {
+            "eslint": "$eslint"
+        }
+    }
+}
