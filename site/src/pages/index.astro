@@ -1,17 +1,15 @@
 ---
-// Заглушка: проверяет, что цепочка сборки работает. Содержание страниц не описано,
-// верстать по догадке нельзя (см. AGENTS.md, раздел "Требует решения").
+// Заглушка главной: содержание страниц еще не утверждено (OPEN-QUESTIONS, О3).
+import Base from "../layouts/Base.astro";
 ---
 
-<!doctype html>
-<html lang="ru">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Добромир</title>
-    </head>
-    <body>
-        <h1>Добромир</h1>
-        <p>Сайт в разработке.</p>
-    </body>
-</html>
+<Base
+    title="Добромир"
+    description="Республиканский центр коррекционной педагогики «Добромир», Симферополь."
+>
+    <h1>Добромир</h1>
+    <p>Сайт в разработке.</p>
+    <p>
+        <a href="/news/">Новости центра</a>
+    </p>
+</Base>

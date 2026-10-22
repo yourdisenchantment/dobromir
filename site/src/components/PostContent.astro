@@ -1,0 +1,53 @@
+---
+// Тело поста или оригинала репоста: текст, фото, ссылки, документы и видео.
+// Документы и видео не храним - ведем на пост в VK (решено 2026-10-23).
+import PostText from "./PostText.astro";
+import { mediaUrl, type NewsPhoto } from "../lib/news";
+
+interface Props {
+    text: string;
+    photos: NewsPhoto[];
+    links: { url: string; title: string }[];
+    media: { kind: "doc" | "video"; title: string }[];
+    sourceUrl: string;
+    alt: string;
+}
+
+const { text, photos, links, media, sourceUrl, alt } = Astro.props;
+const kinds = { doc: "Документ", video: "Видео" };
+---
+
+<PostText text={text} />
+{photos.map((p, i) => (
+    <img
+        src={mediaUrl(p.file)}
+        width={p.width}
+        height={p.height}
+        alt={photos.length > 1 ? `${alt}, фото ${i + 1}` : alt}
+        loading="lazy"
+        decoding="async"
+    />
+))}
+{links.length > 0 && (
+    <ul>
+        {links.map((l) => (
+            <li>
+                <a href={l.url} rel="nofollow noopener">
+                    {l.title || l.url}
+                </a>
+            </li>
+        ))}
+    </ul>
+)}
+{media.length > 0 && (
+    <ul>
+        {media.map((m) => (
+            <li>
+                <a href={sourceUrl} rel="nofollow noopener">
+                    {kinds[m.kind]}
+                    {m.title ? `: ${m.title}` : ""} - смотреть в VK
+                </a>
+            </li>
+        ))}
+    </ul>
+)}

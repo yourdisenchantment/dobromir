@@ -1,0 +1,61 @@
+{
+    "version": 1,
+    "generated_at": "2026-10-23T10:00:00+03:00",
+    "posts": [
+        {
+            "id": 3,
+            "slug": "2026-10-22-vk3",
+            "title": "Пример новости с правкой и ссылками",
+            "date": "2026-10-22T18:30:00+03:00",
+            "edited_date": "2026-10-23T09:15:00+03:00",
+            "pinned": false,
+            "tags": ["пример"],
+            "source_url": "https://vk.com/wall-1_3",
+            "text": "Пример новости с правкой и ссылками\n\nУпоминание [club1|группы], адрес https://example.org/page. и хэштег #пример.\n\n<b>Разметка</b> остается текстом.",
+            "photos": [],
+            "links": [
+                { "url": "https://example.org/", "title": "Пример ссылки" }
+            ],
+            "media": [{ "kind": "doc", "title": "расписание.pdf" }],
+            "repost": null
+        },
+        {
+            "id": 2,
+            "slug": "2026-10-20-vk2",
+            "title": "",
+            "date": "2026-10-20T23:40:00+03:00",
+            "edited_date": null,
+            "pinned": false,
+            "tags": [],
+            "source_url": "https://vk.com/wall-1_2",
+            "text": "",
+            "photos": [],
+            "links": [],
+            "media": [{ "kind": "video", "title": "Видео с занятия" }],
+            "repost": null
+        },
+        {
+            "id": 1,
+            "slug": "2026-10-01-vk1",
+            "title": "Закрепленный пример: репост",
+            "date": "2026-10-01T12:00:00+03:00",
+            "edited_date": null,
+            "pinned": true,
+            "tags": [],
+            "source_url": "https://vk.com/wall-1_1",
+            "text": "",
+            "photos": [],
+            "links": [],
+            "media": [],
+            "repost": {
+                "source_name": "Другая группа",
+                "source_url": "https://vk.com/wall-2_10",
+                "date": "2026-09-30T08:00:00+03:00",
+                "text": "Закрепленный пример: репост\n\nТекст оригинала.",
+                "photos": [],
+                "links": [],
+                "media": []
+            }
+        }
+    ]
+}

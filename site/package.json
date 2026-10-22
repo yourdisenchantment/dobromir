@@ -14,9 +14,12 @@
         "check": "astro check",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "test": "node --test \"src/**/*.test.ts\""
     },
     "dependencies": {
+        "@astrojs/rss": "latest",
+        "@astrojs/sitemap": "latest",
         "astro": "latest",
         "zod": "latest"
     },

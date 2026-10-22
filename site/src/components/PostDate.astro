@@ -1,0 +1,19 @@
+---
+// Дата публикации и, если правили в другой день, дата обновления. Только абсолютные даты.
+import { formatDate, showUpdated } from "../lib/date";
+
+interface Props {
+    date: string;
+    edited?: string | null;
+}
+
+const { date, edited = null } = Astro.props;
+---
+
+<time datetime={date}>{formatDate(date)}</time>
+{edited && showUpdated(date, edited) && (
+    <>
+        {" "}
+        · Обновлено <time datetime={edited}>{formatDate(edited)}</time>
+    </>
+)}

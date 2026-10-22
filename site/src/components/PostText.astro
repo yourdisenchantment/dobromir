@@ -1,0 +1,27 @@
+---
+// Текст поста VK: абзацы, ссылки, упоминания и хэштеги. Ничего не выводится как HTML -
+// Astro экранирует текст, поэтому разметка из поста остается текстом (защита от XSS).
+import { parseVkText } from "../lib/vktext";
+
+interface Props {
+    text: string;
+}
+
+const paragraphs = parseVkText(Astro.props.text);
+---
+
+{paragraphs.map((segments) => (
+    <p>
+        {segments.map((s) =>
+            s.type === "link" ? (
+                <a href={s.href} rel="nofollow noopener">
+                    {s.label}
+                </a>
+            ) : s.type === "tag" ? (
+                <span class="tag">{s.value}</span>
+            ) : (
+                s.value
+            ),
+        )}
+    </p>
+))}

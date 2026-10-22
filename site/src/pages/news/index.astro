@@ -1,0 +1,45 @@
+---
+// Лента новостей: все живые посты, новые первыми, закрепленный - наверху.
+import Base from "../../layouts/Base.astro";
+import PostDate from "../../components/PostDate.astro";
+import { displayTitle, loadNews, mediaUrl, summary } from "../../lib/news";
+
+const posts = loadNews();
+const ordered = [
+    ...posts.filter((p) => p.pinned),
+    ...posts.filter((p) => !p.pinned),
+];
+---
+
+<Base
+    title="Новости"
+    description="Новости центра «Добромир»: занятия, события, объявления."
+>
+    <h1>Новости</h1>
+    {ordered.length === 0 && <p>Новостей пока нет.</p>}
+    {ordered.map((post) => {
+        const cover = post.photos[0] ?? post.repost?.photos[0];
+        return (
+            <article>
+                <h2>
+                    <a href={`/news/${post.slug}/`}>{displayTitle(post)}</a>
+                </h2>
+                {post.pinned && <p>Закреплено</p>}
+                <p>
+                    <PostDate date={post.date} edited={post.edited_date} />
+                </p>
+                {cover && (
+                    <img
+                        src={mediaUrl(cover.file)}
+                        width={cover.width}
+                        height={cover.height}
+                        alt={displayTitle(post)}
+                        loading="lazy"
+                        decoding="async"
+                    />
+                )}
+                <p>{summary(post)}</p>
+            </article>
+        );
+    })}
+</Base>

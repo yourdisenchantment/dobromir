@@ -1,0 +1,69 @@
+---
+// Страница новости. Удаленного поста в news.json нет - страница не собирается, адрес дает 404.
+import Base from "../../layouts/Base.astro";
+import PostContent from "../../components/PostContent.astro";
+import PostDate from "../../components/PostDate.astro";
+import { displayTitle, loadNews, summary, type NewsPost } from "../../lib/news";
+
+export function getStaticPaths() {
+    return loadNews().map((post) => ({
+        params: { slug: post.slug },
+        props: { post },
+    }));
+}
+
+interface Props {
+    post: NewsPost;
+}
+
+const { post } = Astro.props;
+const title = displayTitle(post);
+const repost = post.repost;
+---
+
+<Base title={title} description={summary(post)} type="article">
+    <article>
+        <h1>{title}</h1>
+        <p>
+            <PostDate date={post.date} edited={post.edited_date} />
+        </p>
+        <PostContent
+            text={post.text}
+            photos={post.photos}
+            links={post.links}
+            media={post.media}
+            sourceUrl={post.source_url}
+            alt={title}
+        />
+        {repost && (
+            <section aria-label="Репост">
+                <p>
+                    Репост
+                    {repost.source_name ? `: ${repost.source_name}` : ""} ·{" "}
+                    <PostDate date={repost.date} />
+                </p>
+                <PostContent
+                    text={repost.text}
+                    photos={repost.photos}
+                    links={repost.links}
+                    media={repost.media}
+                    sourceUrl={repost.source_url}
+                    alt={title}
+                />
+                <p>
+                    <a href={repost.source_url} rel="nofollow noopener">
+                        Оригинал в VK
+                    </a>
+                </p>
+            </section>
+        )}
+        <p>
+            <a href={post.source_url} rel="nofollow noopener">
+                Пост в VK
+            </a>
+        </p>
+    </article>
+    <p>
+        <a href="/news/">Все новости</a>
+    </p>
+</Base>

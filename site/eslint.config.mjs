@@ -28,5 +28,18 @@ export default [
         languageOptions: {
             parser: tsParser,
         },
+        // Необъявленные имена в TS ловит проверка типов (astro check); no-undef не знает
+        // глобалов Node и веба (process, URL, Response) и только мешает - так советует
+        // и typescript-eslint.
+        rules: {
+            "no-undef": "off",
+        },
+    },
+    // Конфиг выполняется в Node при сборке: process там есть.
+    {
+        files: ["*.config.mjs"],
+        languageOptions: {
+            globals: { process: "readonly" },
+        },
     },
 ];
