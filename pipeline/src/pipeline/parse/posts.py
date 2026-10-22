@@ -1,9 +1,7 @@
 """Разбор постов VK (`wall.get`, `wall.getById`) в нашу модель. В сеть не ходит."""
 
-import json
 import re
-from collections.abc import Iterable, Iterator
-from pathlib import Path
+from collections.abc import Iterable
 from typing import Any
 
 from pipeline.parse.model import Link, Photo, Post, Repost, VkMedia
@@ -130,15 +128,3 @@ def parse_posts(items: Iterable[dict[str, Any]], names: dict[int, str] | None = 
 def parse_wall(response: dict[str, Any]) -> list[Post]:
     """Ответ `wall.get` (лучше с extended=1 - тогда у репостов есть имя источника)."""
     return parse_posts(response.get("items") or [], source_names(response))
-
-
-def iter_raw_posts(raw_dir: Path) -> Iterator[dict[str, Any]]:
-    """Сырые объекты постов по порядку получения (переходное хранилище до SQLite, P1-3)."""
-    for path in sorted(raw_dir.glob("events-*.jsonl")):
-        for line in path.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                yield json.loads(line)
-
-
-def parse_raw(raw_dir: Path) -> list[Post]:
-    return parse_posts(iter_raw_posts(raw_dir))

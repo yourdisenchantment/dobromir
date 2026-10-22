@@ -57,15 +57,6 @@ class DataDirs:
         """Секреты и настройки сервера."""
         return self.root / ".env"
 
-    # Переходное: нужно нынешним разбору и экспорту по папкам, уходит в P1-3 вместе с ними.
-    @property
-    def raw(self) -> Path:
-        return self.root / "raw"
-
-    @property
-    def content(self) -> Path:
-        return self.root / "content"
-
 
 @dataclass(frozen=True)
 class SiteDirs:

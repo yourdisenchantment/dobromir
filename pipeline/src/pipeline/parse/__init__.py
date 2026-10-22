@@ -2,7 +2,7 @@
 
 from pipeline.parse.hash import content_hash
 from pipeline.parse.model import Link, Photo, Post, Repost, VkMedia
-from pipeline.parse.posts import parse_post, parse_posts, parse_raw, parse_wall
+from pipeline.parse.posts import parse_post, parse_posts, parse_wall
 
 __all__ = [
     "Link",
@@ -13,6 +13,5 @@ __all__ = [
     "content_hash",
     "parse_post",
     "parse_posts",
-    "parse_raw",
     "parse_wall",
 ]

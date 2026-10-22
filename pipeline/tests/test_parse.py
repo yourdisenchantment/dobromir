@@ -4,8 +4,7 @@ from typing import Any
 
 import pytest
 
-from pipeline.fetch.rawlog import RawLog
-from pipeline.parse import Post, parse_post, parse_posts, parse_raw, parse_wall
+from pipeline.parse import Post, parse_post, parse_posts, parse_wall
 from pipeline.parse.posts import is_news, make_title, source_names
 from samples import GROUP, post_obj
 
@@ -69,11 +68,6 @@ def test_parse_posts_filters_dedupes_and_sorts_by_date() -> None:
         ]
     )
     assert [(p.id, p.title) for p in posts] == [(3, "Правка"), (4, "Открытие центра"), (1, "Открытие центра")]
-
-
-def test_parse_raw_reads_post_objects(tmp_path: Path) -> None:
-    RawLog(tmp_path).append([post_obj(1), post_obj(2, from_id=777)])
-    assert [p.id for p in parse_raw(tmp_path)] == [1]
 
 
 def test_photo_prefers_orig_photo() -> None:

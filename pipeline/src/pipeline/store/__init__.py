@@ -1,5 +1,6 @@
-"""Состояние синка в SQLite: что забрано, что изменилось, где остановились."""
+"""Состояние воркера в SQLite: посты, скачанные фото, отметки."""
 
-from pipeline.store.state import Store
+from pipeline.store.db import open_db
+from pipeline.store.state import Change, Store, StoredPost
 
-__all__ = ["Store"]
+__all__ = ["Change", "Store", "StoredPost", "open_db"]
