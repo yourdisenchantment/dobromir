@@ -35,10 +35,11 @@ def run_sync(store: Store, vk: VkClient, http: httpx.Client, settings: Settings,
     result = SyncResult()
     window = reconcile_window(store, vk, settings.vk_window, settings.vk_page_size, now)
     result.changes += window.changes
+    result.deleted = window.deleted
     if full_reconcile_due(store, now, tz, settings.reconcile_after_hour):
         full = full_reconcile(store, vk, settings.vk_by_id_batch, now)  # SyncError/VkError - наружу
         result.changes += full.changes
-        result.deleted = full.deleted
+        result.deleted += full.deleted
         result.full_reconcile = True
         mark_full_reconciled(store, now, tz)
     result.photos = download_photos(store, http, settings.site.media, now)

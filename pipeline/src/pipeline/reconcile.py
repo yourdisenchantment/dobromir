@@ -62,20 +62,28 @@ def fetch_wall(vk: VkClient, limit: int | None, page_size: int) -> dict[str, Any
     offset = 0
     regular: set[int] = set()
     total: int | None = None
+    complete = False
     while True:
         resp = vk.wall_get(offset=offset, count=page_size, extended=True)
         pages.append(resp)
         total = resp.get("count", total)
         items = resp["items"]
         regular.update(p["id"] for p in items if not p.get("is_pinned"))
-        if not items or (limit is not None and len(regular) >= limit):
+        if not items:
+            break
+        if limit is not None and len(regular) >= limit:
+            complete = True
             break
         if total is not None and offset + len(items) >= total:
+            complete = True
             break
         offset += max(1, len(items) - PAGE_OVERLAP)
     merged = merge_responses(pages)
     if limit is not None:
         merged["items"] = _first_regular(merged["items"], limit)
+    # Окно получено целиком: набрали limit обычных постов или дошли до конца стены.
+    # Только по целому окну можно судить, что пропавший из него пост удален.
+    merged["complete"] = complete
     return merged
 
 
@@ -93,11 +101,44 @@ def _first_regular(items: list[dict[str, Any]], limit: int) -> list[dict[str, An
 
 
 def reconcile_window(store: Store, vk: VkClient, window: int, page_size: int, now: int) -> ReconcileResult:
-    """Новые, измененные и вернувшиеся посты из последних `window`. Удалений здесь нет:
-    пост, выпавший из окна, просто старый."""
+    """Новые, измененные, вернувшиеся и удаленные посты в пределах последних `window`.
+
+    Удален - сохраненный пост, чья дата не старше самого старого обычного поста окна, но
+    которого в окне нет (отчет о хостинге, разд. 9 п. 13): так снятый пост исчезает за час,
+    а не ждет суточной сверки. Пост старше окна - просто старый, его проверяет суточная.
+    """
+    response = fetch_wall(vk, window, page_size)
+    missing = window_missing(store, response)
+    _guard(missing, len(store.live_keys()), "окно")
     result = ReconcileResult()
-    result.changes = ingest(store, [fetch_wall(vk, window, page_size)], now)
+    result.changes = ingest(store, [response], now)
+    result.deleted = store.mark_deleted(sorted(missing), now)
     return result
+
+
+def window_missing(store: Store, response: dict[str, Any]) -> set[tuple[int, int]]:
+    """Какие сохраненные посты пропали из окна. Пустое или неполное окно - «не знаем».
+
+    Границу окна задают только обычные посты: закреп VK отдает первым, даже если он
+    старый, и по его дате «окно» растянулось бы на всю стену.
+    """
+    items = response.get("items") or []
+    regular = [p for p in items if not p.get("is_pinned") and isinstance(p.get("date"), int)]
+    if not response.get("complete") or not regular:
+        return set()
+    oldest = min(p["date"] for p in regular)
+    present = {(p.get("owner_id"), p.get("id")) for p in items if not _marked_deleted(p)}
+    return {key for key in store.live_keys_since(oldest) if key not in present}
+
+
+def _guard(missing: set[Any], live: int, where: str) -> None:
+    """Больше max(3, 20% живых) удалений за раз - скорее сбой VK, ничего не применяем."""
+    limit = max(3, live * 20 // 100)
+    if len(missing) > limit:
+        raise SyncError(
+            f"{where}: сверка хочет удалить {len(missing)} из {live} постов (порог {limit}): "
+            "похоже на сбой VK, ничего не изменено"
+        )
 
 
 def classify_missing(batches: list[tuple[list[int], dict[str, Any]]]) -> set[int]:
@@ -142,12 +183,7 @@ def full_reconcile(store: Store, vk: VkClient, batch: int, now: int) -> Reconcil
     missing = classify_missing(batches)
     responses = [resp for _, resp in batches]
 
-    limit = max(3, len(ids) * 20 // 100)
-    if len(missing) > limit:
-        raise SyncError(
-            f"сверка хочет удалить {len(missing)} из {len(ids)} постов (порог {limit}): "
-            "похоже на сбой VK, ничего не изменено"
-        )
+    _guard(missing, len(ids), "суточная сверка")
     result = ReconcileResult(checked=len(ids))
     result.changes = ingest(store, responses, now)
     result.deleted = store.mark_deleted([(owner, i) for i in sorted(missing)], now)

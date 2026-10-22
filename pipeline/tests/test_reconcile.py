@@ -131,16 +131,60 @@ def test_new_post_needs_build(store: Store, tmp_path: Path) -> None:
 # --- удаление и восстановление ---
 
 
-def test_deletion_found_by_daily_reconcile(store: Store, tmp_path: Path) -> None:
+def test_recent_deletion_found_by_window_within_the_hour(store: Store, tmp_path: Path) -> None:
     wall = FakeWall(10)
-    s = settings_at(tmp_path)
+    s = settings_at(tmp_path)  # окно 5: посты 6-10
     backfill(store, wall, at(23, 1))
     sync(store, wall, s, at(23, 1))
     wall.delete(9)
-    r = sync(store, wall, s, at(23, 2))  # окно удаление не замечает
-    assert 9 in live_ids(store) and r.deleted == 0
+    r = sync(store, wall, s, at(23, 2))  # до 03:00 - сверки нет, удаление замечает окно
+    assert not r.full_reconcile and r.deleted == 1 and 9 not in live_ids(store) and r.build_now
+
+
+def test_old_deletion_found_by_daily_reconcile(store: Store, tmp_path: Path) -> None:
+    wall = FakeWall(10)
+    s = settings_at(tmp_path)  # окно 5: посты 6-10, пост 2 - старше окна
+    backfill(store, wall, at(23, 1))
+    sync(store, wall, s, at(23, 1))
+    wall.delete(2)
+    r = sync(store, wall, s, at(23, 2))  # окно старый пост не судит
+    assert 2 in live_ids(store) and r.deleted == 0
     r = sync(store, wall, s, at(23, 4))  # после 03:00 - полная сверка
-    assert r.full_reconcile and r.deleted == 1 and 9 not in live_ids(store) and r.build_now
+    assert r.full_reconcile and r.deleted == 1 and 2 not in live_ids(store) and r.build_now
+
+
+def test_old_pinned_post_does_not_stretch_window(store: Store, tmp_path: Path) -> None:
+    """Закреп VK отдает первым; если бы его дата задавала границу окна, все посты между ним
+    и окном считались бы удаленными."""
+    wall = FakeWall(10)
+    s = settings_at(tmp_path)
+    backfill(store, wall, at(23, 1))
+    wall.pin(1)
+    r = sync(store, wall, s, at(23, 2))
+    assert r.deleted == 0 and live_ids(store) == list(range(1, 11))
+
+
+def test_incomplete_or_empty_window_deletes_nothing(store: Store, tmp_path: Path) -> None:
+    from pipeline.reconcile import window_missing
+
+    wall = FakeWall(10)
+    backfill(store, wall, at(23, 1))
+    full = fetch_wall(wall.client(), limit=5, page_size=10)
+    assert full["complete"] is True
+    partial = {**full, "items": full["items"][:2], "complete": False}
+    assert window_missing(store, partial) == set()
+    assert window_missing(store, {"items": [], "complete": True}) == set()
+
+
+def test_mass_deletion_in_window_refused(store: Store, tmp_path: Path) -> None:
+    wall = FakeWall(10)
+    s = settings_at(tmp_path, VK_WINDOW="8")
+    backfill(store, wall, at(23, 1))
+    for i in (10, 9, 8, 7):  # 4 свежих из 10 - больше порога
+        wall.delete(i)
+    with pytest.raises(SyncError, match="окно"):
+        sync(store, wall, s, at(23, 2))
+    assert live_ids(store) == list(range(1, 11))
 
 
 def test_restored_post_comes_back(store: Store, tmp_path: Path) -> None:
@@ -150,7 +194,7 @@ def test_restored_post_comes_back(store: Store, tmp_path: Path) -> None:
     sync(store, wall, s, at(23, 1))
     hidden = wall.posts[10]
     wall.delete(10)  # например, пост скрыли в VK
-    gone = sync(store, wall, s, at(23, 4))
+    gone = sync(store, wall, s, at(23, 2))  # свежий - его снимает окно
     assert gone.deleted == 1 and 10 not in live_ids(store) and gone.news_changed
     wall.posts[10] = hidden  # и вернули
     back = sync(store, wall, s, at(23, 5))

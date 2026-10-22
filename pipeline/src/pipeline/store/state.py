@@ -125,6 +125,13 @@ class Store:
         row = self._db.execute("SELECT COUNT(*) - COUNT(deleted_at), COUNT(deleted_at) FROM posts").fetchone()
         return int(row[0]), int(row[1])
 
+    def live_keys_since(self, date: int) -> list[tuple[int, int]]:
+        """Живые посты с датой публикации не раньше date."""
+        return [
+            (r["owner_id"], r["id"])
+            for r in self._db.execute("SELECT owner_id, id FROM posts WHERE deleted_at IS NULL AND date >= ?", (date,))
+        ]
+
     def live_keys(self) -> list[tuple[int, int]]:
         return [
             (r["owner_id"], r["id"])
