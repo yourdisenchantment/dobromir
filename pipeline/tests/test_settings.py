@@ -64,9 +64,10 @@ def test_overrides(tmp_path: Path) -> None:
 @pytest.mark.parametrize("name", ["DOBROMIR_DATA", "SITE_ROOT"])
 def test_required_paths(tmp_path: Path, name: str) -> None:
     env = base_env(tmp_path)
-    del env[name]
-    with pytest.raises(RuntimeError, match=name):
-        load_settings(env)
+    if name == "SITE_ROOT":  # у каталога данных есть значение по умолчанию, у папки сайта нет
+        del env[name]
+        with pytest.raises(RuntimeError, match=name):
+            load_settings(env)
     env[name] = "relative/dir"
     with pytest.raises(RuntimeError, match="абсолютным"):
         load_settings(env)
@@ -127,22 +128,38 @@ def test_vk_requires_token_and_group(tmp_path: Path) -> None:
 
 
 def test_env_sources_order(tmp_path: Path) -> None:
-    """Окружение процесса сильнее <data>/.env, а тот сильнее ~/.env.local."""
+    """Окружение процесса сильнее <data>/.env; каталог данных - из DOBROMIR_DATA."""
     data = tmp_path / "data"
     data.mkdir()
-    local = tmp_path / ".env.local"
-    local.write_text(
-        f'# комментарий\nexport DOBROMIR_DATA="{data}"\nVK_WINDOW=10\nVK_GROUP_ID=1\nMAX_BUILDS_PER_DAY=7\n',
-        encoding="utf-8",
+    (data / ".env").write_text(
+        '# комментарий\nexport VK_WINDOW="20"\nVK_GROUP_ID=2\nDOBROMIR_DATA=/куда-то/еще\n', encoding="utf-8"
     )
-    (data / ".env").write_text("VK_WINDOW=20\nVK_GROUP_ID=2\n", encoding="utf-8")
-    env = load_env(environ={"VK_GROUP_ID": "3"}, local_file=local)
-    assert env["VK_WINDOW"] == "20"  # .env сервера сильнее локального файла
-    assert env["VK_GROUP_ID"] == "3"  # окружение процесса сильнее обоих
-    assert env["MAX_BUILDS_PER_DAY"] == "7"  # чего нет выше, берется из локального
-    assert env["DOBROMIR_DATA"] == str(data)
+    env = load_env(environ={"DOBROMIR_DATA": str(data), "VK_GROUP_ID": "3"}, home=tmp_path / "home")
+    assert env["VK_WINDOW"] == "20"  # из файла, кавычки и export сняты
+    assert env["VK_GROUP_ID"] == "3"  # окружение процесса сильнее файла
+    assert env["DOBROMIR_DATA"] == str(data)  # строка в самом .env каталог не меняет
 
 
-def test_env_files_are_optional(tmp_path: Path) -> None:
-    env = load_env(environ={"A": "1"}, local_file=tmp_path / "нет-такого")
-    assert env == {"A": "1"}
+def test_default_data_dir_is_home_dobromir_data(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    (home / "dobromir-data").mkdir(parents=True)
+    (home / "dobromir-data" / ".env").write_text("VK_GROUP_ID=7\n", encoding="utf-8")
+    env = load_env(environ={}, home=home)
+    assert env["DOBROMIR_DATA"] == str(home / "dobromir-data")
+    assert env["VK_GROUP_ID"] == "7"
+
+
+def test_other_files_are_not_read(tmp_path: Path) -> None:
+    """~/.env.local с чужими ключами проект больше не читает."""
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / ".env.local").write_text("VK_GROUP_ID=99\nOTHER_SECRET=x\n", encoding="utf-8")
+    env = load_env(environ={"A": "1"}, home=home)
+    assert env == {"A": "1", "DOBROMIR_DATA": str(home / "dobromir-data")}
+
+
+def test_settings_without_data_var_use_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    env = base_env(tmp_path)
+    del env["DOBROMIR_DATA"]
+    assert load_settings(env).data.root == tmp_path / "dobromir-data"

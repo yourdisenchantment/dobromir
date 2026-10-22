@@ -130,10 +130,9 @@ if [ -e "$DATA_DIR/.env" ]; then
 else
     if [ "$APPLY" -eq 1 ]; then
         umask 077
-        # Пути известны, их подставляем; ключи VK и SITE_ENV остаются пустыми - их вносит человек.
-        sed -e "s|^DOBROMIR_DATA=.*|DOBROMIR_DATA=$DATA_DIR|" \
-            -e "s|^SITE_ROOT=.*|SITE_ROOT=$SITE_DIR|" \
-            "$REPO/.env.example" >"$DATA_DIR/.env"
+        # Папку сайта знаем - подставляем; ключи VK и SITE_ENV остаются пустыми - их вносит человек.
+        # DOBROMIR_DATA в файл не пишем: каталог данных код берет из окружения или по умолчанию.
+        sed -e "s|^SITE_ROOT=.*|SITE_ROOT=$SITE_DIR|" "$REPO/.env.example" >"$DATA_DIR/.env"
         chmod 600 "$DATA_DIR/.env"
         echo "  >     создан из .env.example (права 600). Заполнить: SITE_ENV, VK_SERVICE_TOKEN, VK_GROUP_ID"
     else

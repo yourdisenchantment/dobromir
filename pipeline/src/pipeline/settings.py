@@ -1,8 +1,9 @@
 """Настройки воркера: пути, параметры VK и сборки. Все читается из окружения.
 
-Порядок источников (каждый следующий сильнее): `~/.env.local` (только на ноутбуке),
-`<DOBROMIR_DATA>/.env` (на сервере), переменные окружения процесса.
-Раскладка каталогов - отчет о хостинге, разд. 7.
+Источники (второй сильнее): `<каталог данных>/.env`, затем переменные окружения
+процесса. Каталог данных - `DOBROMIR_DATA` из окружения процесса или, если ее нет,
+`~/dobromir-data`; одинаково на ноутбуке и на сервере. Других файлов (в том числе
+`~/.env.local`) код не читает. Раскладка каталогов - отчет о хостинге, разд. 7.
 """
 
 import os
@@ -17,7 +18,7 @@ SERVICE_TOKEN_VAR = "VK_SERVICE_TOKEN"
 COMMUNITY_TOKEN_VAR = "VK_COMMUNITY_TOKEN"
 GROUP_VAR = "VK_GROUP_ID"
 SITE_ENV_VAR = "SITE_ENV"
-LOCAL_ENV_FILE = Path.home() / ".env.local"
+DEFAULT_DATA_DIR_NAME = "dobromir-data"
 SITE_ENVS = ("production", "staging")
 
 # Допущение О1 (docs/OPEN-QUESTIONS.md): канонический адрес - punycode добромир-крым.рф без www.
@@ -158,20 +159,29 @@ def read_env_file(path: Path) -> dict[str, str]:
     return values
 
 
-def load_env(environ: Mapping[str, str] | None = None, local_file: Path = LOCAL_ENV_FILE) -> dict[str, str]:
-    """Сводит три источника: `~/.env.local`, затем `<DOBROMIR_DATA>/.env`, затем окружение процесса."""
+def default_data_root(home: Path | None = None) -> Path:
+    """`~/dobromir-data`: каталог данных, если `DOBROMIR_DATA` не задана."""
+    return (Path.home() if home is None else home) / DEFAULT_DATA_DIR_NAME
+
+
+def load_env(environ: Mapping[str, str] | None = None, home: Path | None = None) -> dict[str, str]:
+    """Сводит `<каталог данных>/.env` и окружение процесса (оно сильнее).
+
+    Каталог данных берется только из окружения процесса или по умолчанию: строка
+    `DOBROMIR_DATA` внутри самого `.env` его не меняет - иначе файл указывал бы сам на себя.
+    """
     process_env = dict(os.environ if environ is None else environ)
-    values = read_env_file(local_file)
-    # Где лежит .env сервера, узнаем из уже известного: окружение процесса сильнее файла.
-    data_root = process_env.get(DATA_VAR) or values.get(DATA_VAR)
-    if data_root and Path(data_root).is_absolute():
+    data_root = process_env.get(DATA_VAR) or str(default_data_root(home))
+    values: dict[str, str] = {}
+    if Path(data_root).is_absolute():
         values.update(read_env_file(DataDirs(Path(data_root)).env_file))
     values.update(process_env)
+    values[DATA_VAR] = data_root
     return values
 
 
-def _abs_path(env: Mapping[str, str], name: str) -> Path:
-    value = env.get(name)
+def _abs_path(env: Mapping[str, str], name: str, default: Path | None = None) -> Path:
+    value = env.get(name) or (str(default) if default is not None else None)
     if not value:
         raise RuntimeError(f"{name} не задана: укажите абсолютный путь")
     path = Path(value)
@@ -221,7 +231,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         raise RuntimeError(f"SITE_URL должен начинаться с https://, получено {site_url!r}")
 
     return Settings(
-        data=DataDirs(_abs_path(env, DATA_VAR)),
+        data=DataDirs(_abs_path(env, DATA_VAR, default=default_data_root())),
         site=SiteDirs(_abs_path(env, SITE_ROOT_VAR)),
         vk_api_url=env.get("VK_API_URL") or DEFAULT_VK_API_URL,
         vk_group_id=None if group is None else int(group),
