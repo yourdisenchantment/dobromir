@@ -24,6 +24,7 @@ SITE_ENVS = ("production", "staging")
 # Допущение О1 (docs/OPEN-QUESTIONS.md): канонический адрес - punycode добромир-крым.рф без www.
 DEFAULT_SITE_URL = "https://xn----9sbirljdkbtdc7l.xn--p1ai"
 DEFAULT_VK_API_URL = "https://api.vk.ru/method/"
+DEFAULT_TZ_NAME = "Europe/Simferopol"
 
 
 @dataclass(frozen=True)
@@ -215,7 +216,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     if group is not None and not group.isdecimal():
         raise RuntimeError(f"{GROUP_VAR} должна быть числом без минуса, получено {group!r}")
 
-    tz_name = env.get("TZ_NAME") or "Europe/Simferopol"
+    tz_name = env.get("TZ_NAME") or DEFAULT_TZ_NAME
     try:
         ZoneInfo(tz_name)
     except (ZoneInfoNotFoundError, ValueError):

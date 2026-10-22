@@ -1,14 +1,21 @@
 """Наша модель поста. Поля, которых нет в ней, из VK не берем."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+from typing import Literal
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel
 
-# Крым живет по московскому времени; фиксированное смещение, без базы часовых поясов.
-LOCAL_TZ = timezone(timedelta(hours=3))
+from pipeline.settings import DEFAULT_TZ_NAME
+
+# Часовой пояс, в котором показываются даты и строится slug. Через базу зон, а не
+# фиксированным смещением: пост в 23:30 по Симферополю не должен уехать на другой день.
+LOCAL_TZ = ZoneInfo(DEFAULT_TZ_NAME)
 
 
 class Photo(BaseModel):
+    """Фото для скачивания. `url` временный (подписан VK) и в экспорт не идет."""
+
     owner_id: int
     id: int
     url: str
@@ -25,17 +32,44 @@ class Link(BaseModel):
     title: str
 
 
-class Post(BaseModel):
+class VkMedia(BaseModel):
+    """Документ или видео: файл не храним, на сайте - ссылка на VK (решено 2026-10-23)."""
+
+    kind: Literal["doc", "video"]
+    owner_id: int
+    id: int
+    title: str
+
+
+class Content(BaseModel):
+    """То, что показывается на сайте: общее у поста и оригинала репоста."""
+
     owner_id: int
     id: int
     timestamp: int
-    title: str
     text: str
-    tags: list[str]
-    pinned: bool
     photos: list[Photo]
     links: list[Link]
-    skipped: list[str]  # типы вложений, которые мы не берем (видео и прочее)
+    media: list[VkMedia]
+    skipped: list[str]  # типы вложений, которые не показываем (опросы и прочее)
+
+    @property
+    def vk_url(self) -> str:
+        return f"https://vk.com/wall{self.owner_id}_{self.id}"
+
+
+class Repost(Content):
+    """Оригинал репоста. Имя источника - из `groups`/`profiles` ответа с extended=1."""
+
+    source_name: str | None
+
+
+class Post(Content):
+    edited: int | None  # время правки из VK; нет поля - поста не правили
+    title: str
+    tags: list[str]
+    pinned: bool
+    repost: Repost | None
 
     @property
     def date(self) -> datetime:
@@ -43,9 +77,5 @@ class Post(BaseModel):
 
     @property
     def slug(self) -> str:
-        """Имя папки: дата поста и его id в VK, по нему видно, что пост уже импортирован."""
+        """Дата поста по местному времени и его id в VK: уникально и не меняется при правке."""
         return f"{self.date:%Y-%m-%d}-vk{self.id}"
-
-    @property
-    def vk_url(self) -> str:
-        return f"https://vk.com/wall{self.owner_id}_{self.id}"

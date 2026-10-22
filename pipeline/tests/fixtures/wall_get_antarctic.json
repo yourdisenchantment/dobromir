@@ -1,0 +1,1313 @@
+{
+  "_note": "Обезличенный ответ wall.get (v5.199, extended=1) тестовой группы antarctic.test от 2026-10-22: ссылки заменены, ключи доступа и хэши удалены, id и имена пользователей подменены.",
+  "count": 23,
+  "items": [
+    {
+      "inner_type": "wall_wallpost",
+      "is_pinned": 1,
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [],
+      "date": 1792104781,
+      "from_id": -242263522,
+      "geo": {
+        "coordinates": "46.914742289988 143.08910600955",
+        "place": {
+          "discriminator": "place",
+          "created": 1696175955,
+          "id": 216888718,
+          "is_deleted": false,
+          "latitude": 46.914738,
+          "longitude": 143.089111,
+          "title": "Покорителям Антарктиды в экспедиции на Южный полюс",
+          "total_checkins": 94,
+          "updated": 1696175955,
+          "category": 26,
+          "category_object": {
+            "id": 26,
+            "title": "Historical site",
+            "icons": [
+              {
+                "url": "place.png",
+                "width": 0,
+                "height": 0
+              }
+            ]
+          }
+        },
+        "type": "place"
+      },
+      "id": 13,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Тест 12. Пост с местом. Отмечаем на карте точку, где мы теоретически могли бы оказаться.",
+      "views": {
+        "count": 16
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701568,
+            "id": 457239038,
+            "owner_id": -242263522,
+            "post_id": 23,
+            "sizes": [
+              {
+                "height": 40,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/6cdf8e12711b"
+              },
+              {
+                "height": 90,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/02eccb1f3a1d"
+              },
+              {
+                "height": 360,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/79f02c30ca8d"
+              },
+              {
+                "height": 607,
+                "type": "y",
+                "width": 1080,
+                "url": "https://example.invalid/6182ca264099"
+              },
+              {
+                "height": 675,
+                "type": "z",
+                "width": 1200,
+                "url": "https://example.invalid/85f5c9a87117"
+              },
+              {
+                "height": 61,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/7b3d50af344b"
+              },
+              {
+                "height": 135,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/12d67e25b8ec"
+              },
+              {
+                "height": 202,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/449a7f48ce72"
+              },
+              {
+                "height": 304,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/9cfa957ac52e"
+              },
+              {
+                "height": 675,
+                "type": "base",
+                "width": 1200,
+                "url": "https://example.invalid/14c2f131e712"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 675,
+              "type": "base",
+              "url": "https://example.invalid/14c2f131e712",
+              "width": 1200
+            }
+          }
+        }
+      ],
+      "date": 1792701568,
+      "from_id": -242263522,
+      "id": 23,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "ВНИМАНИЕ! Важная информация для всех участников. В субботу занятие переносится на 12:00 в связи с работами в помещении клуба. Просим принять к сведению и поделиться новостью с друзьями.",
+      "views": {
+        "count": 2
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [],
+      "date": 1792701520,
+      "from_id": -242263522,
+      "id": 21,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Уважаемые участники сообщества! Мы собираем мнения о том, какие темы вам интересны больше всего: жизнь на полярных станциях, животный мир Антарктики или история экспедиций. Прочитайте краткую справку по ссылке и напишите в комментариях, о чем рассказывать подробнее: https://ru.wikipedia.org/wiki/Антарктида Спасибо за активность!",
+      "views": {
+        "count": 4
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "carousel_offset": 0,
+      "attachments": [
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701442,
+            "id": 457239030,
+            "owner_id": -242263522,
+            "sizes": [
+              {
+                "height": 72,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/ff7758eb0f59"
+              },
+              {
+                "height": 160,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/48cb9aa02b90"
+              },
+              {
+                "height": 640,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/2a3ac14c3ff1"
+              },
+              {
+                "height": 900,
+                "type": "y",
+                "width": 900,
+                "url": "https://example.invalid/6ca999f82d53"
+              },
+              {
+                "height": 108,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/0e1e7c1a5a68"
+              },
+              {
+                "height": 240,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/750084277097"
+              },
+              {
+                "height": 360,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/5d27637e7ef7"
+              },
+              {
+                "height": 540,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/b7414391dffd"
+              },
+              {
+                "height": 900,
+                "type": "base",
+                "width": 900,
+                "url": "https://example.invalid/299b56f73bfa"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 900,
+              "type": "base",
+              "url": "https://example.invalid/299b56f73bfa",
+              "width": 900
+            }
+          }
+        },
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701442,
+            "id": 457239031,
+            "owner_id": -242263522,
+            "sizes": [
+              {
+                "height": 72,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/4306fe48aee7"
+              },
+              {
+                "height": 160,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/3a8dc2fd3222"
+              },
+              {
+                "height": 640,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/e848e9af0c7b"
+              },
+              {
+                "height": 900,
+                "type": "y",
+                "width": 900,
+                "url": "https://example.invalid/056db8e6a337"
+              },
+              {
+                "height": 108,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/cf7ef1c0870f"
+              },
+              {
+                "height": 240,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/8031fc93c215"
+              },
+              {
+                "height": 360,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/8fb2d45784b4"
+              },
+              {
+                "height": 540,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/b2ff4ce13219"
+              },
+              {
+                "height": 900,
+                "type": "base",
+                "width": 900,
+                "url": "https://example.invalid/d7c422a5f758"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 900,
+              "type": "base",
+              "url": "https://example.invalid/d7c422a5f758",
+              "width": 900
+            }
+          }
+        },
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701442,
+            "id": 457239032,
+            "owner_id": -242263522,
+            "sizes": [
+              {
+                "height": 72,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/d0a9e282ce4c"
+              },
+              {
+                "height": 160,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/604e029f44de"
+              },
+              {
+                "height": 640,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/baa2f15e2366"
+              },
+              {
+                "height": 900,
+                "type": "y",
+                "width": 900,
+                "url": "https://example.invalid/66d239698a35"
+              },
+              {
+                "height": 108,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/2e48d54a46e1"
+              },
+              {
+                "height": 240,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/37ca0ddeca6c"
+              },
+              {
+                "height": 360,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/bbc53e639091"
+              },
+              {
+                "height": 540,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/fdc712d1f286"
+              },
+              {
+                "height": 900,
+                "type": "base",
+                "width": 900,
+                "url": "https://example.invalid/510d543d084d"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 900,
+              "type": "base",
+              "url": "https://example.invalid/510d543d084d",
+              "width": 900
+            }
+          }
+        },
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701442,
+            "id": 457239033,
+            "owner_id": -242263522,
+            "sizes": [
+              {
+                "height": 72,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/98be27f467fd"
+              },
+              {
+                "height": 160,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/44c2539b1e75"
+              },
+              {
+                "height": 640,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/0d3b2f35ba5b"
+              },
+              {
+                "height": 900,
+                "type": "y",
+                "width": 900,
+                "url": "https://example.invalid/6cd3c0c23229"
+              },
+              {
+                "height": 108,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/d92fd8a40648"
+              },
+              {
+                "height": 240,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/0105c278a8eb"
+              },
+              {
+                "height": 360,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/941d97d40c8a"
+              },
+              {
+                "height": 540,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/ad98d2edddca"
+              },
+              {
+                "height": 900,
+                "type": "base",
+                "width": 900,
+                "url": "https://example.invalid/62c740646363"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 900,
+              "type": "base",
+              "url": "https://example.invalid/62c740646363",
+              "width": 900
+            }
+          }
+        },
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701442,
+            "id": 457239034,
+            "owner_id": -242263522,
+            "sizes": [
+              {
+                "height": 72,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/661cb6937847"
+              },
+              {
+                "height": 160,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/900907550a50"
+              },
+              {
+                "height": 640,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/f96360aacdcd"
+              },
+              {
+                "height": 900,
+                "type": "y",
+                "width": 900,
+                "url": "https://example.invalid/522fc1fd5289"
+              },
+              {
+                "height": 108,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/8950d41baace"
+              },
+              {
+                "height": 240,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/333cff4c621f"
+              },
+              {
+                "height": 360,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/b71ea6a10ef9"
+              },
+              {
+                "height": 540,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/eb278eb18e0a"
+              },
+              {
+                "height": 900,
+                "type": "base",
+                "width": 900,
+                "url": "https://example.invalid/5b085b2a484b"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 900,
+              "type": "base",
+              "url": "https://example.invalid/5b085b2a484b",
+              "width": 900
+            }
+          }
+        },
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792701442,
+            "id": 457239035,
+            "owner_id": -242263522,
+            "sizes": [
+              {
+                "height": 72,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/6636e926c71b"
+              },
+              {
+                "height": 160,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/e8c1a0cdcfc4"
+              },
+              {
+                "height": 640,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/f4f82a4d7fcd"
+              },
+              {
+                "height": 900,
+                "type": "y",
+                "width": 900,
+                "url": "https://example.invalid/268dbc090634"
+              },
+              {
+                "height": 108,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/6042166f5872"
+              },
+              {
+                "height": 240,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/7e752afd0dbc"
+              },
+              {
+                "height": 360,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/e6397bf1d63e"
+              },
+              {
+                "height": 540,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/fb00318fe792"
+              },
+              {
+                "height": 900,
+                "type": "base",
+                "width": 900,
+                "url": "https://example.invalid/c73902432ab4"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 900,
+              "type": "base",
+              "url": "https://example.invalid/c73902432ab4",
+              "width": 900
+            }
+          }
+        }
+      ],
+      "date": 1792701442,
+      "from_id": -242263522,
+      "id": 18,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Фотоотчет с занятия клуба юных полярников. Сегодня ребята катались на лыжах, лепили снежных пингвинов, читали книги об экспедициях, рисовали северное сияние, пели песни и гуляли по заснеженному двору. Спасибо всем, кто пришел! Ждем вас на следующей неделе.",
+      "views": {
+        "count": 4
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [
+        {
+          "type": "doc",
+          "doc": {
+            "id": 711181946,
+            "owner_id": 100001,
+            "title": "11_notes.txt",
+            "size": 76,
+            "ext": "txt",
+            "date": 1792105346,
+            "type": 1,
+            "url": "https://example.invalid/04ad66531fdb"
+          }
+        }
+      ],
+      "date": 1792105353,
+      "from_id": -242263522,
+      "id": 17,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Тест 16. Текстовый файл. К посту прикреплён обычный .txt с короткими заметками об Антарктиде.",
+      "views": {
+        "count": 29
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "carousel_offset": 0,
+      "attachments": [
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792105294,
+            "id": 457239029,
+            "owner_id": -242263522,
+            "post_id": 16,
+            "sizes": [
+              {
+                "height": 48,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/a63a3c945a5e"
+              },
+              {
+                "height": 107,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/0a223e24ed06"
+              },
+              {
+                "height": 427,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/2b583de685bf"
+              },
+              {
+                "height": 720,
+                "type": "y",
+                "width": 1080,
+                "url": "https://example.invalid/4fab7a451fa0"
+              },
+              {
+                "height": 800,
+                "type": "z",
+                "width": 1200,
+                "url": "https://example.invalid/c271b2e645fc"
+              },
+              {
+                "height": 72,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/364755738877"
+              },
+              {
+                "height": 160,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/6db27e2026c9"
+              },
+              {
+                "height": 240,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/b3d027b9da7b"
+              },
+              {
+                "height": 360,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/489091888fc5"
+              },
+              {
+                "height": 800,
+                "type": "base",
+                "width": 1200,
+                "url": "https://example.invalid/3f17d3642bf4"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 800,
+              "type": "base",
+              "url": "https://example.invalid/3f17d3642bf4",
+              "width": 1200
+            }
+          }
+        },
+        {
+          "type": "link",
+          "link": {
+            "url": "https://example.invalid/5f57891a2fa8",
+            "title": "Message to community"
+          }
+        }
+      ],
+      "date": 1792105294,
+      "from_id": -242263522,
+      "id": 16,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Тест 15. Картинка и кнопка действия под постом. Научная станция в Антарктиде (нарисована в коде).",
+      "views": {
+        "count": 29
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "carousel_offset": 0,
+      "attachments": [
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1792105233,
+            "id": 457239028,
+            "owner_id": -242263522,
+            "post_id": 15,
+            "sizes": [
+              {
+                "height": 48,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/2ea15daf6677"
+              },
+              {
+                "height": 107,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/54ed8ccb035f"
+              },
+              {
+                "height": 427,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/bd262776ceef"
+              },
+              {
+                "height": 720,
+                "type": "y",
+                "width": 1080,
+                "url": "https://example.invalid/b721fe04f560"
+              },
+              {
+                "height": 800,
+                "type": "z",
+                "width": 1200,
+                "url": "https://example.invalid/33d76d57c678"
+              },
+              {
+                "height": 72,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/2c9af2708d1c"
+              },
+              {
+                "height": 160,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/eec2b7ba3f62"
+              },
+              {
+                "height": 240,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/d6983424c158"
+              },
+              {
+                "height": 360,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/10652e018627"
+              },
+              {
+                "height": 800,
+                "type": "base",
+                "width": 1200,
+                "url": "https://example.invalid/19ffe180c43c"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 800,
+              "type": "base",
+              "url": "https://example.invalid/19ffe180c43c",
+              "width": 1200
+            }
+          }
+        },
+        {
+          "type": "poll",
+          "poll": {
+            "multiple": true,
+            "end_date": 0,
+            "closed": false,
+            "is_board": false,
+            "can_edit": false,
+            "can_vote": false,
+            "can_report": false,
+            "can_share": false,
+            "created": 1792105233,
+            "id": 1083501886,
+            "owner_id": -242263522,
+            "question": "Что вы любите в зиме?",
+            "votes": 0,
+            "disable_unvote": false,
+            "anonymous": true,
+            "answer_ids": [],
+            "answers": [
+              {
+                "id": 2853994801,
+                "rate": 0.0,
+                "text": "Снег",
+                "votes": 0,
+                "users": {
+                  "count": 0,
+                  "items": []
+                }
+              },
+              {
+                "id": 2853994802,
+                "rate": 0.0,
+                "text": "Горячий чай",
+                "votes": 0,
+                "users": {
+                  "count": 0,
+                  "items": []
+                }
+              },
+              {
+                "id": 2853994803,
+                "rate": 0.0,
+                "text": "Тишина",
+                "votes": 0,
+                "users": {
+                  "count": 0,
+                  "items": []
+                }
+              }
+            ],
+            "author_id": -242263522
+          }
+        }
+      ],
+      "date": 1792105233,
+      "from_id": -242263522,
+      "id": 15,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Тест 14. Картинка + анонимный опрос с несколькими вариантами ответа. Что вы любите в зиме?",
+      "views": {
+        "count": 10
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [
+        {
+          "type": "poll",
+          "poll": {
+            "multiple": false,
+            "end_date": 0,
+            "closed": false,
+            "is_board": false,
+            "can_edit": false,
+            "can_vote": false,
+            "can_report": false,
+            "can_share": false,
+            "created": 1791926589,
+            "id": 1083379890,
+            "owner_id": -242263522,
+            "question": "Кто главный в Антарктиде?",
+            "votes": 0,
+            "disable_unvote": false,
+            "anonymous": false,
+            "answer_ids": [],
+            "answers": [
+              {
+                "id": 2853648776,
+                "rate": 0.0,
+                "text": "Пингвины",
+                "votes": 0,
+                "users": {
+                  "count": 0,
+                  "items": []
+                }
+              },
+              {
+                "id": 2853648777,
+                "rate": 0.0,
+                "text": "Тюлени",
+                "votes": 0,
+                "users": {
+                  "count": 0,
+                  "items": []
+                }
+              },
+              {
+                "id": 2853648778,
+                "rate": 0.0,
+                "text": "Учёные на станциях",
+                "votes": 0,
+                "users": {
+                  "count": 0,
+                  "items": []
+                }
+              }
+            ],
+            "author_id": -242263522
+          }
+        }
+      ],
+      "date": 1791926589,
+      "from_id": -242263522,
+      "id": 8,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Тест 7. Опрос. Голосуем: кто в Антарктиде главнее?",
+      "views": {
+        "count": 36
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [
+        {
+          "type": "photo",
+          "photo": {
+            "album_id": -7,
+            "date": 1791926483,
+            "id": 457239021,
+            "owner_id": -242263522,
+            "post_id": 6,
+            "sizes": [
+              {
+                "height": 48,
+                "type": "s",
+                "width": 72,
+                "url": "https://example.invalid/38f76447ddd2"
+              },
+              {
+                "height": 107,
+                "type": "m",
+                "width": 160,
+                "url": "https://example.invalid/817a92e3f845"
+              },
+              {
+                "height": 427,
+                "type": "x",
+                "width": 640,
+                "url": "https://example.invalid/b939f3d7919a"
+              },
+              {
+                "height": 720,
+                "type": "y",
+                "width": 1080,
+                "url": "https://example.invalid/7d283a33800d"
+              },
+              {
+                "height": 800,
+                "type": "z",
+                "width": 1200,
+                "url": "https://example.invalid/c10adb5d8429"
+              },
+              {
+                "height": 72,
+                "type": "o",
+                "width": 108,
+                "url": "https://example.invalid/c63b3816f4aa"
+              },
+              {
+                "height": 160,
+                "type": "p",
+                "width": 240,
+                "url": "https://example.invalid/50987a60cb60"
+              },
+              {
+                "height": 240,
+                "type": "q",
+                "width": 360,
+                "url": "https://example.invalid/f2f7732e30d4"
+              },
+              {
+                "height": 360,
+                "type": "r",
+                "width": 540,
+                "url": "https://example.invalid/80f41e4f3c51"
+              },
+              {
+                "height": 800,
+                "type": "base",
+                "width": 1200,
+                "url": "https://example.invalid/5abf88eb75c9"
+              }
+            ],
+            "text": "",
+            "user_id": 100,
+            "has_tags": false,
+            "orig_photo": {
+              "height": 800,
+              "type": "base",
+              "url": "https://example.invalid/5abf88eb75c9",
+              "width": 1200
+            }
+          }
+        }
+      ],
+      "date": 1791926483,
+      "from_id": -242263522,
+      "id": 6,
+      "likes": {
+        "can_like": 0,
+        "count": 0,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "",
+      "views": {
+        "count": 15
+      }
+    },
+    {
+      "inner_type": "wall_wallpost",
+      "comments": {
+        "count": 0
+      },
+      "marked_as_ads": 0,
+      "type": "post",
+      "attachments": [
+        {
+          "type": "video",
+          "video": {
+            "response_type": "full",
+            "can_like": 1,
+            "can_repost": 1,
+            "can_subscribe": 1,
+            "can_add": 0,
+            "comments": 0,
+            "date": 1791925697,
+            "description": "",
+            "duration": 6,
+            "image": [
+              {
+                "url": "https://example.invalid/12dbec953508",
+                "width": 130,
+                "height": 96,
+                "with_padding": 1
+              },
+              {
+                "url": "https://example.invalid/5ca1cabb7014",
+                "width": 160,
+                "height": 120,
+                "with_padding": 1
+              },
+              {
+                "url": "https://example.invalid/71feeec46c8b",
+                "width": 320,
+                "height": 240,
+                "with_padding": 1
+              },
+              {
+                "url": "https://example.invalid/b28f824dd557",
+                "width": 800,
+                "height": 450,
+                "with_padding": 1
+              },
+              {
+                "url": "https://example.invalid/aea8cc38bee7",
+                "width": 1280,
+                "height": 720
+              },
+              {
+                "url": "https://example.invalid/a5f3e857f0ed",
+                "width": 320,
+                "height": 180
+              },
+              {
+                "url": "https://example.invalid/4e79aeb521cb",
+                "width": 720,
+                "height": 405
+              }
+            ],
+            "first_frame": [
+              {
+                "url": "https://example.invalid/7cccdfc5d829",
+                "width": 720,
+                "height": 405
+              },
+              {
+                "url": "https://example.invalid/10534e76406d",
+                "width": 480,
+                "height": 270
+              },
+              {
+                "url": "https://example.invalid/7fb56fb1cc89",
+                "width": 128,
+                "height": 72
+              },
+              {
+                "url": "https://example.invalid/891bc396e1b4",
+                "width": 960,
+                "height": 540
+              },
+              {
+                "url": "https://example.invalid/aea8cc38bee7",
+                "width": 1280,
+                "height": 720
+              }
+            ],
+            "width": 1280,
+            "height": 720,
+            "id": 456239017,
+            "owner_id": -242263522,
+            "title": "Video by Antarctic",
+            "type": "video",
+            "views": 3,
+            "local_views": 3,
+            "can_dislike": 1,
+            "wall_post_id": 4,
+            "should_stretch": false
+          }
+        }
+      ],
+      "date": 1791925777,
+      "from_id": -242263522,
+      "id": 4,
+      "likes": {
+        "can_like": 0,
+        "count": 1,
+        "user_likes": 0
+      },
+      "owner_id": -242263522,
+      "post_type": "post",
+      "reposts": {
+        "count": 0
+      },
+      "text": "Тест 3. Видео. Короткий 6-секундный ролик (сгенерирован программой, фрактал Мандельброта). Проверяем, что видео нормально загружается и проигрывается в посте.",
+      "views": {
+        "count": 23
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": 242263522,
+      "name": "Antarctic test",
+      "is_closed": 0
+    }
+  ],
+  "profiles": [
+    {
+      "id": 100001,
+      "first_name": "Тест",
+      "last_name": "Пользователь1"
+    },
+    {
+      "id": 100,
+      "first_name": "VK",
+      "last_name": ""
+    }
+  ]
+}

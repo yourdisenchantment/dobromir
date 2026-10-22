@@ -1,4 +1,4 @@
-"""Образцы событий VK в форме реального Long Poll (поля урезаны до используемых)."""
+"""Образцы постов VK в форме ответа wall.get (поля урезаны до используемых)."""
 
 from typing import Any
 
@@ -20,7 +20,7 @@ def photo_att(photo_id: int) -> dict[str, Any]:
     }
 
 
-def post_event(post_id: int = 101, **over: Any) -> dict[str, Any]:
+def post_obj(post_id: int = 101, **over: Any) -> dict[str, Any]:
     obj: dict[str, Any] = {
         "id": post_id,
         "owner_id": -GROUP,
@@ -36,4 +36,4 @@ def post_event(post_id: int = 101, **over: Any) -> dict[str, Any]:
         ],
         **over,
     }
-    return {"type": "wall_post_new", "event_id": f"ev{post_id}", "v": "5.199", "group_id": GROUP, "object": obj}
+    return obj

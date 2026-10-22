@@ -8,7 +8,7 @@ from pipeline.fetch.rawlog import RawLog
 from pipeline.media.photos import clean_jpeg
 from pipeline.settings import DataDirs
 from pipeline.sync import process
-from samples import GROUP, post_event
+from samples import GROUP, post_obj
 
 
 def jpeg(orientation: int | None = None) -> bytes:
@@ -47,7 +47,7 @@ def photo_http() -> httpx.Client:
 
 def test_process_exports_news_folder(tmp_path: Path) -> None:
     dirs = dirs_for(tmp_path)
-    RawLog(dirs.raw).append([post_event(101)])
+    RawLog(dirs.raw).append([post_obj(101)])
     with photo_http() as http:
         assert process(dirs, media_for(tmp_path), http) == 1
         assert process(dirs, media_for(tmp_path), http) == 1  # повторный проход ничего не ломает
@@ -64,7 +64,7 @@ def test_process_exports_news_folder(tmp_path: Path) -> None:
 
 def test_failed_photo_download_is_skipped_not_fatal(tmp_path: Path) -> None:
     dirs = dirs_for(tmp_path)
-    RawLog(dirs.raw).append([post_event(101)])
+    RawLog(dirs.raw).append([post_obj(101)])
     http = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(404)))
     process(dirs, media_for(tmp_path), http)
     meta = (dirs.content / "news" / "2026-08-06-vk101" / "meta.json").read_text(encoding="utf-8")

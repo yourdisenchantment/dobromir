@@ -1,16 +1,16 @@
-"""Разбор поста VK в нашу модель. В сеть не ходит."""
+"""Разбор постов VK (`wall.get`, `wall.getById`) в нашу модель. В сеть не ходит."""
 
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
-from pipeline.parse.model import Link, Photo, Post
+from pipeline.parse.model import Link, Photo, Post, Repost, VkMedia
 
 HASHTAG = re.compile(r"#([^\s#@]+)")
 TITLE_MAX = 120
-POST_EVENTS = {"wall_post_new"}
+MEDIA_KINDS = ("doc", "video")
 
 
 def make_title(text: str) -> str:
@@ -27,53 +27,113 @@ def make_title(text: str) -> str:
 
 
 def _photo(att: dict[str, Any]) -> Photo | None:
-    sizes = att.get("sizes") or []
-    if not sizes and att.get("orig_photo"):
-        sizes = [att["orig_photo"]]
-    sizes = [s for s in sizes if s.get("url")]
-    if not sizes:
+    """Самое большое из того, что отдал VK: `orig_photo`, иначе наибольший из `sizes`."""
+    candidates = [s for s in [att.get("orig_photo"), *(att.get("sizes") or [])] if s and s.get("url")]
+    if not candidates:
         return None
-    best = max(sizes, key=lambda s: s.get("width", 0) * s.get("height", 0))
+    best = max(candidates, key=lambda s: (s.get("width") or 0) * (s.get("height") or 0))
     return Photo(
         owner_id=att["owner_id"],
         id=att["id"],
         url=best["url"],
-        width=best.get("width", 0),
-        height=best.get("height", 0),
+        width=best.get("width") or 0,
+        height=best.get("height") or 0,
     )
 
 
-def parse_post(obj: dict[str, Any]) -> Post:
-    text = obj.get("text") or ""
+def _content_fields(obj: dict[str, Any]) -> dict[str, Any]:
     photos: list[Photo] = []
     links: list[Link] = []
+    media: list[VkMedia] = []
     skipped: list[str] = []
     for att in obj.get("attachments") or []:
         kind = att.get("type", "?")
+        body = att.get(kind) or {}
         if kind == "photo":
-            photo = _photo(att["photo"])
+            photo = _photo(body)
             if photo:
                 photos.append(photo)
-        elif kind == "link":
-            links.append(Link(url=att["link"]["url"], title=att["link"].get("title", "")))
+            else:
+                skipped.append(kind)
+        elif kind == "link" and body.get("url"):
+            links.append(Link(url=body["url"], title=body.get("title") or ""))
+        elif kind in MEDIA_KINDS and "id" in body and "owner_id" in body:
+            media.append(VkMedia(kind=kind, owner_id=body["owner_id"], id=body["id"], title=body.get("title") or ""))
         else:
             skipped.append(kind)
+    return {
+        "owner_id": obj["owner_id"],
+        "id": obj["id"],
+        "timestamp": obj["date"],
+        "text": obj.get("text") or "",
+        "photos": photos,
+        "links": links,
+        "media": media,
+        "skipped": skipped,
+    }
+
+
+def source_names(response: dict[str, Any]) -> dict[int, str]:
+    """Имена авторов из ответа с extended=1: ключ - owner_id (у групп со знаком минус)."""
+    names: dict[int, str] = {}
+    for group in response.get("groups") or []:
+        names[-int(group["id"])] = str(group.get("name") or "")
+    for user in response.get("profiles") or []:
+        names[int(user["id"])] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+    return names
+
+
+def parse_post(obj: dict[str, Any], names: dict[int, str] | None = None) -> Post:
+    """Пост VK в модель. Репост - первый элемент `copy_history`: это сам оригинал."""
+    fields = _content_fields(obj)
+    repost = None
+    history = obj.get("copy_history") or []
+    if history:
+        original = _content_fields(history[0])
+        repost = Repost(**original, source_name=(names or {}).get(original["owner_id"]))
+    text = fields["text"]
+    # Если у репоста нет своего текста, заголовок и теги - из оригинала.
+    title_source = text or (repost.text if repost else "")
     return Post(
-        owner_id=obj["owner_id"],
-        id=obj["id"],
-        timestamp=obj["date"],
-        title=make_title(text),
-        text=text,
-        tags=list(dict.fromkeys(HASHTAG.findall(text))),
+        **fields,
+        edited=obj.get("edited"),
+        title=make_title(title_source),
+        tags=list(dict.fromkeys(HASHTAG.findall(title_source))),
         pinned=bool(obj.get("is_pinned")),
-        photos=photos,
-        links=links,
-        skipped=skipped,
+        repost=repost,
     )
 
 
-def iter_raw_events(raw_dir: Path) -> Iterator[dict[str, Any]]:
-    """Сырые события по порядку получения."""
+def is_news(obj: dict[str, Any]) -> bool:
+    """В новости идут только обычные посты от имени самого сообщества, без рекламы."""
+    return (
+        obj.get("from_id") == obj.get("owner_id")
+        and obj.get("post_type", "post") == "post"
+        and not obj.get("marked_as_ads")
+    )
+
+
+def parse_posts(items: Iterable[dict[str, Any]], names: dict[int, str] | None = None) -> list[Post]:
+    """Новости из списка постов: фильтр, без повторов (последняя версия побеждает), новые первыми.
+
+    Сортировка по дате публикации, а не по порядку VK: закрепленный пост VK отдает первым,
+    даже если он старый (проверено на тестовой группе 2026-10-23).
+    """
+    posts: dict[tuple[int, int], Post] = {}
+    for obj in items:
+        if is_news(obj):
+            post = parse_post(obj, names)
+            posts[(post.owner_id, post.id)] = post
+    return sorted(posts.values(), key=lambda p: (p.timestamp, p.id), reverse=True)
+
+
+def parse_wall(response: dict[str, Any]) -> list[Post]:
+    """Ответ `wall.get` (лучше с extended=1 - тогда у репостов есть имя источника)."""
+    return parse_posts(response.get("items") or [], source_names(response))
+
+
+def iter_raw_posts(raw_dir: Path) -> Iterator[dict[str, Any]]:
+    """Сырые объекты постов по порядку получения (переходное хранилище до SQLite, P1-3)."""
     for path in sorted(raw_dir.glob("events-*.jsonl")):
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.strip():
@@ -81,17 +141,4 @@ def iter_raw_events(raw_dir: Path) -> Iterator[dict[str, Any]]:
 
 
 def parse_raw(raw_dir: Path) -> list[Post]:
-    """Все посты из сырых событий, самые новые первыми. Повтор поста заменяет прежнюю версию.
-
-    Берем только посты от имени самого сообщества: записи посетителей на стене в новости не идут.
-    """
-    posts: dict[tuple[int, int], Post] = {}
-    for event in iter_raw_events(raw_dir):
-        if event.get("type") not in POST_EVENTS:
-            continue
-        obj = event["object"]
-        if obj.get("from_id") != obj.get("owner_id") or obj.get("post_type", "post") != "post":
-            continue
-        post = parse_post(obj)
-        posts[(post.owner_id, post.id)] = post
-    return sorted(posts.values(), key=lambda p: p.timestamp, reverse=True)
+    return parse_posts(iter_raw_posts(raw_dir))
