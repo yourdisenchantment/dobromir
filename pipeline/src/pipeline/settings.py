@@ -118,17 +118,30 @@ class Settings:
     def tz(self) -> ZoneInfo:
         return ZoneInfo(self.tz_name)
 
-    def vk(self) -> VkSettings:
-        """Доступ к стене: сервисный ключ и группа. Нужен воркеру, не каждой команде.
+    def vk(self, key: str = "service") -> VkSettings:
+        """Доступ к VK. Нужен воркеру, не каждой команде.
+
+        Стену (`wall.get`, `wall.getById`) читает только сервисный ключ: ключ
+        сообщества получает ошибку 27 (проверено 2026-10-22, OPEN-QUESTIONS, О2).
+
+        Args:
+            key: "community" или "service".
 
         Raises:
-            RuntimeError: нет ключа или id группы.
+            RuntimeError: нет нужного ключа или id группы.
         """
-        if not self.vk_service_token:
-            raise RuntimeError(f"{SERVICE_TOKEN_VAR} не задана: нужен сервисный ключ приложения VK")
+        tokens = {
+            "community": (self.vk_community_token, COMMUNITY_TOKEN_VAR, "ключ сообщества"),
+            "service": (self.vk_service_token, SERVICE_TOKEN_VAR, "сервисный ключ приложения"),
+        }
+        if key not in tokens:
+            raise ValueError(f"key должен быть community или service, получено {key!r}")
+        token, var, title = tokens[key]
+        if not token:
+            raise RuntimeError(f"{var} не задана: нужен {title} VK")
         if self.vk_group_id is None:
             raise RuntimeError(f"{GROUP_VAR} не задана: нужен id группы без минуса")
-        return VkSettings(token=self.vk_service_token, group_id=self.vk_group_id, api_url=self.vk_api_url)
+        return VkSettings(token=token, group_id=self.vk_group_id, api_url=self.vk_api_url)
 
 
 def read_env_file(path: Path) -> dict[str, str]:

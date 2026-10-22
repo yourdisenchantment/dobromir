@@ -108,16 +108,22 @@ def test_tokens_not_in_repr(tmp_path: Path) -> None:
         base_env(tmp_path, VK_SERVICE_TOKEN=SECRET, VK_COMMUNITY_TOKEN=SECRET + "-group", VK_GROUP_ID="242263522")
     )
     assert SECRET not in repr(s)
-    vk = s.vk()
-    assert vk.token == SECRET and vk.group_id == 242263522
-    assert SECRET not in repr(vk)
+    for key in ("community", "service"):
+        assert SECRET not in repr(s.vk(key))
+    assert s.vk().token == SECRET  # по умолчанию - сервисный: только он читает стену
+    assert s.vk("community").token == SECRET + "-group"
+    assert s.vk().group_id == 242263522
 
 
 def test_vk_requires_token_and_group(tmp_path: Path) -> None:
     with pytest.raises(RuntimeError, match="VK_SERVICE_TOKEN"):
-        load_settings(base_env(tmp_path, VK_GROUP_ID="1")).vk()
+        load_settings(base_env(tmp_path, VK_GROUP_ID="1", VK_COMMUNITY_TOKEN=SECRET)).vk()
+    with pytest.raises(RuntimeError, match="VK_COMMUNITY_TOKEN"):
+        load_settings(base_env(tmp_path, VK_GROUP_ID="1", VK_SERVICE_TOKEN=SECRET)).vk("community")
     with pytest.raises(RuntimeError, match="VK_GROUP_ID"):
         load_settings(base_env(tmp_path, VK_SERVICE_TOKEN=SECRET)).vk()
+    with pytest.raises(ValueError, match="community или service"):
+        load_settings(base_env(tmp_path, VK_GROUP_ID="1", VK_COMMUNITY_TOKEN=SECRET)).vk("user")
 
 
 def test_env_sources_order(tmp_path: Path) -> None:
