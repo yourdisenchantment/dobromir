@@ -12,13 +12,14 @@ import httpx
 
 from pipeline.export import build_news, write_news
 from pipeline.reconcile import fetch_wall
+from pipeline.release import ReleaseError, build_release, rollback
 from pipeline.run import run_sync
 from pipeline.settings import load_settings
 from pipeline.store import Store, open_db
 from pipeline.survey import run_survey
 from pipeline.sync import download_photos, ingest
 from pipeline.vk.client import VkClient
-from pipeline.worker import EXIT_ERROR, run_worker
+from pipeline.worker import EXIT_ERROR, run_worker, single_instance
 
 
 def main() -> None:
@@ -43,9 +44,13 @@ def main() -> None:
     sub.add_parser("backfill", help="загрузить в базу всю стену VK (первичная загрузка)")
     sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
     sub.add_parser("worker", help="запуск из cron: блокировка, синк, сборка, status.json, коды выхода")
+    back = sub.add_parser("rollback", help="вернуть public_html на предыдущий релиз без пересборки")
+    back.add_argument("--to", help="имя релиза из releases/, по умолчанию - предыдущий")
     args = parser.parse_args()
     if args.command == "worker":
         sys.exit(worker_main())
+    if args.command == "rollback":
+        sys.exit(rollback_main(args.to))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)  # httpx пишет адреса запросов
 
@@ -108,7 +113,23 @@ def worker_main() -> int:
         print(f"Воркер не запущен: неверные настройки. {exc}", file=sys.stderr)
         return EXIT_ERROR
     with httpx.Client() as http:
-        return run_worker(settings, http)
+        return run_worker(settings, http, build=build_release)
+
+
+def rollback_main(to: str | None) -> int:
+    """Откат под той же блокировкой, что и воркер: не переключать ссылку посреди его сборки."""
+    settings = load_settings()
+    with single_instance(settings) as acquired:
+        if not acquired:
+            print("Воркер сейчас работает, повторите откат через несколько минут.", file=sys.stderr)
+            return EXIT_ERROR
+        try:
+            target = rollback(settings.site, to)
+        except ReleaseError as exc:
+            print(f"Откат не выполнен: {exc}", file=sys.stderr)
+            return EXIT_ERROR
+    print(f"public_html теперь указывает на {target.name}")
+    return 0
 
 
 if __name__ == "__main__":

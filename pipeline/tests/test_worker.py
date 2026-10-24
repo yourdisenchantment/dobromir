@@ -1,5 +1,6 @@
 """Воркер для cron: блокировка, коды выхода, письмо, status.json, лог."""
 
+import functools
 import io
 import json
 import logging
@@ -13,6 +14,7 @@ import httpx
 import pytest
 
 from fakevk import FakeWall
+from pipeline.release import build_release, current_release
 from pipeline.settings import Settings, load_settings
 from pipeline.store import Store, open_db
 from pipeline.worker import (
@@ -223,6 +225,23 @@ def test_failed_build_keeps_pending(tmp_path: Path) -> None:
     store = Store(open_db(s.data.db))
     assert store.counts() == (3, 0)  # данные синка сохранились, собрать можно позже
     store.close()
+
+
+def test_worker_with_real_release(tmp_path: Path) -> None:
+    """Сборка релиза упала - сайт не тронут, флаг остался; следующий запуск собирает и переключает."""
+    s = settings_at(tmp_path)
+    fake = str(Path(__file__).parent / "fake_build.py")
+
+    def release(mode: str):  # type: ignore[no-untyped-def]
+        return functools.partial(build_release, command=[sys.executable, fake, mode, "5"])
+
+    wall = FakeWall(3)
+    code, err = run(s, wall, at(23, 1), build=release("no-index"))
+    assert code == EXIT_ERROR and "прежней версии" in err and "index.html" in err
+    assert status(s)["pending"] is True and not s.site.public.exists()
+    code, err = run(s, wall, at(23, 2), build=release("ok"))  # VK без изменений: собирает флаг
+    assert code == EXIT_OK and err == ""
+    assert status(s)["pending"] is False and current_release(s.site) is not None
 
 
 def test_log_rotation(tmp_path: Path) -> None:

@@ -28,9 +28,10 @@ BACKLOG, если у нее стоит пометка «заблокирован
 Бэкенд в работе (2026-10-23): клиент VK, разбор постов и хэш, база SQLite,
 экспорт `news.json` (формат - `docs/content-contract.md`), скачивание фото.
 Сверка с VK (окно, суточная сверка, удаления, лимит сборок) - P1-4. Команды
-`python -m pipeline survey | import | photos | export | backfill | sync | worker`;
-`worker` - для cron (P1-5): блокировка, коды выхода, `status.json`, лог.
-Впереди - сборка и переключение релиза (P1-6).
+`python -m pipeline survey | import | photos | export | backfill | sync | worker | rollback`;
+`worker` - для cron (P1-5): блокировка, коды выхода, `status.json`, лог, сборка
+релиза и переключение `public_html` (P1-6, `pipeline/release.py`); `rollback` -
+вернуть ссылку на прежний релиз без пересборки.
 `site/` - каркас без дизайна (P1-8): лента и страницы новостей из `news.json`,
 sitemap, RSS, robots, 404; без `NEWS_JSON` берется `site/src/sample/news.example.json`. Порядок - BACKLOG.
 В разделе «Где что лежит» помечено, что существует, а что только запланировано.

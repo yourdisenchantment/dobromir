@@ -28,6 +28,7 @@ import httpx
 
 from pipeline.builds import LAST_BUILD_AT, builds_today, pending_since, record_build
 from pipeline.reconcile import SyncError
+from pipeline.release import ReleaseError
 from pipeline.run import SyncResult, run_sync
 from pipeline.settings import Settings
 from pipeline.store import Store, open_db
@@ -44,7 +45,7 @@ STATUS_ERRORS_KEPT = 10
 
 log = logging.getLogger("pipeline")
 
-Build = Callable[[Settings, int], None]
+Build = Callable[[Settings, int], object]  # результат не используется
 
 
 def worker_version() -> str:
@@ -138,6 +139,11 @@ def _message(exc: BaseException) -> tuple[int, str]:
         return EXIT_MASS_DELETE, (
             "Новости не обновлены: VK вернул слишком мало постов, удаление остановлено ради сохранности.\n"
             f"Сайт работает со старыми данными. Подробности: {exc}"
+        )
+    if isinstance(exc, ReleaseError):
+        return EXIT_ERROR, (
+            "Сайт не пересобран, он работает на прежней версии; новости обновятся при следующей удачной сборке.\n"
+            f"Причина: {exc}"
         )
     if isinstance(exc, VkNetworkError):
         return EXIT_ERROR, (

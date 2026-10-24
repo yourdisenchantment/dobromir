@@ -111,6 +111,9 @@ class Settings:
     site_url: str
     site_env: str
     node_bin: Path
+    yandex_verification: str | None
+    google_verification: str | None
+    build_timeout: int
 
     @property
     def tz(self) -> ZoneInfo:
@@ -243,4 +246,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         site_url=site_url,
         site_env=site_env,
         node_bin=Path(env["NODE_BIN"]) if env.get("NODE_BIN") else Path.home() / "opt" / "node" / "bin",
+        yandex_verification=env.get("YANDEX_VERIFICATION") or None,
+        google_verification=env.get("GOOGLE_VERIFICATION") or None,
+        build_timeout=_int(env, "BUILD_TIMEOUT", 600, low=30),
     )
