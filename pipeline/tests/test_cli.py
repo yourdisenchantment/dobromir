@@ -44,7 +44,7 @@ def test_backup_command(tmp_path: Path) -> None:
     assert ok.returncode == 0 and ok.stderr == "" and "dobromir-" in ok.stdout
 
 
-@pytest.mark.parametrize("command", ["migrate", "build"])
+@pytest.mark.parametrize("command", ["migrate", "build", "media-cleanup"])
 def test_refuses_while_worker_runs(tmp_path: Path, command: str) -> None:
     (tmp_path / "data").mkdir()
     holder = subprocess.Popen(
@@ -75,3 +75,11 @@ def test_bad_settings_one_line_not_traceback(tmp_path: Path, command: str) -> No
         [sys.executable, "-m", "pipeline", command], env=env, capture_output=True, text=True, timeout=60, check=False
     )
     assert r.returncode == 1 and "Неверные настройки" in r.stderr and "Traceback" not in r.stderr
+
+
+def test_media_cleanup_command(tmp_path: Path) -> None:
+    cli(tmp_path, "migrate")
+    dry = cli(tmp_path, "media-cleanup", "--dry-run")
+    assert dry.returncode == 0 and "удалились бы: 0" in dry.stdout and dry.stderr == ""
+    real = cli(tmp_path, "media-cleanup")
+    assert real.returncode == 0 and "удалено: 0" in real.stdout

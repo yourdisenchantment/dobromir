@@ -37,9 +37,7 @@ def download_photos(store: Store, http: httpx.Client, media_dir: Path, now: int)
     """
     count = 0
     for stored in store.posts():
-        post = stored.post
-        photos = list(post.photos) + (list(post.repost.photos) if post.repost else [])
-        for photo in photos:
+        for photo in stored.post.all_photos:
             known = store.photo_info(photo)
             if known is not None and (media_dir / known[0]).is_file():
                 continue

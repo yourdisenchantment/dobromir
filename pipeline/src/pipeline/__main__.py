@@ -14,6 +14,7 @@ import httpx
 
 from pipeline.backup import BackupError, backup_db
 from pipeline.export import build_news, write_news
+from pipeline.media.cleanup import MEDIA_KEEP_DAYS, cleanup_media
 from pipeline.reconcile import fetch_wall
 from pipeline.release import ReleaseError, build_release, rollback
 from pipeline.run import run_sync
@@ -54,6 +55,8 @@ def main() -> None:
     build.add_argument("--switch", action="store_true", help="после проверок переключить public_html на него")
     sub.add_parser("migrate", help="довести схему базы до последней версии (deploy.sh)")
     sub.add_parser("backup", help="копия базы в <данные>/backup/, хранить 7 последних")
+    clean = sub.add_parser("media-cleanup", help=f"удалить фото, не нужные живым постам дольше {MEDIA_KEEP_DAYS} дней")
+    clean.add_argument("--dry-run", action="store_true", help="только показать, что удалилось бы")
     args = parser.parse_args()
     if args.command == "worker":
         sys.exit(worker_main())
@@ -65,6 +68,8 @@ def main() -> None:
         sys.exit(migrate_main())
     if args.command == "backup":
         sys.exit(backup_main())
+    if args.command == "media-cleanup":
+        sys.exit(media_cleanup_main(dry_run=args.dry_run))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)  # httpx пишет адреса запросов
 
@@ -126,6 +131,29 @@ def _settings_or_none() -> Settings | None:
     except RuntimeError as exc:
         print(f"Неверные настройки: {exc}", file=sys.stderr)
         return None
+
+
+def media_cleanup_main(*, dry_run: bool) -> int:
+    """Под блокировкой воркера: он сам чистит медиа раз в сутки и пишет в ту же базу."""
+    settings = _settings_or_none()
+    if settings is None:
+        return EXIT_ERROR
+    with single_instance(settings) as acquired:
+        if not acquired:
+            print("Воркер сейчас работает, повторите через несколько минут.", file=sys.stderr)
+            return EXIT_ERROR
+        store = Store(open_db(settings.data.db))
+        try:
+            result = cleanup_media(store, settings.site.media, int(time.time()), dry_run=dry_run)
+        finally:
+            store.close()
+    for name in result.removed:
+        print(name)
+    verb = "удалились бы" if dry_run else "удалено"
+    print(
+        f"{verb}: {len(result.removed)}; оставлено у живых постов: {result.in_use}; не тронуто: {len(result.refused)}"
+    )
+    return 0
 
 
 def worker_main() -> int:

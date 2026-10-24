@@ -27,6 +27,7 @@ from typing import IO, Any
 import httpx
 
 from pipeline.builds import LAST_BUILD_AT, builds_today, pending_since, record_build
+from pipeline.media.cleanup import cleanup_media
 from pipeline.reconcile import SyncError
 from pipeline.release import ReleaseError
 from pipeline.run import SyncResult, run_sync
@@ -181,6 +182,10 @@ def run_worker(
                     build(settings, now)  # исключение - сборка не удалась, флаг остается
                     record_build(store, now, settings.tz)
                     log.info("сборка выполнена")
+            if result.full_reconcile and pending_since(store) is None:
+                # Раз в сутки и только на свежем сайте: текущий релиз уже не показывает
+                # удаленные посты, значит их фото ему не нужны.
+                cleanup_media(store, settings.site.media, now)
             status["last_ok_poll_at"] = _iso(now, settings)
             status["last_error"] = None
         except Exception as exc:  # воркер обязан превратить любую ошибку в код и письмо

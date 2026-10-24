@@ -166,6 +166,21 @@ class Store:
                 [(now, p.owner_id, p.id) for p in photos],
             )
 
+    def stale_photos(self, used_before: int) -> list[tuple[int, int, str]]:
+        """Фото, которые в последний раз использовались раньше used_before: (owner_id, id, файл)."""
+        return [
+            (int(r["owner_id"]), int(r["id"]), str(r["file_name"]))
+            for r in self._db.execute(
+                "SELECT owner_id, id, file_name FROM photos WHERE last_used_at < ? ORDER BY last_used_at",
+                (used_before,),
+            )
+        ]
+
+    def forget_photo(self, owner_id: int, photo_id: int) -> None:
+        """Убирает запись о файле. Понадобится снова - фото скачается заново."""
+        with self._db:
+            self._db.execute("DELETE FROM photos WHERE owner_id = ? AND id = ?", (owner_id, photo_id))
+
     # --- отметки ---
 
     def get_meta(self, key: str) -> str | None:

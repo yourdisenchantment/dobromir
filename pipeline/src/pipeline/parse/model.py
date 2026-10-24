@@ -76,6 +76,11 @@ class Post(Content):
         return datetime.fromtimestamp(self.timestamp, timezone.utc).astimezone(LOCAL_TZ)
 
     @property
+    def all_photos(self) -> list[Photo]:
+        """Фото поста и оригинала репоста: их скачивают и их же бережет чистка медиа."""
+        return list(self.photos) + (list(self.repost.photos) if self.repost else [])
+
+    @property
     def slug(self) -> str:
         """Дата поста по местному времени и его id в VK: уникально и не меняется при правке."""
         return f"{self.date:%Y-%m-%d}-vk{self.id}"
