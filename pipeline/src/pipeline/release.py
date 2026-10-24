@@ -23,7 +23,7 @@ from pipeline.settings import Settings, SiteDirs
 
 log = logging.getLogger("pipeline")
 
-RELEASE_NAME = re.compile(r"^\d{8}-\d{6}(-\d+)?$")
+RELEASE_NAME = re.compile(r"^(\d{8}-\d{6})(?:-(\d+))?$")
 KEEP_RELEASES = 5
 # Страниц в новом релизе может стать меньше на max(3, 20%): столько же, сколько
 # удалений за раз пропускает защита сверки. Больше - скорее сломанная сборка.
@@ -48,7 +48,14 @@ def releases(site: SiteDirs) -> list[Path]:
     """Каталоги релизов по возрастанию времени. Только с именем-временем: чужое не трогаем."""
     if not site.releases.is_dir():
         return []
-    return sorted(p for p in site.releases.iterdir() if p.is_dir() and RELEASE_NAME.match(p.name))
+    return sorted((p for p in site.releases.iterdir() if p.is_dir() and RELEASE_NAME.match(p.name)), key=_order)
+
+
+def _order(path: Path) -> tuple[str, int]:
+    """Время, затем номер сборки за ту же секунду. Не по строке: «-10» встало бы раньше «-2»."""
+    match = RELEASE_NAME.match(path.name)
+    assert match is not None  # releases() отбирает только такие имена
+    return match.group(1), int(match.group(2) or 0)
 
 
 def current_release(site: SiteDirs) -> Path | None:
@@ -60,12 +67,15 @@ def current_release(site: SiteDirs) -> Path | None:
 
 
 def _new_release_dir(site: SiteDirs, now: int, settings: Settings) -> Path:
+    """Имя - местное время; за ту же секунду - номер больше всех занятых, даже если младшие
+    уже вычищены: иначе новый релиз получил бы освободившееся «старое» имя."""
     base = datetime.fromtimestamp(now, settings.tz).strftime("%Y%m%d-%H%M%S")
-    path = site.releases / base
-    n = 1
-    while path.exists():
-        path = site.releases / f"{base}-{n}"
+    taken = [n for stamp, n in map(_order, releases(site)) if stamp == base]
+    n = max(taken) + 1 if taken else 0
+    path = site.releases / (f"{base}-{n}" if n else base)
+    while path.exists():  # чужой файл с таким именем
         n += 1
+        path = site.releases / f"{base}-{n}"
     return path
 
 
@@ -162,16 +172,23 @@ def build_env(settings: Settings, out_dir: Path) -> dict[str, str]:
     return env
 
 
-def build_release(settings: Settings, now: int, command: Sequence[str] | None = None) -> Path:
+def build_release(settings: Settings, now: int, command: Sequence[str] | None = None, *, switch: bool = True) -> Path:
     """Собрать, проверить, переключить, почистить. Возвращает новый релиз.
+
+    switch=False - пробная сборка (deploy.sh): релиз собран и проверен, но public_html не
+    тронут; включить его можно потом командой rollback --to. Так можно собрать новый сайт,
+    пока public_html еще обычный каталог старого сайта.
 
     При любой ошибке созданный этим запуском каталог удаляется, public_html не трогается,
     исключение уходит наружу (воркер оставит флаг «сайт устарел»).
     """
     site = settings.site
+    if not settings.data.news_json.is_file():
+        raise ReleaseError(f"нет {settings.data.news_json}: сначала python -m pipeline export")
     site.releases.mkdir(parents=True, exist_ok=True)
     site.media.mkdir(parents=True, exist_ok=True)
-    ensure_switchable(site)  # до долгой сборки, а не после
+    if switch:
+        ensure_switchable(site)  # до долгой сборки, а не после
     previous = current_release(site)
     release = _new_release_dir(site, now, settings)
     cmd = list(command) if command is not None else build_command(settings)
@@ -194,16 +211,18 @@ def build_release(settings: Settings, now: int, command: Sequence[str] | None = 
             raise ReleaseError(f"сборка сайта завершилась с кодом {proc.returncode}")
         os.symlink(os.path.relpath(site.media, release), release / "media")
         pages = check_release(release, site, previous)
-        switch_to(site, release)
+        if switch:
+            switch_to(site, release)
     except BaseException:
         if release.exists():
             shutil.rmtree(release)
         raise
     removed = cleanup(site)
     log.info(
-        "релиз %s: страниц %s; public_html переключен; удалены старые: %s",
+        "релиз %s: страниц %s; public_html %s; удалены старые: %s",
         release.name,
         pages,
+        "переключен" if switch else "не тронут",
         ", ".join(removed) or "нет",
     )
     return release
@@ -222,7 +241,13 @@ def rollback(site: SiteDirs, to: str | None = None) -> Path:
         if target not in found:
             raise ReleaseError(f"нет релиза {to}; есть: {', '.join(p.name for p in found) or 'ни одного'}")
     else:
-        older = [p for p in found if current is None or p.resolve() < current]
+        resolved = [p.resolve() for p in found]
+        if current is None:
+            older = found
+        elif current in resolved:
+            older = found[: resolved.index(current)]
+        else:
+            raise ReleaseError(f"public_html указывает не на релиз из releases/ ({current}); укажите --to")
         if not older:
             raise ReleaseError("нет более раннего релиза для отката")
         target = older[-1]

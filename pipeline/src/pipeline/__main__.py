@@ -3,19 +3,23 @@
 import argparse
 import json
 import logging
+import sqlite3
 import sys
 import time
+from contextlib import closing
 from pathlib import Path
 from typing import Literal, cast
 
 import httpx
 
+from pipeline.backup import BackupError, backup_db
 from pipeline.export import build_news, write_news
 from pipeline.reconcile import fetch_wall
 from pipeline.release import ReleaseError, build_release, rollback
 from pipeline.run import run_sync
-from pipeline.settings import load_settings
+from pipeline.settings import Settings, load_settings
 from pipeline.store import Store, open_db
+from pipeline.store.db import migrate, schema_version
 from pipeline.survey import run_survey
 from pipeline.sync import download_photos, ingest
 from pipeline.vk.client import VkClient
@@ -45,12 +49,22 @@ def main() -> None:
     sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
     sub.add_parser("worker", help="запуск из cron: блокировка, синк, сборка, status.json, коды выхода")
     back = sub.add_parser("rollback", help="вернуть public_html на предыдущий релиз без пересборки")
-    back.add_argument("--to", help="имя релиза из releases/, по умолчанию - предыдущий")
+    back.add_argument("--to", help="имя релиза из releases/ (любого, не только старого); по умолчанию - предыдущий")
+    build = sub.add_parser("build", help="собрать и проверить релиз в releases/; public_html не трогать")
+    build.add_argument("--switch", action="store_true", help="после проверок переключить public_html на него")
+    sub.add_parser("migrate", help="довести схему базы до последней версии (deploy.sh)")
+    sub.add_parser("backup", help="копия базы в <данные>/backup/, хранить 7 последних")
     args = parser.parse_args()
     if args.command == "worker":
         sys.exit(worker_main())
     if args.command == "rollback":
         sys.exit(rollback_main(args.to))
+    if args.command == "build":
+        sys.exit(build_main(switch=args.switch))
+    if args.command == "migrate":
+        sys.exit(migrate_main())
+    if args.command == "backup":
+        sys.exit(backup_main())
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)  # httpx пишет адреса запросов
 
@@ -105,6 +119,15 @@ def main() -> None:
         store.close()
 
 
+def _settings_or_none() -> Settings | None:
+    """Настройки для команд из shell-скриптов: при ошибке одна строка вместо трейсбека."""
+    try:
+        return load_settings()
+    except RuntimeError as exc:
+        print(f"Неверные настройки: {exc}", file=sys.stderr)
+        return None
+
+
 def worker_main() -> int:
     """Без логов на экран: из cron любой вывод уходит письмом, поэтому печатается только ошибка."""
     try:
@@ -118,7 +141,9 @@ def worker_main() -> int:
 
 def rollback_main(to: str | None) -> int:
     """Откат под той же блокировкой, что и воркер: не переключать ссылку посреди его сборки."""
-    settings = load_settings()
+    settings = _settings_or_none()
+    if settings is None:
+        return EXIT_ERROR
     with single_instance(settings) as acquired:
         if not acquired:
             print("Воркер сейчас работает, повторите откат через несколько минут.", file=sys.stderr)
@@ -129,6 +154,64 @@ def rollback_main(to: str | None) -> int:
             print(f"Откат не выполнен: {exc}", file=sys.stderr)
             return EXIT_ERROR
     print(f"public_html теперь указывает на {target.name}")
+    return 0
+
+
+def build_main(*, switch: bool) -> int:
+    """Сборка вне cron (deploy.sh): под блокировкой воркера, ход сборки - в консоль."""
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    settings = _settings_or_none()
+    if settings is None:
+        return EXIT_ERROR
+    with single_instance(settings) as acquired:
+        if not acquired:
+            print("Воркер сейчас работает, повторите сборку через несколько минут.", file=sys.stderr)
+            return EXIT_ERROR
+        try:
+            release = build_release(settings, int(time.time()), switch=switch)
+        except ReleaseError as exc:
+            print(f"Релиз не собран, сайт не тронут: {exc}", file=sys.stderr)
+            return EXIT_ERROR
+    if switch:
+        print(f"public_html теперь указывает на {release.name}")
+    else:
+        print(f"Релиз {release.name} собран и проверен, public_html не тронут.")
+        # Полный путь: на сервере системный python пакета не видит, нужен Python из venv.
+        print(f"Включить: {sys.executable} -m pipeline rollback --to {release.name}")
+    return 0
+
+
+def migrate_main() -> int:
+    """Миграции под блокировкой воркера: не менять схему посреди его записи."""
+    settings = _settings_or_none()
+    if settings is None:
+        return EXIT_ERROR
+    with single_instance(settings) as acquired:
+        if not acquired:
+            print("Воркер сейчас работает, повторите через несколько минут.", file=sys.stderr)
+            return EXIT_ERROR
+        settings.data.db.parent.mkdir(parents=True, exist_ok=True)
+        with closing(sqlite3.connect(settings.data.db)) as conn:
+            before = schema_version(conn)
+            after = migrate(conn)
+    print(
+        f"схема базы: версия {before} -> {after}" if after != before else f"схема базы: версия {after}, без изменений"
+    )
+    return 0
+
+
+def backup_main() -> int:
+    """Без блокировки: снимок SQLite согласован и при работающем воркере, а копия не должна
+    пропадать из-за того, что воркер в это время занят."""
+    settings = _settings_or_none()
+    if settings is None:
+        return EXIT_ERROR
+    try:
+        path = backup_db(settings, int(time.time()))
+    except BackupError as exc:
+        print(f"Копия базы не сделана: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    print(f"копия базы: {path}")
     return 0
 
 

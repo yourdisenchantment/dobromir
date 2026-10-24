@@ -31,7 +31,7 @@ def at(day: int, hour: int, minute: int = 0, second: int = 0) -> int:
 
 
 def settings_at(tmp_path: Path) -> Settings:
-    return load_settings(
+    s = load_settings(
         {
             "DOBROMIR_DATA": str(tmp_path / "data"),
             "SITE_ROOT": str(tmp_path / "site"),
@@ -40,6 +40,9 @@ def settings_at(tmp_path: Path) -> Settings:
             "YANDEX_VERIFICATION": "ya123",
         }
     )
+    s.data.news_json.parent.mkdir(parents=True, exist_ok=True)
+    s.data.news_json.write_text("{}", encoding="utf-8")  # подменная сборка его не читает
+    return s
 
 
 def fake(mode: str = "ok", pages: int = 10) -> list[str]:
@@ -130,6 +133,25 @@ def test_same_second_builds_get_distinct_names(tmp_path: Path) -> None:
     assert a.name == "20261023-100000" and b.name == "20261023-100000-1"
 
 
+def test_many_builds_in_one_second_keep_order(tmp_path: Path) -> None:
+    """Номер за ту же секунду растет и после чистки; «-10» новее «-9», откат идет на «-10»."""
+    s = settings_at(tmp_path)
+    built = [build_release(s, at(23, 10), command=fake()).name for _ in range(12)]
+    assert built[0] == "20261023-100000" and built[11] == "20261023-100000-11"
+    assert len(set(built)) == 12
+    assert [p.name for p in releases(s.site)] == built[-5:]
+    assert rollback(s.site).name == "20261023-100000-10"
+
+
+def test_rollback_refuses_unknown_current(tmp_path: Path) -> None:
+    s = settings_at(tmp_path)
+    build_release(s, at(23, 10), command=fake())
+    (s.site.releases / "ручной").mkdir()
+    switch_to(s.site, s.site.releases / "ручной")
+    with pytest.raises(ReleaseError, match="укажите --to"):
+        rollback(s.site)
+
+
 def test_rollback(tmp_path: Path) -> None:
     s = settings_at(tmp_path)
     first = build_release(s, at(23, 10), command=fake())
@@ -176,3 +198,42 @@ def test_build_env_has_no_vk_keys_and_passes_site_settings(tmp_path: Path) -> No
     assert f"NEWS_JSON={s.data.news_json}" in env and "SITE_ENV=production" in env
     assert "ASTRO_TELEMETRY_DISABLED=1" in env and "YANDEX_VERIFICATION=ya123" in env
     assert f"ASTRO_OUT_DIR={rel}" in env
+
+
+def test_no_news_json_refused_before_build(tmp_path: Path) -> None:
+    """Без news.json боевая сборка не начинается: иначе пустой сайт или примеры."""
+    s = settings_at(tmp_path)
+    s.data.news_json.unlink()
+    with pytest.raises(ReleaseError, match="python -m pipeline export"):
+        build_release(s, at(23, 10), command=fake())
+    assert releases(s.site) == [] and not s.site.public.exists()
+
+
+def test_trial_build_does_not_switch(tmp_path: Path) -> None:
+    s = settings_at(tmp_path)
+    live = build_release(s, at(23, 10), command=fake())
+    trial = build_release(s, at(23, 11), command=fake(), switch=False)
+    assert current_release(s.site) == live.resolve()  # сайт на прежнем
+    assert (trial / "index.html").is_file() and (trial / "media").is_symlink()
+    assert rollback(s.site, to=trial.name) == trial  # включается командой отката
+    assert current_release(s.site) == trial.resolve()
+
+
+def test_trial_build_next_to_old_site_directory(tmp_path: Path) -> None:
+    """Первый деплой: public_html - еще каталог старого сайта. Пробная сборка можно, переключение нет."""
+    s = settings_at(tmp_path)
+    s.site.public.mkdir(parents=True)
+    (s.site.public / "index.php").write_text("старый сайт", encoding="utf-8")
+    trial = build_release(s, at(23, 10), command=fake(), switch=False)
+    assert (trial / "index.html").is_file()
+    assert (s.site.public / "index.php").read_text(encoding="utf-8") == "старый сайт"
+    with pytest.raises(ReleaseError, match="обычный каталог"):
+        rollback(s.site, to=trial.name)
+    assert not s.site.public.is_symlink()
+
+
+def test_failed_trial_build_cleans_up(tmp_path: Path) -> None:
+    s = settings_at(tmp_path)
+    with pytest.raises(ReleaseError):
+        build_release(s, at(23, 10), command=fake("no-index"), switch=False)
+    assert releases(s.site) == []

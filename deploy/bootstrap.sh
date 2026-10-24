@@ -13,7 +13,8 @@
 #   4. ставит npm-зависимости сайта по package-lock.json и проверяет сборку.
 #
 # Чего не делает никогда: не удаляет файлы, не трогает public_html, не правит
-# существующий .env, не ставит cron (воркера еще нет), не пишет секреты в вывод.
+# существующий .env, не ставит cron (его ставит человек по deploy/crontab.example), не пишет
+# секреты в вывод.
 #
 # Пути можно переопределить переменными (для проверки на ноутбуке):
 #   DATA_DIR  SITE_DIR  PYTHON  NODE_BIN
@@ -72,10 +73,10 @@ echo "Сайт:        $SITE_DIR"
 [ "$APPLY" -eq 1 ] && echo "Режим:       ВЫПОЛНЕНИЕ" || echo "Режим:       только проверка (добавьте --apply)"
 
 step "Проверки"
-[ -d "$REPO/pipeline" ] && [ -d "$REPO/site" ] && ok "клон репозитория на месте" || fail "нет pipeline/ или site/ в $REPO"
+if [ -d "$REPO/pipeline" ] && [ -d "$REPO/site" ]; then ok "клон репозитория на месте"; else fail "нет pipeline/ или site/ в $REPO"; fi
 case "$DATA_DIR" in "$REPO" | "$REPO"/*) fail "каталог данных внутри клона: данные о детях попадут под git" ;; esac
 case "$SITE_DIR" in "$REPO" | "$REPO"/*) fail "папка сайта внутри клона" ;; esac
-command -v git >/dev/null && ok "git $(git --version | awk '{print $3}')" || fail "нет git"
+if command -v git >/dev/null; then ok "git $(git --version | awk '{print $3}')"; else fail "нет git"; fi
 
 if [ -x "$PYTHON" ]; then
     pyver="$("$PYTHON" -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])')"
@@ -92,8 +93,8 @@ if [ -x "$NODE_BIN/node" ]; then
     nodever="$("$NODE_BIN/node" --version)"
     major="${nodever#v}"
     major="${major%%.*}"
-    [ "$major" -ge 22 ] && ok "Node $nodever ($NODE_BIN)" || fail "Node $nodever: нужен 22.12 или новее"
-    [ -x "$NODE_BIN/npm" ] && ok "npm $("$NODE_BIN/npm" --version)" || fail "нет npm в $NODE_BIN"
+    if [ "$major" -ge 22 ]; then ok "Node $nodever ($NODE_BIN)"; else fail "Node $nodever: нужен 22.12 или новее"; fi
+    if [ -x "$NODE_BIN/npm" ]; then ok "npm $("$NODE_BIN/npm" --version)"; else fail "нет npm в $NODE_BIN"; fi
 else
     fail "нет node в $NODE_BIN (задайте NODE_BIN=путь)"
 fi
@@ -120,7 +121,7 @@ fi
 
 step "Каталоги"
 for d in "$DATA_DIR" "$DATA_DIR/db" "$DATA_DIR/export" "$DATA_DIR/logs" "$SITE_DIR/media" "$SITE_DIR/releases"; do
-    [ -d "$d" ] && ok "есть $d" || run mkdir -p "$d"
+    if [ -d "$d" ]; then ok "есть $d"; else run mkdir -p "$d"; fi
 done
 [ -d "$DATA_DIR" ] && run chmod 700 "$DATA_DIR"
 
@@ -181,7 +182,7 @@ echo
 if [ "$APPLY" -eq 1 ]; then
     echo "Готово. Дальше вручную:"
     echo "  1. заполнить $DATA_DIR/.env: SITE_ENV, VK_SERVICE_TOKEN, VK_GROUP_ID"
-    echo "  2. cron и переключение public_html - после того как появится воркер (BACKLOG, P1-5, P2-1)"
+    echo "  2. первичная загрузка новостей, замена public_html ссылкой на релиз, затем cron по deploy/crontab.example"
 else
     echo "Проверки пройдены. Для выполнения: ./deploy/bootstrap.sh --apply"
 fi

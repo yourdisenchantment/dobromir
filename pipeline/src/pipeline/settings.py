@@ -58,6 +58,11 @@ class DataDirs:
         return self.root / "worker.lock"
 
     @property
+    def backups(self) -> Path:
+        """Копии базы (backup-db.sh); внутри непубличного каталога, в нем материалы о детях."""
+        return self.root / "backup"
+
+    @property
     def env_file(self) -> Path:
         """Секреты и настройки сервера."""
         return self.root / ".env"

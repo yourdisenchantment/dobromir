@@ -1,0 +1,70 @@
+# Шаблон .htaccess для нового сайта (Apache на Beget).
+#
+# ПОКА НЕ ПОДКЛЮЧЕН: .htaccess должен лежать в каталоге, который отдает сайт, а public_html -
+# ссылка на релиз, который пересобирается. Как файл попадает в каждый релиз - решается
+# после проверки на хосте (P1-7) и карты старых адресов (P2-5); см. docs/OPEN-QUESTIONS.md.
+#
+# Не проверено на хосте (P1-7): какие модули Apache включены; разрешены ли Options в
+# .htaccess; отдает ли статику nginx Beget сам, мимо .htaccess (тогда заголовки ниже для
+# статики не сработают); как Beget сообщает Apache про HTTPS.
+#
+# Правила не зависят от SITE_ENV: боевой сайт и тестовый различаются по адресу.
+
+AddDefaultCharset utf-8
+ErrorDocument 404 /404.html
+
+# Без списков файлов в каталогах. media/ в релизе - ссылка на общий каталог картинок,
+# владелец у ссылки и цели один, поэтому хватает SymLinksIfOwnerMatch.
+Options -Indexes +SymLinksIfOwnerMatch
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Канонический адрес - без www (О1). Только для боевого домена (punycode
+    # добромир-крым.рф); тестовый поддомен *.beget.tech не перенаправляется.
+    RewriteCond %{HTTP_HOST} ^www\.(xn----9sbirljdkbtdc7l\.xn--p1ai)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+    # http -> https. Включать, только когда P1-7 покажет, как Beget передает признак HTTPS:
+    # если SSL снимает nginx перед Apache, %{HTTPS} всегда off и правило зациклится.
+    # Надежнее - переключатель «перенаправлять на HTTPS» в панели Beget, если он есть.
+    # RewriteCond %{HTTP_HOST} ^xn----9sbirljdkbtdc7l\.xn--p1ai$ [NC]
+    # RewriteCond %{HTTPS} !=on
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # Старые адреса WordPress -> новые (P2-5, карта адресов еще не составлена).
+    # Известные заранее: RSS и карта сайта All in One SEO.
+    RewriteRule ^feed/?$ /rss.xml [R=301,L]
+    RewriteRule ^sitemap\.xml$ /sitemap-index.xml [R=301,L]
+    # Примеры формы (кириллица в адресе - как есть, файл в UTF-8; проверить на хосте):
+    # RewriteRule ^сотрудники/?$ /specialists/ [R=301,L]
+    # RewriteRule ^2024/05/24/блог/?$ /news/ [R=301,L]
+</IfModule>
+
+# Тестовый сайт и технический адрес закрыты от поисковиков и заголовком (мета-тег noindex
+# ставит сама сборка при SITE_ENV=staging).
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase Host "\.beget\.tech$" DOBROMIR_NOINDEX
+</IfModule>
+<IfModule mod_headers.c>
+    Header set X-Robots-Tag "noindex, nofollow" env=DOBROMIR_NOINDEX
+
+    # Кэш: файлы Astro в /_astro/ с хэшем в имени - навсегда; HTML - всегда сверять,
+    # иначе новость появится у читателя с опозданием.
+    <If "%{REQUEST_URI} =~ m#^/_astro/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    <FilesMatch "\.(html|xml)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Картинки постов не меняются: файл media/photos/<id фото VK>.jpg.
+    ExpiresByType image/jpeg "access plus 30 days"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/rss+xml application/javascript application/json image/svg+xml
+</IfModule>

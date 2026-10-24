@@ -28,10 +28,12 @@ BACKLOG, если у нее стоит пометка «заблокирован
 Бэкенд в работе (2026-10-23): клиент VK, разбор постов и хэш, база SQLite,
 экспорт `news.json` (формат - `docs/content-contract.md`), скачивание фото.
 Сверка с VK (окно, суточная сверка, удаления, лимит сборок) - P1-4. Команды
-`python -m pipeline survey | import | photos | export | backfill | sync | worker | rollback`;
+`python -m pipeline survey | import | photos | export | backfill | sync | worker | rollback | build | migrate | backup`;
 `worker` - для cron (P1-5): блокировка, коды выхода, `status.json`, лог, сборка
 релиза и переключение `public_html` (P1-6, `pipeline/release.py`); `rollback` -
-вернуть ссылку на прежний релиз без пересборки.
+вернуть ссылку на прежний релиз (или включить любой) без пересборки; `build`,
+`migrate`, `backup` - для скриптов `deploy/` (P2-1). Серверные скрипты готовы, на
+хосте не запускались (P1-7).
 `site/` - каркас без дизайна (P1-8): лента и страницы новостей из `news.json`,
 sitemap, RSS, robots, 404; без `NEWS_JSON` берется `site/src/sample/news.example.json`. Порядок - BACKLOG.
 В разделе «Где что лежит» помечено, что существует, а что только запланировано.
@@ -206,7 +208,7 @@ format:check, check, test, build.
 | `site/` | Astro + npm: сам сайт. Каркас без дизайна: лента и страницы новостей, sitemap, RSS, robots, 404; пример данных - `src/sample/` (не `src/data/`: `data/` в `.gitignore` ради данных VK) | да | да, каркас |
 | `.pre-commit-config.yaml`, `.cz.toml` | хуки и правила сообщений коммитов | да | да |
 | `.env.example` | шаблон переменных окружения, только заглушки | да | да |
-| `deploy/` | серверное. Есть `bootstrap.sh` - первичная подготовка сервера (без `--apply` только проверяет; не удаляет, не трогает `public_html` и существующий `.env`). Запланированы `run-worker.sh`, `deploy.sh`, `crontab.example`, `backup-db.sh`, `htaccess.example`. Заменяет `infra/` (systemd и nginx на Beget не нужны) | да | частично (`bootstrap.sh`, 2026-10-22) |
+| `deploy/` | серверное: `bootstrap.sh` - первичная подготовка (без `--apply` только проверяет); `deploy.sh <тег>` - обновление кода до тега, копия базы, миграции, пробная сборка (`--switch` - переключить); `run-worker.sh` и `backup-db.sh` - для cron, при успехе молчат; `crontab.example` - строки для панели CronTab; `htaccess.example` - шаблон, к сборке не подключен (OPEN-QUESTIONS, О9). Скрипты не удаляют файлы и не трогают `.env` и каталог старого сайта. Заменяет `infra/` (systemd и nginx на Beget не нужны) | да | да (2026-10-24), на хосте не проверено |
 | `docs/` | отчет о хостинге, расхождения, BACKLOG, открытые вопросы, как обновлять зависимости (`dependencies.md`), формат `news.json` (`content-contract.md`); позже README для администратора хостинга | да | да (создан 2026-10-19) |
 | `pipeline/requirements.txt` | запасной путь установки на сервер через `pip`, если uv на хосте не заработает (P1-7); порождается из `uv.lock` командой из `docs/dependencies.md`; руками не править | да | да |
 | `vk-api/` | справочник и машиночитаемая схема VK API (`schema/methods-access.tsv` - какие ключи допустимы для метода). Справочные данные, руками не править; исключены из хука `trailing-whitespace`, потому что хвостовая табуляция в TSV - пустая колонка | да | да |
