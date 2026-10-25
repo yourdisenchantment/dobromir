@@ -70,18 +70,33 @@ def test_parse_posts_filters_dedupes_and_sorts_by_date() -> None:
     assert [(p.id, p.title) for p in posts] == [(3, "Правка"), (4, "Открытие центра"), (1, "Открытие центра")]
 
 
-def test_photo_prefers_orig_photo() -> None:
-    att = {
-        "type": "photo",
-        "photo": {
-            "id": 9,
-            "owner_id": -GROUP,
-            "orig_photo": {"url": "https://pp.example/orig.jpg", "width": 1200, "height": 675},
-            "sizes": [{"type": "x", "url": "https://pp.example/x.jpg", "width": 640, "height": 360}],
-        },
+def att_with(orig: tuple[int, int] | None, *sizes: tuple[str, int, int]) -> dict[str, Any]:
+    photo: dict[str, Any] = {
+        "id": 9,
+        "owner_id": -GROUP,
+        "sizes": [{"type": t, "url": f"https://pp.example/{t}.jpg", "width": w, "height": h} for t, w, h in sizes],
     }
-    photo = parse_post(post_obj(attachments=[att])).photos[0]
-    assert (photo.url, photo.width, photo.height) == ("https://pp.example/orig.jpg", 1200, 675)
+    if orig:
+        photo["orig_photo"] = {"url": "https://pp.example/orig.jpg", "width": orig[0], "height": orig[1]}
+    return {"type": "photo", "photo": photo}
+
+
+@pytest.mark.parametrize(
+    ("att", "url"),
+    [
+        # Есть w 2560 - оригинал 5000 px не качаем.
+        (att_with((5000, 3750), ("x", 604, 453), ("z", 1080, 810), ("w", 2560, 1920)), "https://pp.example/w.jpg"),
+        # Нет размера от 1600 кроме оригинала - берем оригинал.
+        (att_with((4000, 3000), ("x", 604, 453), ("z", 1080, 810)), "https://pp.example/orig.jpg"),
+        # Портрет: считается длинная сторона.
+        (att_with((1200, 1700), ("z", 765, 1080)), "https://pp.example/orig.jpg"),
+        # Все меньше 1600 - самый большой.
+        (att_with((1200, 675), ("x", 640, 360)), "https://pp.example/orig.jpg"),
+        (att_with(None, ("x", 604, 453), ("z", 1080, 810)), "https://pp.example/z.jpg"),
+    ],
+)
+def test_photo_smallest_size_enough_for_display(att: dict[str, Any], url: str) -> None:
+    assert parse_post(post_obj(attachments=[att])).photos[0].url == url
 
 
 def test_photo_with_zero_sizes_still_parsed() -> None:

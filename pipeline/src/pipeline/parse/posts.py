@@ -4,7 +4,7 @@ import re
 from collections.abc import Iterable
 from typing import Any
 
-from pipeline.parse.model import Link, Photo, Post, Repost, VkMedia
+from pipeline.parse.model import DISPLAY_MAX, Link, Photo, Post, Repost, VkMedia
 
 HASHTAG = re.compile(r"#([^\s#@]+)")
 TITLE_MAX = 120
@@ -25,11 +25,21 @@ def make_title(text: str) -> str:
 
 
 def _photo(att: dict[str, Any]) -> Photo | None:
-    """Самое большое из того, что отдал VK: `orig_photo`, иначе наибольший из `sizes`."""
+    """Самый маленький из размеров VK (`orig_photo` и `sizes`), которого хватает на копию для
+    показа (DISPLAY_MAX по длинной стороне); если такого нет - самый большой.
+
+    Оригинал (`orig_photo`) бывает в несколько мегабайт, а хранится все равно копия до 1600 px:
+    качать его, когда есть `w` 2560 px, - лишний трафик и время (решено 2026-10-25).
+    """
     candidates = [s for s in [att.get("orig_photo"), *(att.get("sizes") or [])] if s and s.get("url")]
     if not candidates:
         return None
-    best = max(candidates, key=lambda s: (s.get("width") or 0) * (s.get("height") or 0))
+
+    def area(s: dict[str, Any]) -> int:
+        return (s.get("width") or 0) * (s.get("height") or 0)
+
+    enough = [s for s in candidates if max(s.get("width") or 0, s.get("height") or 0) >= DISPLAY_MAX]
+    best = min(enough, key=area) if enough else max(candidates, key=area)
     return Photo(
         owner_id=att["owner_id"],
         id=att["id"],

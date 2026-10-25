@@ -14,11 +14,11 @@ from pathlib import Path
 import httpx
 from PIL import Image, ImageOps
 
-from pipeline.parse.model import Photo
+from pipeline.parse.model import DISPLAY_MAX, Photo
 
 log = logging.getLogger(__name__)
 
-FULL_MAX = 1600
+FULL_MAX = DISPLAY_MAX
 PREVIEW_MAX = 800
 PREVIEW_SUFFIX = "-800"
 WEBP_QUALITY = 80
