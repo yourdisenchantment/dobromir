@@ -1,6 +1,7 @@
 """Сборка релиза, проверки, атомарное переключение public_html, чистка и откат."""
 
 import dataclasses
+import json
 import os
 import sys
 import threading
@@ -80,13 +81,37 @@ def test_timeout(tmp_path: Path) -> None:
     assert releases(s.site) == [] and not s.site.public.exists()
 
 
-def test_sharp_page_drop_refused(tmp_path: Path) -> None:
+def with_news(s: Settings, *slugs: str) -> None:
+    posts = [{"slug": slug} for slug in slugs]
+    s.data.news_json.write_text(json.dumps({"version": 2, "posts": posts}), encoding="utf-8")
+
+
+def test_release_without_news_pages_refused(tmp_path: Path) -> None:
+    """У каждой новости из news.json должна быть страница: иначе сборка сломана."""
     s = settings_at(tmp_path)
-    good = build_release(s, at(23, 10), command=fake(pages=30))
-    with pytest.raises(ReleaseError, match="страниц стало 20 вместо 30"):
-        build_release(s, at(23, 11), command=fake(pages=20))
+    with_news(s, "2026-10-20-vk1", "2026-10-21-vk2")
+    good = build_release(s, at(23, 10), command=fake())
+    with pytest.raises(ReleaseError, match="нет страниц у 2 новостей"):
+        build_release(s, at(23, 11), command=fake("no-news"))
     assert current_release(s.site) == good.resolve()
-    build_release(s, at(23, 12), command=fake(pages=24))  # минус 6 - в пределах max(3, 20%)
+
+
+def test_fewer_pages_is_fine_when_news_expire(tmp_path: Path) -> None:
+    """Новости уходят по сроку хранения: страниц меньше - это норма, а не поломка."""
+    s = settings_at(tmp_path)
+    with_news(s, *[f"2026-10-{d:02d}-vk{d}" for d in range(1, 21)])
+    build_release(s, at(23, 10), command=fake(pages=5))
+    with_news(s, "2026-10-20-vk20")
+    rel = build_release(s, at(23, 11), command=fake(pages=5))
+    assert current_release(s.site) == rel.resolve()
+
+
+def test_unreadable_news_json_refused(tmp_path: Path) -> None:
+    s = settings_at(tmp_path)
+    s.data.news_json.write_text("{не json", encoding="utf-8")
+    with pytest.raises(ReleaseError, match="не читается"):
+        build_release(s, at(23, 10), command=fake())
+    assert releases(s.site) == []
 
 
 def test_real_public_html_directory_is_never_touched(tmp_path: Path) -> None:

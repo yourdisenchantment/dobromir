@@ -50,6 +50,8 @@ def settings_at(tmp_path: Path, **extra: str) -> Settings:
         "VK_SERVICE_TOKEN": SECRET,
         "VK_GROUP_ID": "49938199",
         "VK_WINDOW": "20",
+        # Посты FakeWall - августовские, «сейчас» - октябрь: срок хранения здесь не проверяется.
+        "NEWS_RETENTION_DAYS": "3650",
         "VK_BY_ID_BATCH": "4",
         **extra,
     }

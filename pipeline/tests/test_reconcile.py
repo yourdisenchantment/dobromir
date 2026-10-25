@@ -38,6 +38,8 @@ def settings_at(tmp_path: Path, **extra: str) -> Settings:
         "SITE_ROOT": str(tmp_path / "site"),
         "SITE_ENV": "staging",
         "VK_WINDOW": "5",
+        # Посты FakeWall - августовские, «сейчас» - октябрь: срок хранения здесь не проверяется.
+        "NEWS_RETENTION_DAYS": "3650",
         "VK_PAGE_SIZE": "10",
         "VK_BY_ID_BATCH": "4",
         **extra,

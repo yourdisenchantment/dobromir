@@ -10,6 +10,7 @@
 public_html указывает либо на старый, либо на новый релиз, промежутка нет.
 """
 
+import json
 import logging
 import os
 import re
@@ -25,10 +26,6 @@ log = logging.getLogger("pipeline")
 
 RELEASE_NAME = re.compile(r"^(\d{8}-\d{6})(?:-(\d+))?$")
 KEEP_RELEASES = 5
-# Страниц в новом релизе может стать меньше на max(3, 20%): столько же, сколько
-# удалений за раз пропускает защита сверки. Больше - скорее сломанная сборка.
-PAGE_DROP_MIN = 3
-PAGE_DROP_SHARE = 0.20
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -83,11 +80,29 @@ def _count_pages(release: Path) -> int:
     return sum(1 for _ in release.rglob("index.html"))
 
 
-def check_release(release: Path, site: SiteDirs, previous: Path | None) -> int:
-    """Проверки целостности до переключения. Возвращает число страниц.
+def news_slugs(news_json: Path) -> list[str]:
+    """Адреса новостей из news.json: у каждой должна быть своя страница в релизе.
 
     Raises:
-        ReleaseError: чего-то нет или страниц резко меньше, чем в текущем релизе.
+        ReleaseError: news.json не читается.
+    """
+    try:
+        data = json.loads(news_json.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ReleaseError(f"{news_json} не читается: {exc}") from None
+    posts = data.get("posts") if isinstance(data, dict) else None
+    return [str(p["slug"]) for p in posts or [] if isinstance(p, dict) and p.get("slug")]
+
+
+def check_release(release: Path, site: SiteDirs, slugs: list[str]) -> int:
+    """Проверки целостности до переключения. Возвращает число страниц.
+
+    Вместо сравнения с прошлым релизом («страниц стало резко меньше») - проверка, что у
+    каждой новости из news.json есть страница: с 2026-10-26 новости уходят с сайта по
+    сроку хранения, и меньше страниц - это норма, а не поломка.
+
+    Raises:
+        ReleaseError: чего-то нет.
     """
     if not (release / "index.html").is_file():
         raise ReleaseError("в релизе нет index.html")
@@ -96,13 +111,10 @@ def check_release(release: Path, site: SiteDirs, previous: Path | None) -> int:
     media = release / "media"
     if not media.is_symlink() or media.resolve() != site.media.resolve():
         raise ReleaseError("в релизе нет ссылки media на каталог картинок")
-    pages = _count_pages(release)
-    if previous is not None:
-        before = _count_pages(previous)
-        allowed = max(PAGE_DROP_MIN, int(before * PAGE_DROP_SHARE))
-        if before - pages > allowed:
-            raise ReleaseError(f"страниц стало {pages} вместо {before} (допустимо минус {allowed})")
-    return pages
+    missing = [slug for slug in slugs if not (release / "news" / slug / "index.html").is_file()]
+    if missing:
+        raise ReleaseError(f"в релизе нет страниц у {len(missing)} новостей из news.json, например {missing[0]}")
+    return _count_pages(release)
 
 
 def ensure_switchable(site: SiteDirs) -> None:
@@ -189,7 +201,7 @@ def build_release(settings: Settings, now: int, command: Sequence[str] | None = 
     site.media.mkdir(parents=True, exist_ok=True)
     if switch:
         ensure_switchable(site)  # до долгой сборки, а не после
-    previous = current_release(site)
+    slugs = news_slugs(settings.data.news_json)
     release = _new_release_dir(site, now, settings)
     cmd = list(command) if command is not None else build_command(settings)
     try:
@@ -210,7 +222,7 @@ def build_release(settings: Settings, now: int, command: Sequence[str] | None = 
             log.error("вывод сборки:\n%s", tail)
             raise ReleaseError(f"сборка сайта завершилась с кодом {proc.returncode}")
         os.symlink(os.path.relpath(site.media, release), release / "media")
-        pages = check_release(release, site, previous)
+        pages = check_release(release, site, slugs)
         if switch:
             switch_to(site, release)
     except BaseException:

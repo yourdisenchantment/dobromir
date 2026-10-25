@@ -111,6 +111,7 @@ class Settings:
     vk_page_size: int
     vk_by_id_batch: int
     max_builds_per_day: int
+    news_retention_days: int  # на сайте и в базе только новости за столько дней
     reconcile_after_hour: int
     tz_name: str
     site_url: str
@@ -246,6 +247,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         vk_page_size=_int(env, "VK_PAGE_SIZE", 100, low=1, high=100),
         vk_by_id_batch=_int(env, "VK_BY_ID_BATCH", 100, low=1, high=100),
         max_builds_per_day=_int(env, "MAX_BUILDS_PER_DAY", 4, low=1),
+        news_retention_days=_int(env, "NEWS_RETENTION_DAYS", 30, low=1),
         reconcile_after_hour=_int(env, "RECONCILE_AFTER_HOUR", 3, low=0, high=23),
         tz_name=tz_name,
         site_url=site_url,

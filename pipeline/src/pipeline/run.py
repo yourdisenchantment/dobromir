@@ -21,6 +21,7 @@ from pipeline.vk.client import VkClient
 class SyncResult:
     changes: Counter[Change] = field(default_factory=Counter)
     deleted: int = 0
+    expired: int = 0  # удалено по сроку хранения
     full_reconcile: bool = False
     photos: int = 0
     news_changed: bool = False
@@ -28,16 +29,23 @@ class SyncResult:
     build_now: bool = False  # собирать в этом запуске: есть что и лимит не исчерпан
 
 
+def retention_start(settings: Settings, now: int) -> int:
+    """Самая ранняя дата публикации, которая еще хранится и показывается."""
+    return now - settings.news_retention_days * 86400
+
+
 def run_sync(store: Store, vk: VkClient, http: httpx.Client, settings: Settings, now: int) -> SyncResult:
     """Повод к сборке один: изменился news.json. Счетчики лайков его не меняют, правки, удаления,
     закреп и докачанные фото - меняют. Несколько изменений за запуск - одна сборка."""
     tz = settings.tz
     result = SyncResult()
-    window = reconcile_window(store, vk, settings.vk_window, settings.vk_page_size, now)
+    since = retention_start(settings, now)
+    result.expired = store.expire_posts(since)  # сначала срок: сверять старое незачем
+    window = reconcile_window(store, vk, settings.vk_window, settings.vk_page_size, now, since)
     result.changes += window.changes
     result.deleted = window.deleted
     if full_reconcile_due(store, now, tz, settings.reconcile_after_hour):
-        full = full_reconcile(store, vk, settings.vk_by_id_batch, now)  # SyncError/VkError - наружу
+        full = full_reconcile(store, vk, settings.vk_by_id_batch, now, since)  # SyncError/VkError - наружу
         result.changes += full.changes
         result.deleted += full.deleted
         result.full_reconcile = True

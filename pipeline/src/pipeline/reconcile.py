@@ -100,7 +100,9 @@ def _first_regular(items: list[dict[str, Any]], limit: int) -> list[dict[str, An
     return out
 
 
-def reconcile_window(store: Store, vk: VkClient, window: int, page_size: int, now: int) -> ReconcileResult:
+def reconcile_window(
+    store: Store, vk: VkClient, window: int, page_size: int, now: int, since: int | None = None
+) -> ReconcileResult:
     """Новые, измененные, вернувшиеся и удаленные посты в пределах последних `window`.
 
     Удален - сохраненный пост, чья дата не старше самого старого обычного поста окна, но
@@ -111,7 +113,7 @@ def reconcile_window(store: Store, vk: VkClient, window: int, page_size: int, no
     missing = window_missing(store, response)
     _guard(missing, len(store.live_keys()), "окно")
     result = ReconcileResult()
-    result.changes = ingest(store, [response], now)
+    result.changes = ingest(store, [response], now, since)
     result.deleted = store.mark_deleted(sorted(missing), now)
     return result
 
@@ -164,7 +166,7 @@ def _marked_deleted(obj: dict[str, Any]) -> bool:
     return bool(obj.get("is_deleted") or obj.get("deleted_reason"))
 
 
-def full_reconcile(store: Store, vk: VkClient, batch: int, now: int) -> ReconcileResult:
+def full_reconcile(store: Store, vk: VkClient, batch: int, now: int, since: int | None = None) -> ReconcileResult:
     """Все живые посты базы через `wall.getById` пачками.
 
     Сначала все ответы, потом решения: при любой ошибке VK исключение уходит наружу до
@@ -185,7 +187,7 @@ def full_reconcile(store: Store, vk: VkClient, batch: int, now: int) -> Reconcil
 
     _guard(missing, len(ids), "суточная сверка")
     result = ReconcileResult(checked=len(ids))
-    result.changes = ingest(store, responses, now)
+    result.changes = ingest(store, responses, now, since)
     result.deleted = store.mark_deleted([(owner, i) for i in sorted(missing)], now)
     return result
 

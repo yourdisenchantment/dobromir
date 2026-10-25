@@ -124,6 +124,12 @@ class Store:
                 count += cur.rowcount
         return count
 
+    def expire_posts(self, published_before: int) -> int:
+        """Физически удаляет посты, опубликованные раньше срока хранения (решено 2026-10-26).
+        Их фото уберет чистка медиа: на них больше не ссылается ни один пост."""
+        with self._db:
+            return self._db.execute("DELETE FROM posts WHERE date < ?", (published_before,)).rowcount
+
     def posts(self, include_deleted: bool = False) -> list[StoredPost]:
         """Посты из базы, разобранные заново из raw_json; новые первыми."""
         sql = "SELECT raw_json, repost_source, deleted_at FROM posts"
@@ -199,14 +205,13 @@ class Store:
                 [(now, p.owner_id, p.id) for p in photos],
             )
 
-    def stale_photos(self, used_before: int) -> list[tuple[int, int, PhotoRecord]]:
-        """Фото, которые в последний раз использовались раньше used_before: (owner_id, id, запись)."""
+    def photo_records(self) -> list[tuple[int, int, PhotoRecord]]:
+        """Все записи о фото: (owner_id, id, запись)."""
         return [
             (int(r["owner_id"]), int(r["id"]), _photo_record(r))
             for r in self._db.execute(
                 "SELECT owner_id, id, file_name, width, height, preview_file, preview_width, preview_height"
-                " FROM photos WHERE last_used_at < ? ORDER BY last_used_at",
-                (used_before,),
+                " FROM photos ORDER BY owner_id, id"
             )
         ]
 

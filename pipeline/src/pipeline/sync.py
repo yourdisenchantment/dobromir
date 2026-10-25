@@ -18,13 +18,17 @@ from pipeline.store.state import Change, Store
 log = logging.getLogger(__name__)
 
 
-def ingest(store: Store, responses: Iterable[dict[str, Any]], now: int) -> Counter[Change]:
-    """Записывает посты из ответов `wall.get`/`wall.getById` (extended=1). Чужие и рекламные пропускает."""
+def ingest(store: Store, responses: Iterable[dict[str, Any]], now: int, since: int | None = None) -> Counter[Change]:
+    """Записывает посты из ответов `wall.get`/`wall.getById` (extended=1). Чужие и рекламные пропускает.
+
+    since - не записывать посты с датой публикации раньше (срок хранения новостей): иначе
+    окно опроса каждый час возвращало бы в базу уже удаленные по сроку.
+    """
     changes: Counter[Change] = Counter()
     for response in responses:
         names = source_names(response)
         for obj in response.get("items") or []:
-            if not is_news(obj):
+            if not is_news(obj) or (since is not None and int(obj.get("date") or 0) < since):
                 continue
             history = obj.get("copy_history") or []
             source = names.get(history[0]["owner_id"]) if history else None

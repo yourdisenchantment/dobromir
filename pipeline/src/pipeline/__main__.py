@@ -14,10 +14,10 @@ import httpx
 
 from pipeline.backup import BackupError, backup_db
 from pipeline.export import build_news, write_news
-from pipeline.media.cleanup import MEDIA_KEEP_DAYS, cleanup_media
+from pipeline.media.cleanup import cleanup_media
 from pipeline.reconcile import fetch_wall
 from pipeline.release import ReleaseError, build_release, rollback
-from pipeline.run import run_sync
+from pipeline.run import retention_start, run_sync
 from pipeline.settings import Settings, load_settings
 from pipeline.store import Store, open_db
 from pipeline.store.db import migrate, schema_version
@@ -46,7 +46,7 @@ def main() -> None:
     load.add_argument("files", nargs="+", type=Path, help="JSON-файлы ответов, например из survey")
     sub.add_parser("photos", help="скачать фото живых постов, которых еще нет")
     sub.add_parser("export", help="записать news.json из базы")
-    sub.add_parser("backfill", help="загрузить в базу всю стену VK (первичная загрузка)")
+    sub.add_parser("backfill", help="первичная загрузка: посты стены VK за срок хранения (NEWS_RETENTION_DAYS)")
     sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
     sub.add_parser("worker", help="запуск из cron: блокировка, синк, сборка, status.json, коды выхода")
     back = sub.add_parser("rollback", help="вернуть public_html на предыдущий релиз без пересборки")
@@ -55,7 +55,7 @@ def main() -> None:
     build.add_argument("--switch", action="store_true", help="после проверок переключить public_html на него")
     sub.add_parser("migrate", help="довести схему базы до последней версии (deploy.sh)")
     sub.add_parser("backup", help="копия базы в <данные>/backup/, хранить 7 последних")
-    clean = sub.add_parser("media-cleanup", help=f"удалить фото, не нужные живым постам дольше {MEDIA_KEEP_DAYS} дней")
+    clean = sub.add_parser("media-cleanup", help="удалить фото, на которые не ссылается ни один пост в базе")
     clean.add_argument("--dry-run", action="store_true", help="только показать, что удалилось бы")
     args = parser.parse_args()
     if args.command == "worker":
@@ -95,14 +95,16 @@ def main() -> None:
             with httpx.Client() as http:
                 vk = VkClient(settings.vk(), http)
                 if args.command == "backfill":
-                    changes = ingest(store, [fetch_wall(vk, None, settings.vk_page_size)], now)
+                    since = retention_start(settings, now)
+                    changes = ingest(store, [fetch_wall(vk, None, settings.vk_page_size)], now, since)
                     logging.info("записано: %s", {c.value: n for c, n in changes.items()} or "ничего")
                 else:
                     r = run_sync(store, vk, http, settings, now)
                     logging.info(
-                        "посты: %s; удалено: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
+                        "посты: %s; удалено: %s; по сроку: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
                         {c.value: n for c, n in r.changes.items()} or "нет",
                         r.deleted,
+                        r.expired,
                         "да" if r.full_reconcile else "нет",
                         r.photos,
                         "изменился" if r.news_changed else "без изменений",
@@ -144,15 +146,13 @@ def media_cleanup_main(*, dry_run: bool) -> int:
             return EXIT_ERROR
         store = Store(open_db(settings.data.db))
         try:
-            result = cleanup_media(store, settings.site.media, int(time.time()), dry_run=dry_run)
+            result = cleanup_media(store, settings.site.media, dry_run=dry_run)
         finally:
             store.close()
     for name in result.removed:
         print(name)
     verb = "файлов удалилось бы" if dry_run else "файлов удалено"
-    print(
-        f"{verb}: {len(result.removed)}; оставлено у живых постов: {result.in_use}; не тронуто: {len(result.refused)}"
-    )
+    print(f"{verb}: {len(result.removed)}; не тронуто: {len(result.refused)}")
     return 0
 
 

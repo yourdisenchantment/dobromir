@@ -1,9 +1,11 @@
 """Поддельная сборка сайта для тестов: пишет релиз в ASTRO_OUT_DIR или имитирует сбой.
 
     python fake_build.py <режим> <страниц>
-режимы: ok, no-index, no-sitemap, fail, slow, env (записать окружение в env.txt)
+режимы: ok, no-index, no-sitemap, no-news (без страниц новостей из NEWS_JSON), fail, slow,
+env (записать окружение в env.txt)
 """
 
+import json
 import os
 import sys
 import time
@@ -25,5 +27,11 @@ for i in range(pages - 1):
     page = out / "news" / f"p{i}"
     page.mkdir(parents=True)
     (page / "index.html").write_text(f"<html>{i}</html>", encoding="utf-8")
+if mode != "no-news":
+    data = json.loads(Path(os.environ["NEWS_JSON"]).read_text(encoding="utf-8"))
+    for post in data.get("posts", []):
+        page = out / "news" / post["slug"]
+        page.mkdir(parents=True)
+        (page / "index.html").write_text("<html>новость</html>", encoding="utf-8")
 if mode == "env":
     (out / "env.txt").write_text("\n".join(f"{k}={v}" for k, v in sorted(os.environ.items())), encoding="utf-8")

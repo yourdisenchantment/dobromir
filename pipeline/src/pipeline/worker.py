@@ -182,10 +182,10 @@ def run_worker(
                     build(settings, now)  # исключение - сборка не удалась, флаг остается
                     record_build(store, now, settings.tz)
                     log.info("сборка выполнена")
-            if result.full_reconcile and pending_since(store) is None:
-                # Раз в сутки и только на свежем сайте: текущий релиз уже не показывает
-                # удаленные посты, значит их фото ему не нужны.
-                cleanup_media(store, settings.site.media, now)
+            if pending_since(store) is None:
+                # Только на свежем сайте: текущий релиз собран без истекших постов, значит
+                # их фото ему не нужны. Пока сборка не прошла, релиз может их еще показывать.
+                cleanup_media(store, settings.site.media)
             status["last_ok_poll_at"] = _iso(now, settings)
             status["last_error"] = None
         except Exception as exc:  # воркер обязан превратить любую ошибку в код и письмо
@@ -223,9 +223,10 @@ def _fill_counts(status: dict[str, Any], store: Store, settings: Settings, now: 
 
 def _log_result(r: SyncResult) -> None:
     log.info(
-        "посты: %s; удалено: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
+        "посты: %s; удалено: %s; по сроку: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
         {c.value: n for c, n in r.changes.items()} or "нет",
         r.deleted,
+        r.expired,
         "да" if r.full_reconcile else "нет",
         r.photos,
         "изменился" if r.news_changed else "без изменений",
