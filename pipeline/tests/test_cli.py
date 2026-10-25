@@ -80,6 +80,6 @@ def test_bad_settings_one_line_not_traceback(tmp_path: Path, command: str) -> No
 def test_media_cleanup_command(tmp_path: Path) -> None:
     cli(tmp_path, "migrate")
     dry = cli(tmp_path, "media-cleanup", "--dry-run")
-    assert dry.returncode == 0 and "удалились бы: 0" in dry.stdout and dry.stderr == ""
+    assert dry.returncode == 0 and "файлов удалилось бы: 0" in dry.stdout and dry.stderr == ""
     real = cli(tmp_path, "media-cleanup")
-    assert real.returncode == 0 and "удалено: 0" in real.stdout
+    assert real.returncode == 0 and "файлов удалено: 0" in real.stdout

@@ -149,7 +149,7 @@ def media_cleanup_main(*, dry_run: bool) -> int:
             store.close()
     for name in result.removed:
         print(name)
-    verb = "удалились бы" if dry_run else "удалено"
+    verb = "файлов удалилось бы" if dry_run else "файлов удалено"
     print(
         f"{verb}: {len(result.removed)}; оставлено у живых постов: {result.in_use}; не тронуто: {len(result.refused)}"
     )

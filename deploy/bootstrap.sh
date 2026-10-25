@@ -164,8 +164,8 @@ else
     fi
 fi
 if [ "$APPLY" -eq 1 ]; then
-    "$REPO/pipeline/.venv/bin/python" -c 'import httpx, PIL, pydantic, zoneinfo, pipeline.settings; zoneinfo.ZoneInfo("Europe/Simferopol")'
-    ok "пакеты импортируются, часовой пояс Europe/Simferopol найден"
+    "$REPO/pipeline/.venv/bin/python" -c 'import httpx, PIL.features, pydantic, zoneinfo, pipeline.settings; zoneinfo.ZoneInfo("Europe/Simferopol"); assert PIL.features.check("webp"), "Pillow без WebP"'
+    ok "пакеты импортируются, часовой пояс Europe/Simferopol найден, Pillow пишет WebP"
 fi
 
 step "Сайт"

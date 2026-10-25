@@ -135,7 +135,7 @@ else
     (cd pipeline && "$UV" sync --frozen --no-dev --python "$PYTHON")
     echo "  ok    uv sync --frozen --no-dev"
 fi
-"$VENV_PY" -c 'import pipeline.settings'
+"$VENV_PY" -c 'import pipeline.settings, PIL.features; assert PIL.features.check("webp"), "Pillow без WebP"'
 
 step "Копия базы и миграции"
 STAGE="копия базы"

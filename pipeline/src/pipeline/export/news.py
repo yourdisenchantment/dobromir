@@ -9,7 +9,7 @@ from typing import Any
 from pipeline.parse.model import LOCAL_TZ, Content, Photo, Post
 from pipeline.store.state import Store
 
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2  # 2026-10-25: у фото появилось превью для карточки
 
 
 def _iso(ts: int | None) -> str | None:
@@ -17,7 +17,7 @@ def _iso(ts: int | None) -> str | None:
 
 
 class _Photos:
-    """Фото для экспорта: только скачанные и реально лежащие в media/."""
+    """Фото для экспорта: только готовые (обе копии) и реально лежащие в media/."""
 
     def __init__(self, store: Store, media_dir: Path) -> None:
         self._store = store
@@ -27,11 +27,20 @@ class _Photos:
     def __call__(self, photos: list[Photo]) -> list[dict[str, Any]]:
         out: list[dict[str, Any]] = []
         for photo in photos:
-            info = self._store.photo_info(photo)
-            if info is None or not (self._media / info[0]).is_file():
-                continue  # не скачано - покажется после следующего скачивания
-            file_name, width, height = info
-            out.append({"file": file_name, "width": width, "height": height})
+            record = self._store.photo_info(photo)
+            if record is None or record.preview is None:
+                continue  # не готово - покажется после следующего скачивания
+            if not all((self._media / name).is_file() for name in record.files):
+                continue
+            preview = record.preview
+            out.append(
+                {
+                    "file": record.file,
+                    "width": record.width,
+                    "height": record.height,
+                    "preview": {"file": preview.file, "width": preview.width, "height": preview.height},
+                }
+            )
             self.used.append(photo)
         return out
 

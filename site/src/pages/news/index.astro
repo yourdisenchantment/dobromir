@@ -30,9 +30,9 @@ const ordered = [
                 </p>
                 {cover && (
                     <img
-                        src={mediaUrl(cover.file)}
-                        width={cover.width}
-                        height={cover.height}
+                        src={mediaUrl(cover.preview.file)}
+                        width={cover.preview.width}
+                        height={cover.preview.height}
                         alt={displayTitle(post)}
                         loading="lazy"
                         decoding="async"

@@ -10,11 +10,14 @@ import example from "../sample/news.example.json";
 import { newsJsonPath, siteEnv } from "./env";
 import { formatDate } from "./date";
 
-const Photo = z.object({
+const Rendition = z.object({
     file: z.string().min(1),
     width: z.number().int().positive(),
     height: z.number().int().positive(),
 });
+// Полная копия (до 1600 px) - для окна и страницы новости, preview (до 800 px) - для
+// карточки; у маленького фото preview - тот же файл.
+const Photo = Rendition.extend({ preview: Rendition });
 const Link = z.object({ url: z.string(), title: z.string() });
 const Media = z.object({ kind: z.enum(["doc", "video"]), title: z.string() });
 const Content = {
@@ -42,7 +45,7 @@ const Post = z.object({
     repost: Repost.nullable(),
 });
 const News = z.object({
-    version: z.literal(1),
+    version: z.literal(2),
     generated_at: z.string(),
     posts: z.array(Post),
 });

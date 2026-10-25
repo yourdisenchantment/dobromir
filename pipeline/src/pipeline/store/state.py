@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from pipeline.media.photos import PhotoFiles, Rendition
 from pipeline.parse import Photo, Post, content_hash, parse_post
 
 
@@ -17,6 +18,22 @@ class Change(str, Enum):
     CHANGED = "changed"
     RESTORED = "restored"
     SAME = "same"
+
+
+@dataclass(frozen=True)
+class PhotoRecord:
+    """Запись о скачанном фото. preview None - запись старого вида (исходный JPEG до
+    2026-10-25): скачивание фото пересчитает ее из этого файла."""
+
+    file: str
+    width: int
+    height: int
+    preview: Rendition | None
+
+    @property
+    def files(self) -> list[str]:
+        names = [self.file] + ([self.preview.file] if self.preview else [])
+        return list(dict.fromkeys(names))
 
 
 @dataclass(frozen=True)
@@ -142,21 +159,37 @@ class Store:
 
     # --- фото ---
 
-    def record_photo(self, photo: Photo, file_name: str, width: int, height: int, now: int) -> None:
+    def record_photo(self, photo: Photo, files: PhotoFiles, now: int) -> None:
+        full, preview = files.full, files.preview
         with self._db:
             self._db.execute(
-                "INSERT INTO photos (owner_id, id, file_name, width, height, downloaded_at, last_used_at)"
-                " VALUES (?,?,?,?,?,?,?) ON CONFLICT (owner_id, id) DO UPDATE SET file_name = excluded.file_name,"
-                " width = excluded.width, height = excluded.height, downloaded_at = excluded.downloaded_at",
-                (photo.owner_id, photo.id, file_name, width, height, now, now),
+                "INSERT INTO photos (owner_id, id, file_name, width, height, preview_file, preview_width,"
+                " preview_height, downloaded_at, last_used_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
+                " ON CONFLICT (owner_id, id) DO UPDATE SET file_name = excluded.file_name,"
+                " width = excluded.width, height = excluded.height, preview_file = excluded.preview_file,"
+                " preview_width = excluded.preview_width, preview_height = excluded.preview_height,"
+                " downloaded_at = excluded.downloaded_at",
+                (
+                    photo.owner_id,
+                    photo.id,
+                    full.file,
+                    full.width,
+                    full.height,
+                    preview.file,
+                    preview.width,
+                    preview.height,
+                    now,
+                    now,
+                ),
             )
 
-    def photo_info(self, photo: Photo) -> tuple[str, int, int] | None:
+    def photo_info(self, photo: Photo) -> PhotoRecord | None:
         row = self._db.execute(
-            "SELECT file_name, width, height FROM photos WHERE owner_id = ? AND id = ?",
+            "SELECT file_name, width, height, preview_file, preview_width, preview_height FROM photos"
+            " WHERE owner_id = ? AND id = ?",
             (photo.owner_id, photo.id),
         ).fetchone()
-        return None if row is None else (str(row["file_name"]), int(row["width"]), int(row["height"]))
+        return None if row is None else _photo_record(row)
 
     def touch_photos(self, photos: Iterable[Photo], now: int) -> None:
         """Отмечает фото как используемые живыми постами (от этого считается срок чистки)."""
@@ -166,12 +199,13 @@ class Store:
                 [(now, p.owner_id, p.id) for p in photos],
             )
 
-    def stale_photos(self, used_before: int) -> list[tuple[int, int, str]]:
-        """Фото, которые в последний раз использовались раньше used_before: (owner_id, id, файл)."""
+    def stale_photos(self, used_before: int) -> list[tuple[int, int, PhotoRecord]]:
+        """Фото, которые в последний раз использовались раньше used_before: (owner_id, id, запись)."""
         return [
-            (int(r["owner_id"]), int(r["id"]), str(r["file_name"]))
+            (int(r["owner_id"]), int(r["id"]), _photo_record(r))
             for r in self._db.execute(
-                "SELECT owner_id, id, file_name FROM photos WHERE last_used_at < ? ORDER BY last_used_at",
+                "SELECT owner_id, id, file_name, width, height, preview_file, preview_width, preview_height"
+                " FROM photos WHERE last_used_at < ? ORDER BY last_used_at",
                 (used_before,),
             )
         ]
@@ -197,6 +231,15 @@ class Store:
                 "INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
                 (key, value),
             )
+
+
+def _photo_record(row: sqlite3.Row) -> PhotoRecord:
+    preview = (
+        None
+        if row["preview_file"] is None
+        else Rendition(str(row["preview_file"]), int(row["preview_width"]), int(row["preview_height"]))
+    )
+    return PhotoRecord(str(row["file_name"]), int(row["width"]), int(row["height"]), preview)
 
 
 def with_source(post: Post, source_name: str | None) -> Post:

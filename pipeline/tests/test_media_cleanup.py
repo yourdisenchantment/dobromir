@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 
 from fakevk import FakeWall
 from pipeline.media.cleanup import cleanup_media
+from pipeline.media.photos import PhotoFiles, Rendition
 from pipeline.parse import Photo
 from pipeline.settings import Settings, load_settings
 from pipeline.store import Store, open_db
@@ -27,11 +28,20 @@ def setup(tmp_path: Path) -> tuple[Store, Path]:
     store.upsert(post_obj(102, attachments=[photo_att(3)]), NOW)
     for sp in store.posts():
         for photo in sp.post.all_photos:
-            path = media / "photos" / f"{photo.uid}.jpg"
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(b"jpeg")
-            store.record_photo(photo, f"photos/{photo.uid}.jpg", 10, 10, NOW)
+            files = two_files(photo)
+            for name in files.files:
+                (media / name).parent.mkdir(parents=True, exist_ok=True)
+                (media / name).write_bytes(b"webp")
+            store.record_photo(photo, files, NOW)
     return store, media
+
+
+def two_files(photo: Photo) -> PhotoFiles:
+    """Копия для окна и превью - как у фото крупнее 800 px."""
+    return PhotoFiles(
+        full=Rendition(f"photos/{photo.uid}.webp", 1600, 1200),
+        preview=Rendition(f"photos/{photo.uid}-800.webp", 800, 600),
+    )
 
 
 def photo(photo_id: int) -> Photo:
@@ -39,7 +49,11 @@ def photo(photo_id: int) -> Photo:
 
 
 def file_of(media: Path, photo_id: int) -> Path:
-    return media / "photos" / f"{photo(photo_id).uid}.jpg"
+    return media / "photos" / f"{photo(photo_id).uid}.webp"
+
+
+def preview_of(media: Path, photo_id: int) -> Path:
+    return media / "photos" / f"{photo(photo_id).uid}-800.webp"
 
 
 def delete_post(store: Store, post_id: int, last_used: int) -> None:
@@ -63,8 +77,9 @@ def test_29_days_stays_31_days_removed(tmp_path: Path) -> None:
     assert file_of(media, 3).is_file()
     delete_post(store, 102, NOW - 31 * DAY)
     result = cleanup_media(store, media, NOW)
-    assert result.removed == [f"photos/{photo(3).uid}.jpg"]
-    assert not file_of(media, 3).exists() and store.photo_info(photo(3)) is None
+    assert result.removed == [f"photos/{photo(3).uid}.webp", f"photos/{photo(3).uid}-800.webp"]
+    assert not file_of(media, 3).exists() and not preview_of(media, 3).exists()  # обе копии
+    assert store.photo_info(photo(3)) is None
     assert file_of(media, 1).is_file() and file_of(media, 2).is_file()  # чужие фото на месте
 
 
@@ -88,15 +103,17 @@ def test_dry_run_changes_nothing(tmp_path: Path) -> None:
     store, media = setup(tmp_path)
     delete_post(store, 102, NOW - 40 * DAY)
     result = cleanup_media(store, media, NOW, dry_run=True)
-    assert result.removed == [f"photos/{photo(3).uid}.jpg"]
-    assert file_of(media, 3).is_file() and store.photo_info(photo(3)) is not None
+    assert len(result.removed) == 2
+    assert file_of(media, 3).is_file() and preview_of(media, 3).is_file()
+    assert store.photo_info(photo(3)) is not None
 
 
 def test_missing_file_only_forgets_record(tmp_path: Path) -> None:
     store, media = setup(tmp_path)
     delete_post(store, 102, NOW - 40 * DAY)
     file_of(media, 3).unlink()
-    assert len(cleanup_media(store, media, NOW).removed) == 1
+    assert len(cleanup_media(store, media, NOW).removed) == 2
+    assert not preview_of(media, 3).exists()
     assert store.photo_info(photo(3)) is None
 
 
@@ -106,7 +123,9 @@ def test_foreign_names_and_symlinks_refused(tmp_path: Path) -> None:
     outside = tmp_path / "важное.jpg"
     outside.write_bytes(b"x")
     # Фото 1 записано под чужим именем, фото 2 - ссылка наружу.
-    store.record_photo(photo(1), "../важное.jpg", 10, 10, NOW)
+    store.record_photo(
+        photo(1), PhotoFiles(Rendition("../важное.jpg", 10, 10), Rendition("../важное.jpg", 10, 10)), NOW
+    )
     store.touch_photos([photo(1)], NOW - 40 * DAY)
     file_of(media, 2).unlink()
     os.symlink(outside, file_of(media, 2))
@@ -114,6 +133,7 @@ def test_foreign_names_and_symlinks_refused(tmp_path: Path) -> None:
     assert result.removed == [] and len(result.refused) == 2
     assert outside.read_bytes() == b"x" and file_of(media, 2).is_symlink()
     assert store.photo_info(photo(1)) is not None  # запись не тронута
+    assert preview_of(media, 2).is_file()  # у фото со ссылкой не тронута и вторая копия
 
 
 def test_removed_photo_downloads_again_when_needed(tmp_path: Path) -> None:
@@ -144,10 +164,11 @@ def old_deleted_photo(tmp_path: Path) -> Path:
     store = Store(open_db(s.data.db))
     store.upsert(post_obj(900, date=1785000000, attachments=[photo_att(9)]), NOW - 50 * DAY)
     store.mark_deleted([(-GROUP, 900)], NOW - 40 * DAY)
-    path = s.site.media / "photos" / f"{photo(9).uid}.jpg"
+    path = s.site.media / "photos" / f"{photo(9).uid}.webp"
     path.parent.mkdir(parents=True)
-    path.write_bytes(b"jpeg")
-    store.record_photo(photo(9), f"photos/{photo(9).uid}.jpg", 10, 10, NOW - 40 * DAY)
+    path.write_bytes(b"webp")
+    small = Rendition(f"photos/{photo(9).uid}.webp", 640, 480)  # маленькое фото: один файл
+    store.record_photo(photo(9), PhotoFiles(small, small), NOW - 40 * DAY)
     store.close()
     return path
 

@@ -2,8 +2,9 @@
 
 Срок считается от `photos.last_used_at`: его обновляет каждый экспорт news.json для фото
 живых постов. Две защиты от ошибки в этом учете: фото, которое прямо сейчас есть у живого
-поста, не удаляется при любой дате; удаляется только файл вида `photos/<uid>.jpg` внутри
-каталога media, не ссылка. Сначала стирается запись в базе, потом файл: оборвется посередине -
+поста, не удаляется при любой дате; удаляются только файлы вида `photos/<uid>[-800].webp`
+(или `.jpg` старого вида) внутри каталога media, не ссылки. У фото до двух файлов - копия
+для окна и превью; удаляются оба. Сначала стирается запись в базе, потом файл: оборвется посередине -
 останется лишний файл, но не битая картинка на сайте.
 """
 
@@ -17,7 +18,7 @@ from pipeline.store.state import Store
 log = logging.getLogger("pipeline")
 
 MEDIA_KEEP_DAYS = 30
-PHOTO_FILE = re.compile(r"^photos/[0-9m]+_[0-9]+\.jpg$")
+PHOTO_FILE = re.compile(r"^photos/[0-9m]+_[0-9]+(-800)?\.(webp|jpg)$")
 
 
 @dataclass
@@ -35,22 +36,23 @@ def cleanup_media(
     used_before = now - days * 86400
     in_use = {(p.owner_id, p.id) for sp in store.posts() for p in sp.post.all_photos}
     photos_dir = (media_dir / "photos").resolve()
-    for owner_id, photo_id, file_name in store.stale_photos(used_before):
+    for owner_id, photo_id, record in store.stale_photos(used_before):
         if (owner_id, photo_id) in in_use:
             result.in_use += 1
             continue
-        path = media_dir / file_name
-        if not PHOTO_FILE.match(file_name) or path.is_symlink() or path.resolve().parent != photos_dir:
-            result.refused.append(file_name)
+        refused = [name for name in record.files if not _ours(media_dir / name, name, photos_dir)]
+        if refused:
+            result.refused.extend(refused)  # запись и все ее файлы не трогаем
             continue
-        result.removed.append(file_name)
+        result.removed.extend(record.files)
         if dry_run:
             continue
         store.forget_photo(owner_id, photo_id)
-        try:
-            path.unlink(missing_ok=True)
-        except OSError as exc:
-            log.warning("файл %s не удален (%s); запись о нем уже убрана", file_name, type(exc).__name__)
+        for name in record.files:
+            try:
+                (media_dir / name).unlink(missing_ok=True)
+            except OSError as exc:
+                log.warning("файл %s не удален (%s); запись о нем уже убрана", name, type(exc).__name__)
     if result.in_use:
         # Живой пост с давно не отмеченным фото - значит, экспорт не отмечал его; стоит посмотреть.
         log.warning("фото со старой отметкой у живых постов: %s - оставлены", result.in_use)
@@ -63,3 +65,8 @@ def cleanup_media(
         len(result.removed),
     )
     return result
+
+
+def _ours(path: Path, name: str, photos_dir: Path) -> bool:
+    """Наш файл фото: имя по образцу, лежит прямо в media/photos, не ссылка."""
+    return bool(PHOTO_FILE.match(name)) and not path.is_symlink() and path.resolve().parent == photos_dir
