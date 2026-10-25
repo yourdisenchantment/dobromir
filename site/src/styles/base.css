@@ -1,0 +1,144 @@
+/* Сброс, базовая типографика, ссылки, фокус и общие утилиты. Порядок слоев задан здесь:
+   стили компонентов (scoped в .astro) идут вне слоев и поэтому сильнее базы. */
+
+@layer reset, tokens, base, utilities;
+
+@layer reset {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+    * {
+        margin: 0;
+    }
+    img,
+    svg,
+    picture {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+    input,
+    button,
+    textarea,
+    select {
+        font: inherit;
+        color: inherit;
+    }
+}
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        scroll-padding-top: var(--space-6);
+    }
+
+    body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-text);
+        font-size: var(--text-base);
+        line-height: 1.6;
+        font-optical-sizing: auto;
+        text-rendering: optimizeLegibility;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+    }
+    h1 {
+        font-size: var(--text-h1);
+    }
+    h2 {
+        font-size: var(--text-h2);
+    }
+    h3 {
+        font-size: var(--text-h3);
+        font-weight: 650;
+    }
+    h4 {
+        font-size: var(--text-h4);
+        font-weight: 650;
+    }
+
+    p,
+    li {
+        max-width: var(--measure);
+        text-wrap: pretty;
+    }
+
+    /* Ссылки в тексте всегда подчеркнуты: цвет - не единственный признак */
+    a {
+        color: var(--color-link);
+        text-decoration-line: underline;
+        text-decoration-thickness: 0.08em;
+        text-underline-offset: 0.2em;
+    }
+    a:visited {
+        color: var(--color-link-visited);
+    }
+    a:hover {
+        text-decoration-thickness: 0.15em;
+    }
+
+    :focus-visible {
+        outline: 3px solid var(--color-focus);
+        outline-offset: 3px;
+        border-radius: 4px;
+    }
+
+    time,
+    .num {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* Любое движение выключается настройкой «уменьшить движение» */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@layer utilities {
+    .container {
+        width: min(100% - 2 * var(--gutter), var(--container));
+        max-width: none; /* иначе абзац с .container сужается до --measure и встает по центру */
+        margin-inline: auto;
+    }
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+    .skip-link {
+        position: absolute;
+        left: var(--space-4);
+        top: -100%;
+        padding: var(--space-3) var(--space-5);
+        background: var(--color-surface);
+        border-radius: var(--radius-sm);
+        z-index: 10;
+    }
+    .skip-link:focus {
+        top: var(--space-4);
+    }
+    .stack > * + * {
+        margin-top: var(--space-4);
+    }
+}

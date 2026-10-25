@@ -1,0 +1,78 @@
+---
+// Полоса цифр: четыре в ряд, на телефоне 2x2, тонкие разделители. У статистики -
+// источник (методичка 7.6); у цифр самого центра источник не нужен.
+interface Fact {
+    value: string;
+    label: string;
+    source?: { title: string; url?: string };
+}
+interface Props {
+    items: Fact[];
+}
+
+const { items } = Astro.props;
+---
+
+<dl class="facts container">
+    {items.map((f) => (
+        <div class="fact">
+            <dt class="num">{f.value}</dt>
+            <dd>
+                {f.label}
+                {f.source && (
+                    <small class="source">
+                        {f.source.url ? (
+                            <a href={f.source.url}>{f.source.title}</a>
+                        ) : (
+                            f.source.title
+                        )}
+                    </small>
+                )}
+            </dd>
+        </div>
+    ))}
+</dl>
+
+<style>
+    .facts {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        border-block: 1px solid var(--color-border);
+    }
+    @media (min-width: 48rem) {
+        .facts {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+    .fact {
+        padding: var(--space-5) var(--space-4);
+        border-inline-start: 1px solid var(--color-border);
+    }
+    .fact:nth-child(odd) {
+        border-inline-start: 0;
+    }
+    @media (min-width: 48rem) {
+        .fact:nth-child(odd) {
+            border-inline-start: 1px solid var(--color-border);
+        }
+        .fact:first-child {
+            border-inline-start: 0;
+        }
+    }
+    dt {
+        font-size: var(--text-h2);
+        font-weight: 750;
+        color: var(--color-primary);
+        line-height: 1.1;
+    }
+    dd {
+        margin-top: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+    }
+    .source {
+        display: block;
+        margin-top: var(--space-1);
+        font-size: 0.8125rem;
+    }
+</style>

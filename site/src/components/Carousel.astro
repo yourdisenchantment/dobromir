@@ -1,0 +1,114 @@
+---
+// Карусель: карточки в одну строку (решено 2026-10-25). Первая (самая свежая) - по
+// центру, слева от нее пусто, следующие уходят за правый край. Листается свайпом и
+// колесом без JS; кнопки со стрелками появляются, только если работает скрипт. Ничего
+// не крутится само. С клавиатуры ряд листается сам: Tab переходит по ссылкам карточек,
+// браузер прокручивает к ним. Дети - карточки с as="li".
+interface Props {
+    label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="carousel" data-carousel>
+    <ul class="track" aria-label={label}>
+        <slot />
+    </ul>
+    <div class="controls container" data-controls hidden>
+        <button type="button" data-step="-1" aria-label="Предыдущие">
+            <span aria-hidden="true">←</span>
+        </button>
+        <button type="button" data-step="1" aria-label="Следующие">
+            <span aria-hidden="true">→</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Кнопки «назад/вперед»: прокрутка на одну карточку. Скрипт только добавляет удобство:
+    // без него ряд листается пальцем и колесом, а кнопок просто не видно.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    for (const root of document.querySelectorAll<HTMLElement>(
+        "[data-carousel]",
+    )) {
+        const track = root.querySelector<HTMLElement>(".track");
+        const controls = root.querySelector<HTMLElement>("[data-controls]");
+        if (!track || !controls) continue;
+        const buttons = [
+            ...controls.querySelectorAll<HTMLButtonElement>("button"),
+        ];
+        const step = () => {
+            const card = track.firstElementChild as HTMLElement | null;
+            const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+            return card ? card.offsetWidth + gap : track.clientWidth;
+        };
+        const update = () => {
+            const max = track.scrollWidth - track.clientWidth - 1;
+            buttons[0].disabled = track.scrollLeft <= 1;
+            buttons[1].disabled = track.scrollLeft >= max;
+        };
+        for (const button of buttons) {
+            button.addEventListener("click", () => {
+                const dir = Number(button.dataset.step);
+                track.scrollBy({
+                    left: dir * step(),
+                    behavior: reduce.matches ? "auto" : "smooth",
+                });
+            });
+        }
+        track.addEventListener("scroll", update, { passive: true });
+        controls.hidden = false;
+        update();
+    }
+</script>
+
+<style>
+    .track {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: var(--space-5);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        /* Первая и последняя карточки встают по центру: слева от свежей - пусто */
+        padding-inline: max(var(--gutter), calc(50% - var(--card-w) / 2));
+        padding-block: var(--space-2) var(--space-5);
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-border) transparent;
+    }
+    .track > :global(*) {
+        flex: 0 0 var(--card-w);
+        scroll-snap-align: center;
+        max-width: none;
+    }
+    .controls {
+        display: flex;
+        justify-content: center;
+        gap: var(--space-4);
+        margin-top: var(--space-4);
+    }
+    .controls[hidden] {
+        display: none;
+    }
+    .controls button {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-pill);
+        border: 2px solid var(--color-primary);
+        background: var(--color-surface);
+        color: var(--color-primary);
+        font-size: 1.25rem;
+        cursor: pointer;
+    }
+    .controls button:hover:not(:disabled) {
+        background: var(--color-surface-alt);
+    }
+    .controls button:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+</style>

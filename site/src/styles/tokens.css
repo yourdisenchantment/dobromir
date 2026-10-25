@@ -1,0 +1,75 @@
+/* Токены дизайна: все цвета, размеры и отступы сайта. Компоненты берут значения только
+   отсюда. Палитра - от цветов логотипа в более спокойной тональности; контраст пар,
+   где на цвете текст, проверен расчетом по WCAG (в скобках - к --color-bg). */
+
+@layer tokens {
+    :root {
+        color-scheme: light;
+
+        /* Фон и поверхности */
+        --color-bg: #fdfbf9; /* теплый белый */
+        --color-surface: #ffffff; /* карточки */
+        --color-surface-alt: #feefe7; /* чередующиеся секции, волны: персиковый тон слона */
+        --color-border: #e8d9cf;
+
+        /* Текст */
+        --color-text: #1c2740; /* глубокий синий от надписи логотипа (14.4:1) */
+        --color-text-muted: #525b6f; /* подписи, даты (6.6:1) */
+
+        /* Основной цвет: приглушенный оранжевый тела слона */
+        --color-primary: #b6390c; /* кнопки, заголовки-акценты (5.7:1) */
+        --color-primary-hover: #952f09;
+        --color-on-primary: #ffffff; /* белый на primary (5.9:1) */
+
+        /* Цвета логотипа как есть - только рисунки и мелкие акценты, не текст */
+        --color-accent: #fe4300; /* тело слона (3.4:1 - не для текста) */
+        --color-accent-soft: #ff8601; /* уши (2.4:1 - не для текста) */
+        --color-heart: #d11102; /* сердце (5.4:1) */
+
+        /* Ссылки и фокус: синий логотипа */
+        --color-link: #204db6; /* 7.3:1 */
+        --color-link-visited: #5e3b9b; /* 7.9:1 */
+        --color-focus: #174ecf; /* контур фокуса (6.7:1 к фону) */
+
+        /* Шрифт: Inter везде */
+        --font-text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+        /* Размеры текста */
+        --text-sm: 0.9375rem; /* 15px, только подписи */
+        --text-base: 1.125rem; /* 18px */
+        --text-lead: 1.25rem; /* 20px */
+        --text-h4: 1.375rem;
+        --text-h3: clamp(1.5rem, 1.3rem + 0.8vw, 1.75rem);
+        --text-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+        --text-h1: clamp(2.125rem, 1.6rem + 2.4vw, 3.5rem);
+
+        /* Отступы, шаг 4px */
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.5rem;
+        --space-6: 2rem;
+        --space-7: 3rem;
+        --space-8: 4rem;
+        --space-9: 6rem;
+        --section-y: clamp(3rem, 2rem + 4vw, 6rem);
+
+        /* Скругления и тени */
+        --radius-sm: 8px;
+        --radius-md: 16px;
+        --radius-lg: 24px;
+        --radius-pill: 999px;
+        --shadow-1:
+            0 1px 2px rgb(28 39 64 / 0.06), 0 4px 16px rgb(28 39 64 / 0.06);
+
+        /* Сетка */
+        --container: 70rem; /* 1120px */
+        --container-wide: 80rem; /* 1280px */
+        --measure: 65ch;
+        --gutter: max(1rem, env(safe-area-inset-left));
+
+        /* Карусель */
+        --card-w: min(20rem, 80vw);
+    }
+}

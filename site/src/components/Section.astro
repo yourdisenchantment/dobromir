@@ -1,0 +1,59 @@
+---
+// Секция лендинга: заголовок, содержимое, чередование фона. У секции с фоном alt сверху
+// волна (одна форма на весь сайт, SVG без JS, методичка 7.5).
+interface Props {
+    id?: string;
+    title?: string;
+    alt?: boolean;
+}
+
+const { id, title, alt = false } = Astro.props;
+const headingId = id ? `${id}-title` : undefined;
+---
+
+<section
+    id={id}
+    class:list={["section", { alt }]}
+    aria-labelledby={title ? headingId : undefined}
+>
+    {alt && (
+        <svg
+            class="wave"
+            viewBox="0 0 1440 80"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <path d="M0,40 C240,80 480,0 720,32 C960,64 1200,8 1440,40 L1440,80 L0,80 Z" />
+        </svg>
+    )}
+    <div class="inner">
+        {title && (
+            <h2 id={headingId} class="container">
+                {title}
+            </h2>
+        )}
+        <slot />
+    </div>
+</section>
+
+<style>
+    .section {
+        position: relative;
+    }
+    .inner {
+        padding-block: var(--section-y);
+    }
+    .alt .inner {
+        background: var(--color-surface-alt);
+    }
+    .wave {
+        display: block;
+        width: 100%;
+        height: clamp(32px, 5vw, 80px);
+        fill: var(--color-surface-alt);
+    }
+    h2 {
+        margin-bottom: var(--space-6);
+    }
+</style>

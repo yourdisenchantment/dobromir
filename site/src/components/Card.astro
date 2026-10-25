@@ -1,0 +1,125 @@
+---
+// Карточка ряда: картинка (или заглушка), заголовок, подзаголовок, кратко. Если есть
+// href - вся карточка одна ссылка (растянута через ::after, цель не меньше 44px).
+// Раскрытие окном поверх страницы - отдельным шагом; без JS ссылка ведет на страницу.
+interface Props {
+    title: string;
+    subtitle?: string;
+    text?: string;
+    href?: string;
+    image?: { src: string; width: number; height: number; alt: string };
+    ratio?: "4/3" | "1/1" | "4/5";
+    as?: "article" | "li";
+}
+
+const {
+    title,
+    subtitle,
+    text,
+    href,
+    image,
+    ratio = "4/3",
+    as: Tag = "article",
+} = Astro.props;
+---
+
+<Tag class="card">
+    <div class="media" style={`aspect-ratio: ${ratio}`}>
+        {image ? (
+            <img
+                src={image.src}
+                width={image.width}
+                height={image.height}
+                alt={image.alt}
+                loading="lazy"
+                decoding="async"
+            />
+        ) : (
+            <div class="placeholder" aria-hidden="true" />
+        )}
+    </div>
+    <div class="body">
+        <h3>{href ? <a href={href}>{title}</a> : title}</h3>
+        {subtitle && <p class="subtitle">{subtitle}</p>}
+        {text && <p class="text">{text}</p>}
+        <slot />
+    </div>
+</Tag>
+
+<style>
+    .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-1);
+    }
+    .media {
+        background: var(--color-surface-alt);
+    }
+    .media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .placeholder {
+        width: 100%;
+        height: 100%;
+        background:
+            radial-gradient(
+                circle at 70% 30%,
+                var(--color-accent-soft) 0 18%,
+                transparent 19%
+            ),
+            linear-gradient(135deg, var(--color-surface-alt), #fbd9c6);
+    }
+    .body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-5);
+    }
+    h3 {
+        font-size: var(--text-h4);
+    }
+    h3 a,
+    h3 a:visited {
+        color: var(--color-text);
+        text-decoration: none;
+    }
+    /* Вся карточка - цель ссылки */
+    h3 a::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: var(--radius-lg);
+    }
+    h3 a:focus-visible {
+        outline: none;
+    }
+    h3 a:focus-visible::after {
+        outline: 3px solid var(--color-focus);
+        outline-offset: 3px;
+    }
+    .card:has(h3 a:hover) h3 a {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+    .subtitle {
+        color: var(--color-primary);
+        font-weight: 600;
+        font-size: var(--text-sm);
+    }
+    .text {
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>

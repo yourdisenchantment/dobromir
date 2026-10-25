@@ -1,0 +1,181 @@
+---
+// Шапка: логотип, меню (переходы к блокам лендинга), телефон для записи. Не липкая.
+// На телефоне меню и телефон спрятаны в <details> без JS (методичка 7.3): иначе пункты
+// переносятся в несколько строк и шапка занимает пол-экрана. Ссылки повторены в двух
+// навигациях, но видна всегда одна: вторая скрыта display: none и для экранных дикторов.
+const links = [
+    { href: "/#services", label: "Услуги" },
+    { href: "/#specialists", label: "Специалисты" },
+    { href: "/#news", label: "Новости" },
+    { href: "/#about", label: "О нас" },
+    { href: "/#contacts", label: "Контакты" },
+];
+const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
+---
+
+<header class="header">
+    <div class="bar container">
+        <a class="logo" href="/" aria-label="Добромир, на главную">
+            <img src="/logo.svg" width="568" height="232" alt="" />
+            <span class="name">Добромир</span>
+        </a>
+        <nav aria-label="Основное меню" class="nav wide">
+            <ul>
+                {links.map((l) => (
+                    <li>
+                        <a href={l.href}>{l.label}</a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+        <a class="phone wide" href={phone.href}>
+            {phone.label}
+        </a>
+        <details class="menu">
+            <summary>Меню</summary>
+            <nav aria-label="Основное меню" class="nav">
+                <ul>
+                    {links.map((l) => (
+                        <li>
+                            <a href={l.href}>{l.label}</a>
+                        </li>
+                    ))}
+                </ul>
+                <a class="phone" href={phone.href}>
+                    {phone.label}
+                </a>
+            </nav>
+        </details>
+    </div>
+</header>
+
+<style>
+    .header {
+        position: relative;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+    }
+    .bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-3) var(--space-6);
+        padding-block: var(--space-3);
+    }
+    .logo,
+    .logo:visited {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        color: var(--color-text);
+        text-decoration: none;
+        margin-inline-end: auto;
+    }
+    .logo img {
+        height: 36px;
+        width: auto;
+    }
+    .name {
+        font-weight: 750;
+        font-size: 1.125rem;
+        letter-spacing: -0.01em;
+    }
+    .nav ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-1) var(--space-5);
+    }
+    .nav a,
+    .nav a:visited {
+        color: var(--color-text);
+        text-decoration: none;
+        font-weight: 500;
+        padding-block: var(--space-2);
+        display: inline-block;
+    }
+    .nav a:hover {
+        color: var(--color-primary);
+        text-decoration: underline;
+    }
+    .phone,
+    .phone:visited {
+        font-weight: 650;
+        color: var(--color-primary);
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .phone:hover {
+        text-decoration: underline;
+    }
+
+    /* Телефон: меню свернуто в «Меню» */
+    .wide {
+        display: none;
+    }
+    .menu summary {
+        list-style: none;
+        cursor: pointer;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-pill);
+        font-weight: 600;
+    }
+    .menu summary::-webkit-details-marker {
+        display: none;
+    }
+    .menu summary::before {
+        content: "\2261"; /* ≡ */
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+    .menu[open] summary::before {
+        content: "\00d7"; /* × */
+    }
+    /* Открытое меню - панель на всю ширину под шапкой; кнопка остается на месте */
+    .menu[open] .nav {
+        position: absolute;
+        inset-inline: 0;
+        top: 100%;
+        z-index: 5;
+        padding: var(--space-3) var(--gutter) var(--space-5);
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+        box-shadow: var(--shadow-1);
+    }
+    .menu .nav ul {
+        flex-direction: column;
+        gap: 0;
+    }
+    .menu .nav a {
+        display: block;
+        padding-block: var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+    }
+    .menu .phone {
+        display: inline-block;
+        margin-top: var(--space-4);
+        font-size: var(--text-lead);
+    }
+
+    /* Шире телефона: меню в строку, телефон справа */
+    @media (min-width: 60rem) {
+        .logo img {
+            height: 44px;
+        }
+        .name {
+            font-size: 1.25rem;
+        }
+        .wide {
+            display: block;
+        }
+        .menu {
+            display: none;
+        }
+    }
+</style>

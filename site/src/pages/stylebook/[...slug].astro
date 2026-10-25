@@ -1,0 +1,477 @@
+---
+// Стайлбук - только для разработки: палитра, шрифт, кнопки, ссылки и живые образцы блоков
+// лендинга. По нему принимается визуал. В боевую сборку не попадает: getStaticPaths в
+// PROD пуст, страницы в релизе нет (так же сделано в проекте cv). Адрес: /stylebook/.
+import "../../styles/base.css";
+import "../../styles/tokens.css";
+import "../../styles/fonts.css";
+import tokensCss from "../../styles/tokens.css?raw";
+import Button from "../../components/Button.astro";
+import Card from "../../components/Card.astro";
+import Carousel from "../../components/Carousel.astro";
+import Facts from "../../components/Facts.astro";
+import Section from "../../components/Section.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+
+export function getStaticPaths() {
+    if (import.meta.env.PROD) return [];
+    return [{ params: { slug: undefined } }];
+}
+
+// Палитра - из самого tokens.css: числа на странице не разойдутся с токенами.
+const colors = [
+    ...tokensCss.matchAll(
+        /--(color-[a-z-]+):\s*(#[0-9a-f]{6});[ \t]*(?:\/\*\s*(.*?)\s*\*\/)?/gi,
+    ),
+].map((m) => ({ name: m[1], hex: m[2], note: m[3] ?? "" }));
+const hexOf = (name: string) =>
+    colors.find((c) => c.name === name)?.hex ?? "#000000";
+
+function luminance(hex: string): number {
+    const [r, g, b] = [1, 3, 5].map((i) => {
+        const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a: string, b: string): number {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+}
+const pairs = [
+    ["color-text", "color-bg"],
+    ["color-text", "color-surface-alt"],
+    ["color-text-muted", "color-bg"],
+    ["color-primary", "color-bg"],
+    ["color-on-primary", "color-primary"],
+    ["color-link", "color-bg"],
+    ["color-link-visited", "color-bg"],
+    ["color-heart", "color-bg"],
+    ["color-accent", "color-bg"],
+    ["color-accent-soft", "color-bg"],
+    ["color-focus", "color-bg"],
+].map(([fg, back]) => ({ fg, back, ratio: contrast(hexOf(fg), hexOf(back)) }));
+
+const services = [
+    {
+        title: "Диагностика у врача",
+        text: "Прием ведут врач-психиатр и логопед-дефектолог высшей категории. Диагностика по методикам PEP и VB-MAPP.",
+    },
+    {
+        title: "ABA-терапия",
+        text: "Обучение строится на поощрении каждого шага: ребенку нравится результат, и он охотно повторяет действие.",
+    },
+    {
+        title: "Альтернативная коммуникация",
+        text: "Обмен карточками-изображениями помогает общаться детям, которым трудно говорить.",
+    },
+    {
+        title: "Логопеды",
+        text: "Запуск речи, постановка звуков, развитие словарного запаса.",
+    },
+];
+const people = [
+    {
+        title: "Шепитько Лариса Семеновна",
+        subtitle: "Руководитель центра, логопед-дефектолог",
+    },
+    { title: "Арзякова Марина Александровна", subtitle: "Музыкотерапевт" },
+    { title: "Липкань Вера Николаевна", subtitle: "Педагог (тьютор)" },
+    { title: "Самик Александра Александровна", subtitle: "Игротерапевт" },
+    { title: "Шевченко Юлия Николаевна", subtitle: "Старший логопед" },
+];
+const news = [
+    {
+        title: "Открыта запись в летний лагерь",
+        subtitle: "19 октября 2026",
+        text: "Короткий анонс новости, до трех-четырех строк, дальше - многоточие.",
+    },
+    {
+        title: "Занятие в сенсорной комнате",
+        subtitle: "17 октября 2026",
+        text: "Второй анонс для проверки, как выглядит ряд из нескольких карточек.",
+    },
+    { title: "Новость без текста, только фото", subtitle: "15 октября 2026" },
+    {
+        title: "Праздник осени",
+        subtitle: "12 октября 2026",
+        text: "Еще одна карточка, чтобы ряд уходил за правый край экрана.",
+    },
+    {
+        title: "Встреча с родителями",
+        subtitle: "9 октября 2026",
+        text: "Последняя карточка ряда; за ней - «Все новости».",
+    },
+];
+---
+
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title>Стайлбук - Добромир</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body>
+        <a class="skip-link" href="#main">
+            Перейти к содержанию
+        </a>
+        <SiteHeader />
+        <main id="main">
+            <div class="container intro stack">
+                <h1>Стайлбук</h1>
+                <p class="lead">
+                    Палитра, шрифт и образцы блоков лендинга. Страница только
+                    для разработки: в боевую сборку не попадает.
+                </p>
+            </div>
+
+            <Section id="palette" title="Палитра">
+                <div class="container">
+                    <ul class="swatches">
+                        {colors.map((c) => (
+                            <li>
+                                <span
+                                    class="chip"
+                                    style={`background:${c.hex}`}
+                                />
+                                <code>--{c.name}</code>
+                                <span class="hex">{c.hex}</span>
+                                {c.note && <span class="note">{c.note}</span>}
+                            </li>
+                        ))}
+                    </ul>
+                    <h3 class="sub">
+                        Контраст пар (норма для текста - 4.5:1, цель - 7:1)
+                    </h3>
+                    <table class="pairs">
+                        <thead>
+                            <tr>
+                                <th>Цвет</th>
+                                <th>На фоне</th>
+                                <th>Контраст</th>
+                                <th>Пример</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pairs.map((p) => (
+                                <tr>
+                                    <td>
+                                        <code>{p.fg}</code>
+                                    </td>
+                                    <td>
+                                        <code>{p.back}</code>
+                                    </td>
+                                    <td
+                                        class:list={[
+                                            "num",
+                                            { weak: p.ratio < 4.5 },
+                                        ]}
+                                    >
+                                        {p.ratio.toFixed(2)}:1
+                                        {p.ratio < 4.5
+                                            ? " - не для текста"
+                                            : ""}
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="sample"
+                                            style={`color:${hexOf(p.fg)};background:${hexOf(p.back)}`}
+                                        >
+                                            Добромир
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Section>
+
+            <Section id="type" title="Шрифт Inter" alt>
+                <div class="container stack">
+                    <p class="h1-like">Заголовок первого уровня</p>
+                    <p class="h2-like">Заголовок секции</p>
+                    <p class="h3-like">Заголовок карточки</p>
+                    <p class="lead">
+                        Вводный абзац крупнее основного текста: что это за центр
+                        и чем он помогает.
+                    </p>
+                    <p>
+                        Основной текст - 18 px, межстрочный интервал 1.6, строка
+                        не длиннее 65 знаков. Ссылки всегда подчеркнуты:{" "}
+                        <a href="#type">обычная ссылка</a> и{" "}
+                        <a href="/stylebook/">посещенная ссылка</a>. Цифры в
+                        датах ровные: <time class="num">12 октября 2026</time>.
+                    </p>
+                    <p class="muted">Второстепенный текст: подписи и даты.</p>
+                </div>
+            </Section>
+
+            <Section id="buttons" title="Кнопки">
+                <div class="container row">
+                    <Button href="tel:+79782294854">
+                        Записаться по телефону
+                    </Button>
+                    <Button href="#about" variant="secondary">
+                        О центре
+                    </Button>
+                    <Button href="#news" variant="text">
+                        Все новости
+                    </Button>
+                </div>
+                <p class="container muted hint">
+                    Нажмите Tab: у каждого элемента виден синий контур фокуса.
+                </p>
+            </Section>
+
+            <Section id="hero" title="Первый экран (образец)" alt>
+                <div class="container hero">
+                    <div class="stack">
+                        <p class="h1-like">
+                            Помогаем детям с аутизмом и их семьям
+                        </p>
+                        <p class="lead">
+                            Центр коррекционной педагогики в Симферополе:
+                            диагностика, ABA-терапия, логопеды и психологи для
+                            детей от 0 до 18 лет.
+                        </p>
+                        <div class="row">
+                            <Button href="tel:+79782294854">
+                                Записаться по телефону
+                            </Button>
+                            <Button href="#services" variant="secondary">
+                                Услуги
+                            </Button>
+                        </div>
+                    </div>
+                    <img
+                        class="hero-logo"
+                        src="/logo.svg"
+                        width="568"
+                        height="232"
+                        alt=""
+                    />
+                </div>
+            </Section>
+
+            <Section id="facts" title="Цифры">
+                <Facts
+                    items={[
+                        { value: "250+", label: "детей занимаются в центре" },
+                        { value: "20+", label: "специалистов" },
+                        { value: "20+", label: "кабинетов для занятий" },
+                        {
+                            value: "1500",
+                            label: "детей с аутизмом в Крыму",
+                            source: {
+                                title: "Минздрав России, 2024 (источник уточнить)",
+                            },
+                        },
+                    ]}
+                />
+            </Section>
+
+            <Section id="news" title="Новости" alt>
+                <Carousel label="Последние новости">
+                    {news.map((n) => (
+                        <Card as="li" href="#news" {...n} />
+                    ))}
+                    <Card
+                        as="li"
+                        title="Все новости"
+                        text="Архив за последний месяц"
+                        href="#news"
+                    />
+                </Carousel>
+            </Section>
+
+            <Section id="services" title="Услуги">
+                <Carousel label="Услуги центра">
+                    {services.map((s) => (
+                        <Card as="li" href="#services" {...s} />
+                    ))}
+                </Carousel>
+            </Section>
+
+            <Section id="specialists" title="Специалисты" alt>
+                <Carousel label="Специалисты центра">
+                    {people.map((p) => (
+                        <Card as="li" ratio="4/5" href="#specialists" {...p} />
+                    ))}
+                </Carousel>
+            </Section>
+
+            <Section id="about" title="Отзыв и раскрывающийся блок">
+                <div class="container stack">
+                    <blockquote class="quote">
+                        <p>
+                            Всегда отзывчивые и приветливые, у педагогов
+                            терпение и внимание к нашим детям. Ходим полтора
+                            года и очень довольны результатом.
+                        </p>
+                        <footer>Мама воспитанника</footer>
+                    </blockquote>
+                    <details class="faq">
+                        <summary>
+                            Как записаться на первую консультацию?
+                        </summary>
+                        <p>
+                            Позвоните администратору: запись только по телефону.
+                        </p>
+                    </details>
+                </div>
+            </Section>
+        </main>
+    </body>
+</html>
+
+<style>
+    .intro {
+        padding-block: var(--space-7) 0;
+    }
+    .lead {
+        font-size: var(--text-lead);
+    }
+    .muted,
+    .hint {
+        color: var(--color-text-muted);
+    }
+    .hint {
+        margin-top: var(--space-4);
+        font-size: var(--text-sm);
+    }
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        align-items: center;
+    }
+    .sub {
+        margin: var(--space-7) 0 var(--space-4);
+        font-size: var(--text-h4);
+    }
+    .swatches {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        gap: var(--space-4);
+    }
+    .swatches li {
+        display: grid;
+        grid-template-columns: 3rem 1fr;
+        column-gap: var(--space-3);
+        align-items: center;
+        font-size: var(--text-sm);
+        max-width: none;
+    }
+    .chip {
+        grid-row: span 3;
+        width: 3rem;
+        height: 3rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+    }
+    .hex {
+        color: var(--color-text-muted);
+    }
+    .note {
+        color: var(--color-text-muted);
+        font-size: 0.8125rem;
+    }
+    .pairs {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: var(--text-sm);
+    }
+    .pairs th,
+    .pairs td {
+        text-align: left;
+        padding: var(--space-2) var(--space-3);
+        border-bottom: 1px solid var(--color-border);
+    }
+    .weak {
+        color: var(--color-heart);
+    }
+    .sample {
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+    }
+    .h1-like {
+        font-size: var(--text-h1);
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+    }
+    .h2-like {
+        font-size: var(--text-h2);
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .h3-like {
+        font-size: var(--text-h3);
+        font-weight: 650;
+    }
+    .hero {
+        display: grid;
+        gap: var(--space-7);
+        align-items: center;
+    }
+    @media (min-width: 60rem) {
+        .hero {
+            grid-template-columns: 3fr 2fr;
+        }
+    }
+    .hero-logo {
+        width: 100%;
+        max-width: 28rem;
+        justify-self: center;
+    }
+    .quote {
+        border-inline-start: 4px solid var(--color-accent-soft);
+        padding: var(--space-2) 0 var(--space-2) var(--space-5);
+    }
+    .quote p {
+        font-size: var(--text-lead);
+    }
+    .quote footer {
+        margin-top: var(--space-2);
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+    }
+    .faq {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+        padding-inline: var(--space-5);
+        max-width: var(--measure);
+    }
+    .faq summary {
+        cursor: pointer;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        list-style: none;
+        font-weight: 600;
+    }
+    .faq summary::-webkit-details-marker {
+        display: none;
+    }
+    .faq summary::after {
+        content: "+";
+        margin-inline-start: auto;
+        font-size: 1.5rem;
+        color: var(--color-primary);
+    }
+    .faq[open] > summary::after {
+        content: "\2212";
+    }
+    .faq p {
+        padding-bottom: var(--space-4);
+    }
+</style>
