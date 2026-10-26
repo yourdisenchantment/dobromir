@@ -99,3 +99,24 @@ export function summary(post: NewsPost, max = 160): string {
 export function mediaUrl(file: string): string {
     return `/media/${file}`;
 }
+
+/** Новость как карточка (components/Card.astro): лента лендинга, архив, стайлбук. */
+export function newsCard(post: NewsPost) {
+    const cover = post.photos[0] ?? post.repost?.photos[0];
+    return {
+        title: displayTitle(post),
+        subtitle: formatDate(post.date),
+        datetime: post.date,
+        text: post.text || post.repost?.text ? summary(post, 140) : undefined,
+        href: `/news/${post.slug}/`,
+        modal: true,
+        image: cover
+            ? {
+                  src: mediaUrl(cover.preview.file),
+                  width: cover.preview.width,
+                  height: cover.preview.height,
+                  alt: "",
+              }
+            : undefined,
+    };
+}

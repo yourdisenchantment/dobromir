@@ -1,8 +1,8 @@
 ---
 // Страница новости. Удаленного поста в news.json нет - страница не собирается, адрес дает 404.
+// Ее же часть (PostArticle, data-modal-content) показывает всплывающее окно на лендинге.
 import Base from "../../layouts/Base.astro";
-import PostContent from "../../components/PostContent.astro";
-import PostDate from "../../components/PostDate.astro";
+import PostArticle from "../../components/PostArticle.astro";
 import { displayTitle, loadNews, summary, type NewsPost } from "../../lib/news";
 
 export function getStaticPaths() {
@@ -17,53 +17,41 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const title = displayTitle(post);
-const repost = post.repost;
 ---
 
-<Base title={title} description={summary(post)} type="article">
-    <article>
-        <h1>{title}</h1>
-        <p>
-            <PostDate date={post.date} edited={post.edited_date} />
-        </p>
-        <PostContent
-            text={post.text}
-            photos={post.photos}
-            links={post.links}
-            media={post.media}
-            sourceUrl={post.source_url}
-            alt={title}
-        />
-        {repost && (
-            <section aria-label="Репост">
-                <p>
-                    Репост
-                    {repost.source_name ? `: ${repost.source_name}` : ""} ·{" "}
-                    <PostDate date={repost.date} />
-                </p>
-                <PostContent
-                    text={repost.text}
-                    photos={repost.photos}
-                    links={repost.links}
-                    media={repost.media}
-                    sourceUrl={repost.source_url}
-                    alt={title}
-                />
-                <p>
-                    <a href={repost.source_url} rel="nofollow noopener">
-                        Оригинал в VK
-                    </a>
-                </p>
-            </section>
-        )}
-        <p>
-            <a href={post.source_url} rel="nofollow noopener">
-                Пост в VK
-            </a>
-        </p>
-    </article>
-    <p>
-        <a href="/news/">Все новости</a>
-    </p>
+<Base title={displayTitle(post)} description={summary(post)} type="article">
+    <div class="container page">
+        <nav aria-label="Хлебные крошки" class="crumbs">
+            <ol>
+                <li>
+                    <a href="/">Главная</a>
+                </li>
+                <li>
+                    <a href="/news/">Новости</a>
+                </li>
+            </ol>
+        </nav>
+        <PostArticle post={post} />
+    </div>
 </Base>
+
+<style>
+    .page {
+        max-width: 48rem;
+        padding-block: var(--space-6) var(--space-7);
+    }
+    .crumbs ol {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-bottom: var(--space-5);
+        font-size: var(--text-sm);
+    }
+    .crumbs li + li::before {
+        content: "›";
+        margin-inline-end: var(--space-2);
+        color: var(--color-text-muted);
+    }
+</style>

@@ -1,0 +1,61 @@
+---
+// Новость целиком: заголовок, даты, текст, фото, репост, ссылка на пост в VK.
+// data-modal-content - эту часть страницы всплывающее окно лендинга вставляет к себе
+// (components/Modal.astro), поэтому новость существует в одном экземпляре.
+import PostContent from "./PostContent.astro";
+import PostDate from "./PostDate.astro";
+import { displayTitle, type NewsPost } from "../lib/news";
+
+interface Props {
+    post: NewsPost;
+}
+
+const { post } = Astro.props;
+const title = displayTitle(post);
+const repost = post.repost;
+---
+
+<article class="post" data-modal-content>
+    <header class="stack">
+        <h1 class="post-title" data-modal-title>
+            {title}
+        </h1>
+        <p class="post-meta">
+            <PostDate date={post.date} edited={post.edited_date} />
+        </p>
+    </header>
+    <PostContent
+        text={post.text}
+        photos={post.photos}
+        links={post.links}
+        media={post.media}
+        sourceUrl={post.source_url}
+        alt={title}
+    />
+    {repost && (
+        <section class="post-repost" aria-label="Репост">
+            <p class="post-meta">
+                Репост{repost.source_name ? `: ${repost.source_name}` : ""} ·{" "}
+                <PostDate date={repost.date} />
+            </p>
+            <PostContent
+                text={repost.text}
+                photos={repost.photos}
+                links={repost.links}
+                media={repost.media}
+                sourceUrl={repost.source_url}
+                alt={title}
+            />
+            <p class="post-source">
+                <a href={repost.source_url} rel="nofollow noopener">
+                    Оригинал во ВКонтакте
+                </a>
+            </p>
+        </section>
+    )}
+    <p class="post-source">
+        <a href={post.source_url} rel="nofollow noopener">
+            Читать во ВКонтакте
+        </a>
+    </p>
+</article>

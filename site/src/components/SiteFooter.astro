@@ -1,0 +1,61 @@
+---
+// Подвал: контакты на одном и том же месте на всех страницах (WCAG 3.2.6, методичка 7.12).
+// Часы работы и почта - при наполнении из VK (решено 2026-10-25).
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+    <div class="container cols">
+        <div class="stack">
+            <p class="name">Добромир</p>
+            <p>Республиканский центр коррекционной педагогики, Симферополь</p>
+        </div>
+        <div class="stack">
+            <p>ул. Желябова, 44</p>
+            <p>
+                Запись по телефону:
+                <a href="tel:+79782294854">+7 978 229-48-54</a>
+            </p>
+            <p>
+                <a href="https://vk.com/dobromir.crimea" rel="noopener">
+                    Группа ВКонтакте
+                </a>
+            </p>
+        </div>
+    </div>
+    <p class="container copy">© {year} «Добромир»</p>
+</footer>
+
+<style>
+    .footer {
+        margin-top: var(--space-8);
+        padding-block: var(--space-7) var(--space-5);
+        background: var(--color-text);
+        color: var(--color-on-dark);
+        font-size: var(--text-sm);
+        /* синий контур фокуса на темном фоне не виден - светлый */
+        --color-focus: var(--color-on-dark);
+    }
+    .footer a,
+    .footer a:visited {
+        color: var(--color-surface);
+    }
+    .cols {
+        display: grid;
+        gap: var(--space-6);
+    }
+    @media (min-width: 48rem) {
+        .cols {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    .name {
+        font-size: var(--text-h4);
+        font-weight: 750;
+        color: var(--color-surface);
+    }
+    .copy {
+        margin-top: var(--space-6);
+        color: var(--color-on-dark-muted);
+    }
+</style>

@@ -26,6 +26,10 @@
         --color-accent-soft: #ff8601; /* уши (2.4:1 - не для текста) */
         --color-heart: #d11102; /* сердце (5.4:1) */
 
+        /* Темный подвал: фон - --color-text */
+        --color-on-dark: #e6e9f0; /* 12.2:1 к --color-text */
+        --color-on-dark-muted: #b9c0d0; /* 8.1:1 */
+
         /* Ссылки и фокус: синий логотипа */
         --color-link: #204db6; /* 7.3:1 */
         --color-link-visited: #5e3b9b; /* 7.9:1 */

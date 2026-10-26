@@ -10,6 +10,10 @@ interface Props {
     image?: { src: string; width: number; height: number; alt: string };
     ratio?: "4/3" | "1/1" | "4/5";
     as?: "article" | "li";
+    /** Открывать во всплывающем окне (components/Modal.astro); без JS - переход по href. */
+    modal?: boolean;
+    /** Если подзаголовок - дата: машиночитаемое значение для <time>. */
+    datetime?: string;
 }
 
 const {
@@ -20,6 +24,8 @@ const {
     image,
     ratio = "4/3",
     as: Tag = "article",
+    modal = false,
+    datetime,
 } = Astro.props;
 ---
 
@@ -39,8 +45,24 @@ const {
         )}
     </div>
     <div class="body">
-        <h3>{href ? <a href={href}>{title}</a> : title}</h3>
-        {subtitle && <p class="subtitle">{subtitle}</p>}
+        <h3>
+            {href ? (
+                <a href={href} data-modal-link={modal ? "" : undefined}>
+                    {title}
+                </a>
+            ) : (
+                title
+            )}
+        </h3>
+        {subtitle && (
+            <p class="subtitle">
+                {datetime ? (
+                    <time datetime={datetime}>{subtitle}</time>
+                ) : (
+                    subtitle
+                )}
+            </p>
+        )}
         {text && <p class="text">{text}</p>}
         <slot />
     </div>

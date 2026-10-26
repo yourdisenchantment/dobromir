@@ -1,8 +1,9 @@
 ---
-// Лента новостей: все живые посты, новые первыми, закрепленный - наверху.
+// Архив новостей: все новости за срок хранения (NEWS_RETENTION_DAYS, решено 2026-10-26),
+// новые первыми, закрепленный - наверху. Карточка открывается во всплывающем окне.
 import Base from "../../layouts/Base.astro";
-import PostDate from "../../components/PostDate.astro";
-import { displayTitle, loadNews, mediaUrl, summary } from "../../lib/news";
+import Card from "../../components/Card.astro";
+import { loadNews, newsCard } from "../../lib/news";
 
 const posts = loadNews();
 const ordered = [
@@ -15,31 +16,47 @@ const ordered = [
     title="Новости"
     description="Новости центра «Добромир»: занятия, события, объявления."
 >
-    <h1>Новости</h1>
-    {ordered.length === 0 && <p>Новостей пока нет.</p>}
-    {ordered.map((post) => {
-        const cover = post.photos[0] ?? post.repost?.photos[0];
-        return (
-            <article>
-                <h2>
-                    <a href={`/news/${post.slug}/`}>{displayTitle(post)}</a>
-                </h2>
-                {post.pinned && <p>Закреплено</p>}
-                <p>
-                    <PostDate date={post.date} edited={post.edited_date} />
-                </p>
-                {cover && (
-                    <img
-                        src={mediaUrl(cover.preview.file)}
-                        width={cover.preview.width}
-                        height={cover.preview.height}
-                        alt={displayTitle(post)}
-                        loading="lazy"
-                        decoding="async"
-                    />
-                )}
-                <p>{summary(post)}</p>
-            </article>
-        );
-    })}
+    <div class="container page">
+        <h1>Новости</h1>
+        <p class="lead">
+            Новости центра за последний месяц. Все новости - в группе ВКонтакте.
+        </p>
+        {ordered.length === 0 ? (
+            <p>Новостей пока нет.</p>
+        ) : (
+            <ul class="grid">
+                {ordered.map((post) => (
+                    <Card as="li" {...newsCard(post)} />
+                ))}
+            </ul>
+        )}
+        <p>
+            <a href="https://vk.com/dobromir.crimea" rel="noopener">
+                Группа «Добромира» ВКонтакте
+            </a>
+        </p>
+    </div>
 </Base>
+
+<style>
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+        padding-block: var(--space-7);
+    }
+    .lead {
+        font-size: var(--text-lead);
+        color: var(--color-text-muted);
+    }
+    .grid {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        gap: var(--space-5);
+        grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+    }
+    .grid > :global(li) {
+        max-width: none;
+    }
+</style>

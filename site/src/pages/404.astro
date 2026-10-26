@@ -3,9 +3,20 @@ import Base from "../layouts/Base.astro";
 ---
 
 <Base title="Страница не найдена" description="Такой страницы на сайте нет.">
-    <h1>Страница не найдена</h1>
-    <p>Возможно, новость удалили или адрес набран с ошибкой.</p>
-    <p>
-        <a href="/news/">Все новости</a> · <a href="/">На главную</a>
-    </p>
+    <div class="container missing stack">
+        <h1>Страница не найдена</h1>
+        <p>
+            Возможно, новость удалили или она старше месяца, либо адрес набран с
+            ошибкой.
+        </p>
+        <p>
+            <a href="/news/">Все новости</a> · <a href="/">На главную</a>
+        </p>
+    </div>
 </Base>
+
+<style>
+    .missing {
+        padding-block: var(--space-8);
+    }
+</style>

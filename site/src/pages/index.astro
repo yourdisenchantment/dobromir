@@ -7,9 +7,17 @@ import Base from "../layouts/Base.astro";
     title="Добромир"
     description="Республиканский центр коррекционной педагогики «Добромир», Симферополь."
 >
-    <h1>Добромир</h1>
-    <p>Сайт в разработке.</p>
-    <p>
-        <a href="/news/">Новости центра</a>
-    </p>
+    <div class="container placeholder stack">
+        <h1>Добромир</h1>
+        <p>Сайт в разработке.</p>
+        <p>
+            <a href="/news/">Новости центра</a>
+        </p>
+    </div>
 </Base>
+
+<style>
+    .placeholder {
+        padding-block: var(--space-8);
+    }
+</style>

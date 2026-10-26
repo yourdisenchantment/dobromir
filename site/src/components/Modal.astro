@@ -1,0 +1,165 @@
+---
+// Всплывающее окно карточки (решено 2026-10-25). Ссылка с data-modal-link ведет на
+// обычную страницу (новости, специалиста); скрипт вместо перехода загружает эту страницу,
+// берет ее [data-modal-content] и показывает в <dialog> поверх текущей. Адрес в строке
+// меняется на адрес страницы, «Назад», Esc, «×» и клик мимо окна закрывают его. Без JS
+// или при любой ошибке загрузки - обычный переход на страницу.
+---
+
+<dialog class="modal" data-modal aria-labelledby="modal-title">
+    <div class="frame">
+        <form method="dialog" class="close-row">
+            <button
+                class="close"
+                type="submit"
+                aria-label="Закрыть"
+                data-modal-close
+            >
+                <span aria-hidden="true">×</span>
+            </button>
+        </form>
+        <div class="body" data-modal-body></div>
+    </div>
+</dialog>
+
+<script>
+    const dialog = document.querySelector<HTMLDialogElement>("[data-modal]");
+    const body = dialog?.querySelector<HTMLElement>("[data-modal-body]");
+    if (dialog && body) {
+        const pageTitle = document.title;
+
+        // Уборка здесь, а не в событии close: браузер может отложить событие до отрисовки.
+        const hide = () => {
+            dialog.close();
+            document.title = pageTitle;
+            body.replaceChildren();
+        };
+
+        const show = async (url: string, push: boolean) => {
+            const res = await fetch(url, { headers: { Accept: "text/html" } });
+            if (!res.ok) throw new Error(String(res.status));
+            const doc = new DOMParser().parseFromString(
+                await res.text(),
+                "text/html",
+            );
+            const content = doc.querySelector("[data-modal-content]");
+            if (!content) throw new Error("нет [data-modal-content]");
+            const heading = content.querySelector("[data-modal-title]");
+            heading?.setAttribute("id", "modal-title");
+            body.replaceChildren(document.importNode(content, true));
+            if (push) history.pushState({ modal: url }, "", url);
+            document.title = doc.title;
+            if (!dialog.open) dialog.showModal();
+            body.scrollTop = 0;
+        };
+
+        // Закрыть через историю, если окно открыто нами: тогда «Назад» и «×» - одно и то же.
+        const close = () => {
+            if ((history.state as { modal?: string } | null)?.modal)
+                history.back();
+            else hide();
+        };
+
+        document.addEventListener("click", (e) => {
+            const link = (
+                e.target as Element | null
+            )?.closest<HTMLAnchorElement>("a[data-modal-link]");
+            if (!link || e.defaultPrevented || e.button !== 0) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // новая вкладка
+            e.preventDefault();
+            show(link.href, true).catch(() => {
+                location.href = link.href;
+            });
+        });
+
+        // Esc и «×»: вместо закрытия напрямую - шаг назад по истории.
+        dialog.addEventListener("cancel", (e) => {
+            e.preventDefault();
+            close();
+        });
+        dialog
+            .querySelector("[data-modal-close]")
+            ?.addEventListener("click", (e) => {
+                e.preventDefault();
+                close();
+            });
+        // Клик по затемнению вокруг окна.
+        dialog.addEventListener("click", (e) => {
+            if (e.target === dialog) close();
+        });
+
+        window.addEventListener("popstate", (e) => {
+            const url = (e.state as { modal?: string } | null)?.modal;
+            if (url) {
+                show(url, false).catch(() => {
+                    location.href = url;
+                });
+            } else if (dialog.open) {
+                hide();
+            }
+        });
+    }
+</script>
+
+<style>
+    .modal {
+        width: min(100% - 2 * var(--space-4), 48rem);
+        max-height: min(100dvh - 2 * var(--space-6), 60rem);
+        margin: auto;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-lg);
+        background: var(--color-surface);
+        color: var(--color-text);
+        box-shadow: 0 8px 40px rgb(28 39 64 / 0.25);
+    }
+    .modal::backdrop {
+        background: rgb(28 39 64 / 0.55);
+    }
+    .frame {
+        display: flex;
+        flex-direction: column;
+        max-height: inherit;
+    }
+    .close-row {
+        position: sticky;
+        top: 0;
+        display: flex;
+        justify-content: flex-end;
+        padding: var(--space-3) var(--space-3) 0;
+    }
+    .close {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-pill);
+        border: 2px solid var(--color-border);
+        background: var(--color-surface);
+        color: var(--color-text);
+        font-size: 1.75rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .close:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+    .body {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 0 var(--space-6) var(--space-6);
+    }
+    @media (max-width: 40rem) {
+        .modal {
+            width: 100%;
+            max-height: 100dvh;
+            height: 100dvh;
+            border-radius: 0;
+        }
+        .body {
+            padding: 0 var(--space-4) var(--space-6);
+        }
+    }
+    :global(html:has(dialog[open])) {
+        overflow: hidden;
+    }
+</style>
