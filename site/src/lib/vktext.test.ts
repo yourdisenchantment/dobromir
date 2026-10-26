@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { parseVkText, safeHref, type Segment } from "./vktext.ts";
+import { parseVkText, plainVkText, safeHref, type Segment } from "./vktext.ts";
 
 function links(text: string): string[] {
     return parseVkText(text)
@@ -68,4 +68,14 @@ test("кавычки и скобки рядом с адресом", () => {
     assert.deepEqual(links("«https://example.org/b»"), [
         "https://example.org/b",
     ]);
+});
+
+test("текст без разметки VK: упоминания - только название", () => {
+    assert.equal(
+        plainVkText(
+            "Ссылка на [club1|группу] и [https://example.org|сайт], #тег остается",
+        ),
+        "Ссылка на группу и сайт, #тег остается",
+    );
+    assert.equal(plainVkText("Без разметки"), "Без разметки");
 });

@@ -9,6 +9,7 @@ import example from "../sample/news.example.json";
 
 import { newsJsonPath, siteEnv } from "./env";
 import { formatDate } from "./date";
+import { plainVkText } from "./vktext";
 
 const Rendition = z.object({
     file: z.string().min(1),
@@ -89,7 +90,7 @@ export function displayTitle(post: NewsPost): string {
 
 /** Краткое описание для meta description и RSS: первые ~160 символов текста. */
 export function summary(post: NewsPost, max = 160): string {
-    const text = (post.text || post.repost?.text || "")
+    const text = plainVkText(post.text || post.repost?.text || "")
         .replace(/\s+/gu, " ")
         .trim();
     if (text.length <= max) return text || displayTitle(post);

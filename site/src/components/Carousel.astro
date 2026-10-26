@@ -73,6 +73,7 @@ const { label } = Astro.props;
         overflow-x: auto;
         overscroll-behavior-x: contain;
         scroll-snap-type: x mandatory;
+        align-items: flex-start; /* карточки своей высоты, не по самой длинной в ряду */
         scroll-behavior: smooth;
         /* Первая и последняя карточки встают по центру: слева от свежей - пусто */
         padding-inline: max(var(--gutter), calc(50% - var(--card-w) / 2));

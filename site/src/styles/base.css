@@ -142,4 +142,18 @@
     .stack > * + * {
         margin-top: var(--space-4);
     }
+    /* «Черепица» (решено 2026-10-27, как проекты в cv): колонки CSS, элементы разной
+       высоты не растягиваются под соседей. Порядок - по столбцам сверху вниз. */
+    .masonry {
+        display: block;
+        columns: var(--masonry-col, 18rem);
+        column-gap: var(--space-5);
+        list-style: none;
+        padding: 0;
+    }
+    .masonry > * {
+        break-inside: avoid;
+        margin-bottom: var(--space-5);
+        max-width: none;
+    }
 }

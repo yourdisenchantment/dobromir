@@ -33,6 +33,12 @@ function mentionHref(target: string): string | null {
         : safeHref(target);
 }
 
+/** Текст без разметки VK: упоминание [club1|Название] -> «Название». Для анонсов,
+ *  описаний и RSS, где ссылок нет, а служебный текст VK читателю не нужен. */
+export function plainVkText(text: string): string {
+    return text.replace(MENTION, (_m, _target: string, label: string) => label);
+}
+
 /** Текст поста -> абзацы (пустая строка - граница абзаца) из кусков. */
 export function parseVkText(text: string): Paragraph[] {
     return text

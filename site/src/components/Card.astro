@@ -1,7 +1,8 @@
 ---
-// Карточка ряда: картинка (или заглушка), заголовок, подзаголовок, кратко. Если есть
-// href - вся карточка одна ссылка (растянута через ::after, цель не меньше 44px).
-// Раскрытие окном поверх страницы - отдельным шагом; без JS ссылка ведет на страницу.
+// Карточка: картинка, заголовок, подзаголовок, кратко. Высота - по содержимому, без
+// пустых блоков (решено 2026-10-27, как карточки проектов в cv): нет картинки - нет и
+// места под нее; картинка в своих пропорциях, если не задан ratio; текст не обрезается.
+// Если есть href - вся карточка одна ссылка (растянута через ::after, цель не меньше 44px).
 interface Props {
     title: string;
     subtitle?: string;
@@ -22,7 +23,7 @@ const {
     text,
     href,
     image,
-    ratio = "4/3",
+    ratio,
     as: Tag = "article",
     modal = false,
     datetime,
@@ -30,8 +31,8 @@ const {
 ---
 
 <Tag class="card">
-    <div class="media" style={`aspect-ratio: ${ratio}`}>
-        {image ? (
+    {image && (
+        <div class="media" style={ratio ? `aspect-ratio: ${ratio}` : undefined}>
             <img
                 src={image.src}
                 width={image.width}
@@ -40,10 +41,8 @@ const {
                 loading="lazy"
                 decoding="async"
             />
-        ) : (
-            <div class="placeholder" aria-hidden="true" />
-        )}
-    </div>
+        </div>
+    )}
     <div class="body">
         <h3>
             {href ? (
@@ -85,18 +84,7 @@ const {
     .media img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
-    }
-    .placeholder {
-        width: 100%;
-        height: 100%;
-        background:
-            radial-gradient(
-                circle at 70% 30%,
-                var(--color-accent-soft) 0 18%,
-                transparent 19%
-            ),
-            linear-gradient(135deg, var(--color-surface-alt), #fbd9c6);
+        object-fit: cover; /* только при заданном ratio; иначе картинка в своих пропорциях */
     }
     .body {
         display: flex;
@@ -138,10 +126,5 @@ const {
     .text {
         color: var(--color-text-muted);
         font-size: var(--text-sm);
-        display: -webkit-box;
-        -webkit-line-clamp: 4;
-        line-clamp: 4;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
     }
 </style>

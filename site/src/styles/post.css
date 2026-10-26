@@ -21,16 +21,20 @@
     .post-text .tag {
         color: var(--color-text-muted);
     }
+    /* Фото «черепицей»: каждое в своих пропорциях, без обрезки (решено 2026-10-27).
+       Одно фото - на всю ширину. */
     .post-photos {
-        display: grid;
-        gap: var(--space-3);
+        columns: 14rem;
+        column-gap: var(--space-3);
     }
-    .post-photos:has(> :nth-child(2)) {
-        grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+    .post-photos:not(:has(> :nth-child(2))) {
+        columns: auto;
     }
     .post-photos img {
         width: 100%;
         height: auto;
+        margin-bottom: var(--space-3);
+        break-inside: avoid;
         border-radius: var(--radius-md);
         background: var(--color-surface-alt);
     }
