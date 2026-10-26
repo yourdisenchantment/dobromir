@@ -1,19 +1,28 @@
 ---
-// Шапка: логотип, меню (переходы к блокам лендинга), телефон для записи. Не липкая.
-// На телефоне меню и телефон спрятаны в <details> без JS (методичка 7.3): иначе пункты
-// переносятся в несколько строк и шапка занимает пол-экрана. Ссылки повторены в двух
-// навигациях, но видна всегда одна: вторая скрыта display: none и для экранных дикторов.
+// Шапка: логотип, меню (переходы к блокам лендинга), телефон для записи.
+// Липкая (решено 2026-10-26): остается сверху при прокрутке; чтобы она не закрывала
+// якоря и фокус (WCAG 2.4.11), высота шапки - --header-h, на нее же scroll-padding-top.
+// Пункт текущего раздела подсвечивается маленьким скриптом; без JS подсветки нет, все
+// остальное работает. На телефоне меню и телефон спрятаны в <details> (методичка 7.3).
+// Ссылки повторены в двух навигациях, но видна всегда одна: вторая скрыта display: none
+// и для экранных дикторов.
+interface Props {
+    /** Начало ссылок меню: "/" на всех страницах, "" - на самом лендинге-образце. */
+    base?: string;
+}
+
+const { base = "/" } = Astro.props;
 const links = [
-    { href: "/#services", label: "Услуги" },
-    { href: "/#specialists", label: "Специалисты" },
-    { href: "/#news", label: "Новости" },
-    { href: "/#about", label: "О нас" },
-    { href: "/#contacts", label: "Контакты" },
-];
+    { id: "services", label: "Услуги" },
+    { id: "specialists", label: "Специалисты" },
+    { id: "news", label: "Новости" },
+    { id: "about", label: "О нас" },
+    { id: "contacts", label: "Контакты" },
+].map((l) => ({ ...l, href: `${base}#${l.id}` }));
 const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
 ---
 
-<header class="header">
+<header class="header" data-header>
     <div class="bar container">
         <a class="logo" href="/" aria-label="Добромир, на главную">
             <img src="/logo.svg" width="568" height="232" alt="" />
@@ -23,7 +32,9 @@ const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
             <ul>
                 {links.map((l) => (
                     <li>
-                        <a href={l.href}>{l.label}</a>
+                        <a href={l.href} data-section={l.id}>
+                            {l.label}
+                        </a>
                     </li>
                 ))}
             </ul>
@@ -37,7 +48,9 @@ const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
                 <ul>
                     {links.map((l) => (
                         <li>
-                            <a href={l.href}>{l.label}</a>
+                            <a href={l.href} data-section={l.id}>
+                                {l.label}
+                            </a>
                         </li>
                     ))}
                 </ul>
@@ -49,9 +62,59 @@ const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
     </div>
 </header>
 
+<script>
+    // Подсветка пункта меню текущего раздела и закрытие мобильного меню после выбора.
+    // Раздел текущий, если пересекает полосу в верхней трети экрана (под шапкой).
+    const header = document.querySelector<HTMLElement>("[data-header]");
+    if (header) {
+        const links = [
+            ...header.querySelectorAll<HTMLAnchorElement>("a[data-section]"),
+        ];
+        const sections = [...new Set(links.map((a) => a.dataset.section))]
+            .map((id) => (id ? document.getElementById(id) : null))
+            .filter((el): el is HTMLElement => el !== null)
+            // в порядке на странице, а не в порядке пунктов меню
+            .sort((a, b) =>
+                a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING
+                    ? -1
+                    : 1,
+            );
+        const mark = (id: string | null) => {
+            for (const a of links) {
+                if (a.dataset.section === id)
+                    a.setAttribute("aria-current", "location");
+                else a.removeAttribute("aria-current");
+            }
+        };
+        if (sections.length > 0) {
+            const visible = new Set<string>();
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    for (const e of entries) {
+                        if (e.isIntersecting) visible.add(e.target.id);
+                        else visible.delete(e.target.id);
+                    }
+                    // В полосе может оказаться граница двух разделов - берем верхний.
+                    const first = sections.find((s) => visible.has(s.id));
+                    mark(first ? first.id : null);
+                },
+                { rootMargin: "-20% 0px -70% 0px" },
+            );
+            for (const s of sections) observer.observe(s);
+        }
+        const menu = header.querySelector<HTMLDetailsElement>("details");
+        for (const a of menu?.querySelectorAll("a") ?? []) {
+            a.addEventListener("click", () => menu?.removeAttribute("open"));
+        }
+    }
+</script>
+
 <style>
     .header {
-        position: relative;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        min-height: var(--header-h);
         background: var(--color-surface);
         border-bottom: 1px solid var(--color-border);
     }
@@ -98,6 +161,11 @@ const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
     .nav a:hover {
         color: var(--color-primary);
         text-decoration: underline;
+    }
+    /* Текущий раздел: цвет и черта снизу - не только цвет (методичка 6, 7.3) */
+    .nav a[aria-current] {
+        color: var(--color-primary);
+        box-shadow: inset 0 -3px 0 var(--color-primary);
     }
     .phone,
     .phone:visited {

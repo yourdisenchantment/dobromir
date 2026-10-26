@@ -1,6 +1,9 @@
 ---
 // Секция лендинга: заголовок, содержимое, чередование фона. У секции с фоном alt сверху
-// волна (одна форма на весь сайт, SVG без JS, методичка 7.5).
+// волна - у каждой секции свои изгибы, посчитанные при сборке из ее имени (решено
+// 2026-10-26, отступление от «единой формы» методички 7.5); SVG без JS.
+import { WAVE_HEIGHT, WAVE_WIDTH, wavePath } from "../lib/wave";
+
 interface Props {
     id?: string;
     title?: string;
@@ -9,6 +12,7 @@ interface Props {
 
 const { id, title, alt = false } = Astro.props;
 const headingId = id ? `${id}-title` : undefined;
+const wave = alt ? wavePath(id ?? title ?? "") : "";
 ---
 
 <section
@@ -19,12 +23,12 @@ const headingId = id ? `${id}-title` : undefined;
     {alt && (
         <svg
             class="wave"
-            viewBox="0 0 1440 80"
+            viewBox={`0 0 ${WAVE_WIDTH} ${WAVE_HEIGHT}`}
             preserveAspectRatio="none"
             aria-hidden="true"
             focusable="false"
         >
-            <path d="M0,40 C240,80 480,0 720,32 C960,64 1200,8 1440,40 L1440,80 L0,80 Z" />
+            <path d={wave} />
         </svg>
     )}
     <div class="inner">

@@ -118,7 +118,7 @@ const news = [
         <a class="skip-link" href="#main">
             Перейти к содержанию
         </a>
-        <SiteHeader />
+        <SiteHeader base="" />
         <main id="main">
             <div class="container intro stack">
                 <h1>Стайлбук</h1>
@@ -324,6 +324,41 @@ const news = [
                     </details>
                 </div>
             </Section>
+            <Section id="contacts" title="Контакты" alt>
+                <div class="container contacts">
+                    <div class="stack">
+                        <p class="lead">Симферополь, ул. Желябова, 44</p>
+                        <p>
+                            Отдельно стоящее здание в центре города, тихий двор,
+                            места для ожидания. Ближайшие стоянки: супермаркет
+                            на Маяковского, 12, гостиница «Спортивная».
+                        </p>
+                        <p>
+                            <a href="https://yandex.ru/maps/?text=Симферополь, Желябова 44">
+                                Открыть на Яндекс Картах
+                            </a>
+                        </p>
+                    </div>
+                    <div class="stack">
+                        <p>
+                            <span class="muted">
+                                Запись - только по телефону:
+                            </span>
+                            <br />
+                            <a class="tel" href="tel:+79782294854">
+                                +7 978 229-48-54
+                            </a>
+                        </p>
+                        <p>
+                            <span class="muted">Общий телефон:</span>
+                            <br />
+                            <a class="tel" href="tel:+79787991709">
+                                +7 978 799-17-09
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </Section>
         </main>
     </body>
 </html>
@@ -470,6 +505,20 @@ const news = [
     }
     .faq[open] > summary::after {
         content: "\2212";
+    }
+    .contacts {
+        display: grid;
+        gap: var(--space-6);
+        min-height: 50vh;
+    }
+    @media (min-width: 48rem) {
+        .contacts {
+            grid-template-columns: 3fr 2fr;
+        }
+    }
+    .tel {
+        font-size: var(--text-h4);
+        font-weight: 650;
     }
     .faq p {
         padding-bottom: var(--space-4);

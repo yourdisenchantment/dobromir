@@ -32,7 +32,8 @@
     html {
         -webkit-text-size-adjust: 100%;
         text-size-adjust: 100%;
-        scroll-padding-top: var(--space-6);
+        /* Липкая шапка не закрывает якоря и элемент в фокусе (WCAG 2.4.11) */
+        scroll-padding-top: calc(var(--header-h) + var(--space-4));
     }
 
     body {
