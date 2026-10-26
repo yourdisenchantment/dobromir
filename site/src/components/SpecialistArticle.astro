@@ -1,0 +1,51 @@
+---
+// Специалист целиком: фото, имя, должность, описание. data-modal-content - эту часть
+// страницы специалиста всплывающее окно лендинга вставляет к себе (Modal.astro).
+// Фото здесь целиком, в своих пропорциях (в карточке - рамка 4:5, решено 2026-10-27).
+import { descriptionParts, type Specialist } from "../lib/content";
+
+interface Props {
+    person: Specialist;
+}
+
+const { person } = Astro.props;
+const parts = descriptionParts(person.description);
+---
+
+<article class="post specialist" data-modal-content>
+    <div class="head">
+        <img
+            class="photo"
+            src={person.image.src}
+            width={person.image.width}
+            height={person.image.height}
+            alt={`${person.name}, ${person.position.toLowerCase()}`}
+            decoding="async"
+        />
+        <div class="stack">
+            <h1 class="post-title" data-modal-title>
+                {person.name}
+            </h1>
+            <p class="position">{person.position}</p>
+        </div>
+    </div>
+    {parts.length > 0 && (
+        <div class="post-text">
+            {parts.map((part) =>
+                part.type === "p" ? (
+                    <p>{part.text}</p>
+                ) : (
+                    <ul class="post-links">
+                        {part.items.map((item) => (
+                            <li>{item}</li>
+                        ))}
+                    </ul>
+                ),
+            )}
+        </div>
+    )}
+    <p class="post-source">
+        Записаться к специалисту — по телефону{" "}
+        <a href="tel:+79782294854">+7 978 229-48-54</a>
+    </p>
+</article>

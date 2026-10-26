@@ -2,6 +2,7 @@
 // Страница новости. Удаленного поста в news.json нет - страница не собирается, адрес дает 404.
 // Ее же часть (PostArticle, data-modal-content) показывает всплывающее окно на лендинге.
 import Base from "../../layouts/Base.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import PostArticle from "../../components/PostArticle.astro";
 import { displayTitle, loadNews, summary, type NewsPost } from "../../lib/news";
 
@@ -21,16 +22,12 @@ const { post } = Astro.props;
 
 <Base title={displayTitle(post)} description={summary(post)} type="article">
     <div class="container page">
-        <nav aria-label="Хлебные крошки" class="crumbs">
-            <ol>
-                <li>
-                    <a href="/">Главная</a>
-                </li>
-                <li>
-                    <a href="/news/">Новости</a>
-                </li>
-            </ol>
-        </nav>
+        <Breadcrumbs
+            items={[
+                { href: "/", label: "Главная" },
+                { href: "/news/", label: "Новости" },
+            ]}
+        />
         <PostArticle post={post} />
     </div>
 </Base>
@@ -39,19 +36,5 @@ const { post } = Astro.props;
     .page {
         max-width: 48rem;
         padding-block: var(--space-6) var(--space-7);
-    }
-    .crumbs ol {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2);
-        margin-bottom: var(--space-5);
-        font-size: var(--text-sm);
-    }
-    .crumbs li + li::before {
-        content: "›";
-        margin-inline-end: var(--space-2);
-        color: var(--color-text-muted);
     }
 </style>

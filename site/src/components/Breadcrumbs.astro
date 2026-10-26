@@ -1,0 +1,35 @@
+---
+// Хлебные крошки внутренних страниц (методичка 7.13): путь до текущей страницы.
+interface Props {
+    items: { href: string; label: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav aria-label="Хлебные крошки" class="crumbs">
+    <ol>
+        {items.map((item) => (
+            <li>
+                <a href={item.href}>{item.label}</a>
+            </li>
+        ))}
+    </ol>
+</nav>
+
+<style>
+    ol {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-bottom: var(--space-5);
+        font-size: var(--text-sm);
+    }
+    li + li::before {
+        content: "›";
+        margin-inline-end: var(--space-2);
+        color: var(--color-text-muted);
+    }
+</style>

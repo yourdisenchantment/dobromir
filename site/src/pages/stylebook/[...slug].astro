@@ -15,6 +15,7 @@ import Section from "../../components/Section.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import Modal from "../../components/Modal.astro";
 import { loadNews, newsCard } from "../../lib/news";
+import { loadSpecialists, specialistCard } from "../../lib/content";
 
 export function getStaticPaths() {
     if (import.meta.env.PROD) return [];
@@ -72,16 +73,6 @@ const services = [
         title: "Логопеды",
         text: "Запуск речи, постановка звуков, развитие словарного запаса.",
     },
-];
-const people = [
-    {
-        title: "Шепитько Лариса Семеновна",
-        subtitle: "Руководитель центра, логопед-дефектолог",
-    },
-    { title: "Арзякова Марина Александровна", subtitle: "Музыкотерапевт" },
-    { title: "Липкань Вера Николаевна", subtitle: "Педагог (тьютор)" },
-    { title: "Самик Александра Александровна", subtitle: "Игротерапевт" },
-    { title: "Шевченко Юлия Николаевна", subtitle: "Старший логопед" },
 ];
 // Новости - из примера данных (без NEWS_JSON) или настоящие: у них есть страницы,
 // поэтому на них проверяется всплывающее окно. Две заглушки - чтобы ряд уходил за край.
@@ -351,8 +342,8 @@ const photos = [
 
             <Section id="specialists" title="Специалисты" alt>
                 <Carousel label="Специалисты центра">
-                    {people.map((p) => (
-                        <Card as="li" ratio="4/5" href="#specialists" {...p} />
+                    {loadSpecialists().items.map((p) => (
+                        <Card as="li" {...specialistCard(p)} />
                     ))}
                 </Carousel>
             </Section>

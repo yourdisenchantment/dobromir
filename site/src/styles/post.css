@@ -53,4 +53,27 @@
     .post-source {
         font-size: var(--text-sm);
     }
+
+    /* Специалист: фото целиком слева, имя и должность справа; на телефоне - столбиком */
+    .specialist .head {
+        display: grid;
+        gap: var(--space-5);
+        align-items: start;
+    }
+    @media (min-width: 40rem) {
+        .specialist .head {
+            grid-template-columns: minmax(10rem, 16rem) 1fr;
+        }
+    }
+    .specialist .photo {
+        width: 100%;
+        max-width: 20rem;
+        height: auto;
+        border-radius: var(--radius-lg);
+        background: var(--color-surface-alt);
+    }
+    .specialist .position {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
 }

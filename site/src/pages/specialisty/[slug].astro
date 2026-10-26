@@ -1,0 +1,43 @@
+---
+// Страница специалиста. Ее же часть (SpecialistArticle, data-modal-content) показывает
+// всплывающее окно на лендинге; по прямой ссылке и без JS открывается эта страница.
+import Base from "../../layouts/Base.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import SpecialistArticle from "../../components/SpecialistArticle.astro";
+import { loadSpecialists, type Specialist } from "../../lib/content";
+
+export function getStaticPaths() {
+    return loadSpecialists().items.map((person) => ({
+        params: { slug: person.slug },
+        props: { person },
+    }));
+}
+
+interface Props {
+    person: Specialist;
+}
+
+const { person } = Astro.props;
+const description = person.short
+    ? `${person.position}: ${person.short.toLowerCase()}. Центр «Добромир», Симферополь.`
+    : `${person.position}, центр «Добромир», Симферополь.`;
+---
+
+<Base title={person.name} description={description}>
+    <div class="container page">
+        <Breadcrumbs
+            items={[
+                { href: "/", label: "Главная" },
+                { href: "/#specialists", label: "Специалисты" },
+            ]}
+        />
+        <SpecialistArticle person={person} />
+    </div>
+</Base>
+
+<style>
+    .page {
+        max-width: 48rem;
+        padding-block: var(--space-6) var(--space-7);
+    }
+</style>

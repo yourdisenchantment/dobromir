@@ -15,6 +15,8 @@ interface Props {
     modal?: boolean;
     /** Если подзаголовок - дата: машиночитаемое значение для <time>. */
     datetime?: string;
+    /** Что держать в кадре при обрезке до ratio, например "50% 15%" - лица на портретах. */
+    focus?: string;
 }
 
 const {
@@ -27,6 +29,7 @@ const {
     as: Tag = "article",
     modal = false,
     datetime,
+    focus,
 } = Astro.props;
 ---
 
@@ -38,6 +41,7 @@ const {
                 width={image.width}
                 height={image.height}
                 alt={image.alt}
+                style={focus ? `object-position: ${focus}` : undefined}
                 loading="lazy"
                 decoding="async"
             />
