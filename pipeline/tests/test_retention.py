@@ -29,9 +29,9 @@ def settings_at(tmp_path: Path, **extra: str) -> Settings:
     return load_settings(env)
 
 
-def test_default_is_30_days_and_bounds(tmp_path: Path) -> None:
-    assert settings_at(tmp_path).news_retention_days == 30
-    assert settings_at(tmp_path, NEWS_RETENTION_DAYS="90").news_retention_days == 90
+def test_default_is_90_days_and_bounds(tmp_path: Path) -> None:
+    assert settings_at(tmp_path).news_retention_days == 90  # было 30, Павел 2026-10-27
+    assert settings_at(tmp_path, NEWS_RETENTION_DAYS="30").news_retention_days == 30
     with pytest.raises(RuntimeError, match="NEWS_RETENTION_DAYS"):
         settings_at(tmp_path, NEWS_RETENTION_DAYS="0")
 
@@ -60,7 +60,7 @@ def news(s: Settings) -> list[int]:
 
 def test_worker_drops_expired_news_and_does_not_take_them_back(tmp_path: Path) -> None:
     """Через срок хранения новость уходит с сайта, хотя в группе VK она есть и попадает в окно."""
-    s = settings_at(tmp_path, VK_WINDOW="20")
+    s = settings_at(tmp_path, VK_WINDOW="20", NEWS_RETENTION_DAYS="30")
     wall = FakeWall(3)
     builds: list[int] = []
 
