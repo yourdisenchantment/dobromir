@@ -40,7 +40,7 @@ const blocks = loadPage();
                     {block.intro && (
                         <p class="container intro">{block.intro}</p>
                     )}
-                    <Carousel label={block.title} align="center">
+                    <Carousel label={block.title}>
                         {block.items.map((p) => (
                             <Card as="li" {...specialistCard(p)} />
                         ))}

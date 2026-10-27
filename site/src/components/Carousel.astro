@@ -6,18 +6,13 @@
 // браузер прокручивает к ним. Дети - карточки с as="li".
 interface Props {
     label: string;
-    /** Карточки разной высоты: по верхнему краю (start) или по средней линии ряда (center). */
-    align?: "start" | "center";
 }
 
-const { label, align = "start" } = Astro.props;
+const { label } = Astro.props;
 ---
 
 <div class="carousel" data-carousel>
-    <ul
-        class:list={["track", { center: align === "center" }]}
-        aria-label={label}
-    >
+    <ul class="track" aria-label={label}>
         <slot />
     </ul>
     <div class="controls container" data-controls hidden>
@@ -78,24 +73,22 @@ const { label, align = "start" } = Astro.props;
         overflow-x: auto;
         overscroll-behavior-x: contain;
         scroll-snap-type: x mandatory;
-        align-items: flex-start; /* карточки своей высоты, не по самой длинной в ряду */
+        /* карточки своей высоты, по средней линии ряда (решено 2026-10-27, все карусели) */
+        align-items: center;
         scroll-behavior: smooth;
         /* Первая и последняя карточки встают по центру: слева от свежей - пусто */
         padding-inline: max(var(--gutter), calc(50% - var(--card-w) / 2));
         /* место сверху и снизу: увеличенная карточка не должна обрезаться краем ряда */
-        padding-block: var(--space-6) var(--space-7);
+        padding-block: var(--space-5);
         scrollbar-width: thin;
         scrollbar-color: var(--color-border) transparent;
-    }
-    .track.center {
-        align-items: center; /* специалисты: по средней линии ряда (решено 2026-10-27) */
     }
     .track > :global(*) {
         flex: 0 0 var(--card-w);
         scroll-snap-align: center;
         max-width: none;
     }
-    /* Текущая карточка (по центру) - яркая и крупнее, соседние заметно меньше и тусклее
+    /* Текущая карточка (по центру) - яркая и крупнее, соседние меньше и тусклее
        (решено 2026-10-27). Анимация от прокрутки, без JS; где браузер ее не умеет, все
        карточки одинаковые. Карточка с фокусом клавиатуры - всегда яркая. */
     @supports (animation-timeline: view()) {
@@ -107,17 +100,25 @@ const { label, align = "start" } = Astro.props;
         .track > :global(*:focus-within) {
             animation: none;
         }
+        /* Уменьшенные соседи придвинуты к центральной карточке (translate), чтобы между
+           ними не оставалось пустого места от уменьшения: справа - влево, слева - вправо. */
         @keyframes carousel-focus {
             0%,
-            40%,
-            60%,
-            100% {
+            40% {
                 opacity: 0.5;
-                scale: 0.8;
+                scale: 0.85;
+                translate: -4.5% 0;
             }
             50% {
                 opacity: 1;
-                scale: 1.08;
+                scale: 1.06;
+                translate: 0 0;
+            }
+            60%,
+            100% {
+                opacity: 0.5;
+                scale: 0.85;
+                translate: 4.5% 0;
             }
         }
         /* «Уменьшить движение»: только яркость, без изменения размера */

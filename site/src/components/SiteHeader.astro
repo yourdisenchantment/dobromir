@@ -63,21 +63,19 @@ const phone = { href: tel(booking.number), label: booking.number };
 
 <script>
     // Подсветка пункта меню текущего раздела и закрытие мобильного меню после выбора.
-    // Раздел текущий, если пересекает полосу в верхней трети экрана (под шапкой).
+    // Раздел текущий, если пересекает полосу в верхней трети экрана (под шапкой). У блока
+    // без пункта меню («О центре», цифры, отзывы) подсветка остается на ближайшем пункте
+    // выше, а не пропадает (решено 2026-10-27).
     const header = document.querySelector<HTMLElement>("[data-header]");
     if (header) {
         const links = [
             ...header.querySelectorAll<HTMLAnchorElement>("a[data-section]"),
         ];
-        const sections = [...new Set(links.map((a) => a.dataset.section))]
-            .map((id) => (id ? document.getElementById(id) : null))
-            .filter((el): el is HTMLElement => el !== null)
-            // в порядке на странице, а не в порядке пунктов меню
-            .sort((a, b) =>
-                a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING
-                    ? -1
-                    : 1,
-            );
+        const withLink = new Set(links.map((a) => a.dataset.section));
+        // все разделы страницы в порядке на странице, и с пунктом меню, и без
+        const sections = [
+            ...document.querySelectorAll<HTMLElement>("main section[id]"),
+        ];
         const mark = (id: string | null) => {
             for (const a of links) {
                 if (a.dataset.section === id)
@@ -93,9 +91,15 @@ const phone = { href: tel(booking.number), label: booking.number };
                         if (e.isIntersecting) visible.add(e.target.id);
                         else visible.delete(e.target.id);
                     }
-                    // В полосе может оказаться граница двух разделов - берем верхний.
-                    const first = sections.find((s) => visible.has(s.id));
-                    mark(first ? first.id : null);
+                    // В полосе может оказаться граница двух разделов - берем верхний,
+                    // а от него - ближайший раздел с пунктом меню (он сам или выше).
+                    const first = sections.findIndex((s) => visible.has(s.id));
+                    if (first < 0) return;
+                    const owner = sections
+                        .slice(0, first + 1)
+                        .reverse()
+                        .find((s) => withLink.has(s.id));
+                    mark(owner ? owner.id : null);
                 },
                 { rootMargin: "-20% 0px -70% 0px" },
             );
