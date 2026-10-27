@@ -5,6 +5,8 @@
 import type { ImageMetadata } from "astro";
 import { z } from "zod";
 
+import { iconNames, icons } from "./icons";
+
 import pageJson from "../../content/page.json";
 import specialistsJson from "../../content/blocks/specialists/block.json";
 
@@ -118,6 +120,12 @@ const FactsSchema = z.strictObject({
     items: z
         .array(
             z.strictObject({
+                icon: z
+                    .string({ error: "icon: нужно имя иконки" })
+                    .refine((n) => n in icons, {
+                        error: `нет такой иконки; есть ${iconNames.join(", ")}`,
+                    })
+                    .optional(),
                 value: text("value (число)"),
                 label: text("label (подпись)"),
                 source: z

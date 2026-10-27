@@ -3,18 +3,22 @@
     "title": "Центр в цифрах",
     "items": [
         {
+            "icon": "child_care",
             "value": "250+",
             "label": "детей занимаются в центре"
         },
         {
+            "icon": "groups",
             "value": "20+",
             "label": "специалистов"
         },
         {
+            "icon": "meeting_room",
             "value": "20+",
             "label": "кабинетов для занятий"
         },
         {
+            "icon": "family_restroom",
             "value": "0–18",
             "label": "лет — возраст детей"
         }

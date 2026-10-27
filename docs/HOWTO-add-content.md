@@ -191,7 +191,7 @@ npm run dev
 }
 ```
 
-**`cards`** - карточки в карусели. У карточки обязателен только `title`; `subtitle`,
+**`cards`** - карточки «черепицей» (как архив новостей). У карточки обязателен только `title`; `subtitle`,
 `text`, `list` (пункты) - можно не писать. `intro` - абзац над каруселью:
 
 ```json
@@ -205,14 +205,20 @@ npm run dev
 }
 ```
 
-**`facts`** - цифры, лучше четыре. `source` - если цифра чужая, указать откуда:
+**`facts`** - цифры, лучше четыре. `icon` - значок над цифрой (можно не писать); `source` -
+если цифра чужая, указать откуда. Значок - имя файла без `.svg` из `site/src/assets/icons/`:
+`accessibility_new`, `calendar_month`, `child_care`, `diversity_3`, `family_restroom`,
+`favorite`, `fingerprint`, `groups`, `health_and_safety`, `location_on`, `meeting_room`,
+`neurology`, `psychology`, `record_voice_over`, `school`, `sentiment_satisfied`,
+`stethoscope`, `volunteer_activism`. Неверное имя - сборка остановится и перечислит все.
+Нужен другой значок - к разработчику (это файл в коде, не в `site/content/`):
 
 ```json
 {
     "type": "facts",
     "title": "Центр в цифрах",
     "items": [
-        { "value": "250+", "label": "детей занимаются в центре" },
+        { "icon": "child_care", "value": "250+", "label": "детей занимаются в центре" },
         { "value": "1500", "label": "детей с аутизмом в Крыму", "source": { "title": "Минздрав РК, 2024", "url": "https://..." } }
     ]
 }

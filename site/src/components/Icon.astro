@@ -1,0 +1,24 @@
+---
+// Иконка из src/assets/icons/ (lib/icons.ts): встроенный SVG цвета текста, для чтения
+// с экрана скрыт - смысл несет подпись рядом.
+import { icons } from "../lib/icons";
+
+interface Props {
+    name: string;
+    class?: string;
+}
+
+const { name, class: cls } = Astro.props;
+const icon = icons[name];
+if (!icon) throw new Error(`нет иконки ${name} в src/assets/icons/`);
+---
+
+<svg
+    class={cls}
+    viewBox={icon.viewBox}
+    fill="currentColor"
+    aria-hidden="true"
+    focusable="false"
+>
+    <path d={icon.d}></path>
+</svg>
