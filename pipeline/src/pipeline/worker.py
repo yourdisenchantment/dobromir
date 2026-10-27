@@ -223,7 +223,8 @@ def _fill_counts(status: dict[str, Any], store: Store, settings: Settings, now: 
 
 def _log_result(r: SyncResult) -> None:
     log.info(
-        "посты: %s; удалено: %s; по сроку: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
+        "%sпосты: %s; удалено: %s; по сроку: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
+        "первичная загрузка; " if r.backfill else "",
         {c.value: n for c, n in r.changes.items()} or "нет",
         r.deleted,
         r.expired,

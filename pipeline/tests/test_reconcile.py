@@ -101,6 +101,31 @@ def test_pinned_outside_window_is_not_deleted(store: Store, tmp_path: Path) -> N
     assert 1 in live_ids(store)
 
 
+# --- первичная загрузка на свежей базе ---
+
+
+def test_fresh_db_backfills_beyond_window_once(store: Store, tmp_path: Path) -> None:
+    wall = FakeWall(30)  # окно - 5 постов, на стене 30: без первичной загрузки 25 не попали бы никогда
+    s = settings_at(tmp_path)
+    first = sync(store, wall, s, at(23, 1))
+    assert first.backfill
+    assert live_ids(store) == list(range(1, 31))
+    wall.calls.clear()
+    second = sync(store, wall, s, at(23, 2))
+    assert not second.backfill
+    assert wall.calls == ["wall.get"]  # дальше только окно
+
+
+def test_backfill_takes_only_retention_and_stops_paging(store: Store, tmp_path: Path) -> None:
+    wall = FakeWall(57)
+    s = settings_at(tmp_path, NEWS_RETENTION_DAYS="1")
+    now = 1786000000 + 86400 + 40 * 60  # в срок попадают посты 40..57
+    sync(store, wall, s, now)
+    assert live_ids(store) == list(range(40, 58))
+    # Страница 57..48, затем 52..43, затем 47..38 - на ней старше срока, дальше не листаем.
+    assert wall.calls.count("wall.get") == 3 + 1  # первичная загрузка + окно
+
+
 # --- решение о сборке ---
 
 

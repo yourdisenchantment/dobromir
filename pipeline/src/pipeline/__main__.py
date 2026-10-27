@@ -15,9 +15,8 @@ import httpx
 from pipeline.backup import BackupError, backup_db
 from pipeline.export import build_news, write_news
 from pipeline.media.cleanup import cleanup_media
-from pipeline.reconcile import fetch_wall
 from pipeline.release import ReleaseError, build_release, rollback
-from pipeline.run import retention_start, run_sync
+from pipeline.run import backfill, run_sync
 from pipeline.settings import Settings, load_settings
 from pipeline.store import Store, open_db
 from pipeline.store.db import migrate, schema_version
@@ -95,8 +94,7 @@ def main() -> None:
             with httpx.Client() as http:
                 vk = VkClient(settings.vk(), http)
                 if args.command == "backfill":
-                    since = retention_start(settings, now)
-                    changes = ingest(store, [fetch_wall(vk, None, settings.vk_page_size)], now, since)
+                    changes = backfill(store, vk, settings, now)
                     logging.info("записано: %s", {c.value: n for c, n in changes.items()} or "ничего")
                 else:
                     r = run_sync(store, vk, http, settings, now)

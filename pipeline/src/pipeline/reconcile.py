@@ -52,8 +52,10 @@ def merge_responses(responses: Iterable[dict[str, Any]]) -> dict[str, Any]:
     return {"items": items, "groups": list(groups.values()), "profiles": list(profiles.values())}
 
 
-def fetch_wall(vk: VkClient, limit: int | None, page_size: int) -> dict[str, Any]:
+def fetch_wall(vk: VkClient, limit: int | None, page_size: int, since: int | None = None) -> dict[str, Any]:
     """Посты со стены, новые первыми. limit - сколько обычных постов (закреп не в счет); None - вся стена.
+    since - не листать дальше страницы, где встретился обычный пост старше (первичная загрузка за
+    срок хранения): обычные посты идут по убыванию даты, дальше только старее.
 
     Закрепленный пост VK отдает первым при offset=0, поэтому он не занимает место в окне
     и учитывается один раз.
@@ -73,6 +75,8 @@ def fetch_wall(vk: VkClient, limit: int | None, page_size: int) -> dict[str, Any
             break
         if limit is not None and len(regular) >= limit:
             complete = True
+            break
+        if since is not None and any(int(p.get("date") or 0) < since for p in items if not p.get("is_pinned")):
             break
         if total is not None and offset + len(items) >= total:
             complete = True

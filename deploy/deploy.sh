@@ -166,9 +166,9 @@ if [ -f "$DATA_DIR/export/news.json" ]; then
         (cd pipeline && "$VENV_PY" -m pipeline build)
     fi
 elif [ "$SWITCH" -eq 1 ]; then
-    die "нет $DATA_DIR/export/news.json - переключать не на что; сначала первичная загрузка новостей"
+    die "нет $DATA_DIR/export/news.json - переключать не на что; сначала ./deploy/run-worker.sh (первый запуск загрузит новости)"
 else
-    echo "  ok    news.json еще нет - пробная сборка пропущена (сначала первичная загрузка новостей)"
+    echo "  ok    news.json еще нет - пробная сборка пропущена (его создаст первый запуск ./deploy/run-worker.sh)"
 fi
 
 STAGE=""

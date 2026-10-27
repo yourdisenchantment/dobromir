@@ -182,7 +182,8 @@ echo
 if [ "$APPLY" -eq 1 ]; then
     echo "Готово. Дальше вручную:"
     echo "  1. заполнить $DATA_DIR/.env: SITE_ENV, VK_SERVICE_TOKEN, VK_GROUP_ID"
-    echo "  2. первичная загрузка новостей, замена public_html ссылкой на релиз, затем cron по deploy/crontab.example"
+    echo "  2. ./deploy/run-worker.sh: первый запуск сам загрузит новости за срок хранения и соберет релиз"
+    echo "  3. замена public_html ссылкой на релиз, затем cron по deploy/crontab.example"
 else
     echo "Проверки пройдены. Для выполнения: ./deploy/bootstrap.sh --apply"
 fi
