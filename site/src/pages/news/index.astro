@@ -1,7 +1,10 @@
 ---
 // Архив новостей: все новости за срок хранения (NEWS_RETENTION_DAYS, 90 дней с 2026-10-27),
 // новые первыми, закрепленный - наверху. Карточка открывается во всплывающем окне.
+// Кнопка «На главную» - сверху и под длинной лентой: обратно к блоку новостей, без JS
+// и без истории браузера (страницу могли открыть по ссылке извне).
 import Base from "../../layouts/Base.astro";
+import Button from "../../components/Button.astro";
 import Card from "../../components/Card.astro";
 import { loadNews, newsCard } from "../../lib/news";
 
@@ -17,6 +20,11 @@ const ordered = [
     description="Новости центра «Добромир»: занятия, события, объявления."
 >
     <div class="container page">
+        <div>
+            <Button href="/#news" variant="secondary">
+                <span aria-hidden="true">←</span> На главную
+            </Button>
+        </div>
         <h1>Новости</h1>
         <p class="lead">
             Новости центра за последние три месяца. Все новости - в группе
@@ -31,11 +39,14 @@ const ordered = [
                 ))}
             </ul>
         )}
-        <p>
+        <div class="bottom">
+            <Button href="/#news" variant="secondary">
+                <span aria-hidden="true">←</span> На главную
+            </Button>
             <a href="https://vk.com/dobromir.crimea" rel="noopener">
                 Группа «Добромира» ВКонтакте
             </a>
-        </p>
+        </div>
     </div>
 </Base>
 
@@ -45,6 +56,12 @@ const ordered = [
         flex-direction: column;
         gap: var(--space-5);
         padding-block: var(--space-7);
+    }
+    .bottom {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-4) var(--space-5);
     }
     .lead {
         font-size: var(--text-lead);
