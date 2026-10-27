@@ -70,6 +70,9 @@ uv run pytest
 ```bash
 npm ci                      # воспроизводимая установка по package-lock.json
 npm run dev                 # сервер разработки
+MEDIA_DIR=~/dobromir-site/media NEWS_JSON=~/dobromir-data/export/news.json npm run dev
+                            # с настоящими новостями и фото (MEDIA_DIR - <SITE_ROOT>/media;
+                            # раздает только сервер разработки, в сборку фото не попадают)
 npm run lint
 npm run format:check
 npm run check               # astro check - единственная проверка типов
