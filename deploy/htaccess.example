@@ -32,13 +32,43 @@ Options -Indexes +SymLinksIfOwnerMatch
     # RewriteCond %{HTTPS} !=on
     # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-    # Старые адреса WordPress -> новые (P2-5, карта адресов еще не составлена).
-    # Известные заранее: RSS и карта сайта All in One SEO.
+    # Старые адреса WordPress -> новые (P2-5, карта составлена 2026-10-27 по картам сайта
+    # старого WordPress: post-, page-, category-sitemap.xml - 21 страница и 5 записей).
+    # Кириллица в шаблонах - как есть: mod_rewrite сравнивает с раскодированным адресом,
+    # файл в UTF-8. Проверить на хосте (P1-7) хотя бы одну кириллическую строку.
+    # Цели /specialisty/... сверяет тест site/src/lib/redirects.test.ts с block.json.
     RewriteRule ^feed/?$ /rss.xml [R=301,L]
     RewriteRule ^sitemap\.xml$ /sitemap-index.xml [R=301,L]
-    # Примеры формы (кириллица в адресе - как есть, файл в UTF-8; проверить на хосте):
-    # RewriteRule ^сотрудники/?$ /specialists/ [R=301,L]
-    # RewriteRule ^2024/05/24/блог/?$ /news/ [R=301,L]
+    RewriteRule ^wp-sitemap\.xml$ /sitemap-index.xml [R=301,L]
+
+    # Страницы - блоки лендинга
+    RewriteRule ^о-нас/?$ /#about [R=301,L,NE]
+    RewriteRule ^контакты/?$ /#contacts [R=301,L,NE]
+    RewriteRule ^сотрудники/?$ /#specialists [R=301,L,NE]
+
+    # Специалисты: /<фамилия-и-о>/ -> /specialisty/<slug>/ (241-2 - Шепитько)
+    RewriteRule ^241-2/?$           /specialisty/shepitko/ [R=301,L]
+    RewriteRule ^арзякова-м-а/?$    /specialisty/arzyakova/ [R=301,L]
+    RewriteRule ^липкань-в-н/?$     /specialisty/lipkan/ [R=301,L]
+    RewriteRule ^самик-а-а/?$       /specialisty/samik/ [R=301,L]
+    RewriteRule ^шевченко-ю-н/?$    /specialisty/shevchenko/ [R=301,L]
+    RewriteRule ^черкасова-м-в/?$   /specialisty/cherkasova/ [R=301,L]
+    RewriteRule ^лихих-и-в/?$       /specialisty/likhikh/ [R=301,L]
+    RewriteRule ^клименко-е-в/?$    /specialisty/klimenko/ [R=301,L]
+    RewriteRule ^проскуряков-в-с/?$ /specialisty/proskuryakov/ [R=301,L]
+    RewriteRule ^аксенова-в-д/?$    /specialisty/aksenova/ [R=301,L]
+    RewriteRule ^сизоненко-е-в/?$   /specialisty/sizonenko/ [R=301,L]
+    RewriteRule ^тихонова-о-а/?$    /specialisty/tikhonova/ [R=301,L]
+    RewriteRule ^барбашина-н-ю/?$   /specialisty/barbashina/ [R=301,L]
+    RewriteRule ^нудьга-к-в/?$      /specialisty/nudga/ [R=301,L]
+    RewriteRule ^слинченко-а-о/?$   /specialisty/slinchenko/ [R=301,L]
+    RewriteRule ^хадиева-о-г/?$     /specialisty/khadieva/ [R=301,L]
+
+    # Блог: записи «Блог» - на архив новостей. Статьи специалистов не переносились
+    # (docs/pages.md, вопрос 2), служебные страницы WordPress - на главную.
+    RewriteRule ^2024/05/24/блог/?$ /news/ [R=301,L]
+    RewriteRule ^20[0-9][0-9]/[0-9][0-9]/[0-9][0-9]/[^/]+/?$ / [R=301,L]
+    RewriteRule ^(sample-page|category/[^/]+)/?$ / [R=301,L]
 </IfModule>
 
 # Тестовый сайт и технический адрес закрыты от поисковиков и заголовком (мета-тег noindex
@@ -61,8 +91,8 @@ Options -Indexes +SymLinksIfOwnerMatch
 
 <IfModule mod_expires.c>
     ExpiresActive On
-    # Картинки постов не меняются: файл media/photos/<id фото VK>.jpg.
-    ExpiresByType image/jpeg "access plus 30 days"
+    # Картинки постов не меняются: файл media/photos/<id фото VK>[-800].webp (с 2026-10-25).
+    ExpiresByType image/webp "access plus 30 days"
 </IfModule>
 
 <IfModule mod_deflate.c>
