@@ -1,0 +1,40 @@
+---
+// Отзывы родителей - карточки-цитаты в карусели.
+import Carousel from "../Carousel.astro";
+import type { Block } from "../../lib/content";
+
+interface Props {
+    block: Extract<Block, { type: "quotes" }>;
+}
+
+const { block } = Astro.props;
+---
+
+<Carousel label={block.title}>
+    {block.items.map((item) => (
+        <li class="quote">
+            <blockquote>
+                <p>{item.text}</p>
+            </blockquote>
+            <p class="author">{item.author ?? "Отзыв родителей"}</p>
+        </li>
+    ))}
+</Carousel>
+
+<style>
+    .quote {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        padding: var(--space-5);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-inline-start: 4px solid var(--color-accent-soft);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-1);
+    }
+    .author {
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+    }
+</style>

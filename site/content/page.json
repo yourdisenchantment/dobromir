@@ -1,0 +1,14 @@
+{
+    "blocks": [
+        "hero",
+        "center",
+        "news",
+        "services",
+        "directions",
+        "facts",
+        "specialists",
+        "about",
+        "reviews",
+        "contacts"
+    ]
+}

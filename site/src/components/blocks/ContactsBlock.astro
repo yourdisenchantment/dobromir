@@ -1,0 +1,67 @@
+---
+// Контакты: адрес, как добраться, ссылка на карту (не встроенная карта, решено
+// 2026-10-27), телефоны и группа VK.
+import type { Block } from "../../lib/content";
+
+interface Props {
+    block: Extract<Block, { type: "contacts" }>;
+}
+
+const { block } = Astro.props;
+const tel = (number: string) => `tel:${number.replace(/[^+\d]/gu, "")}`;
+---
+
+<div class="container contacts">
+    <div class="stack">
+        <p class="lead">{block.address}</p>
+        {block.text && <p>{block.text}</p>}
+        {block.map && (
+            <p>
+                <a href={block.map} rel="noopener">
+                    Открыть на Яндекс Картах
+                </a>
+            </p>
+        )}
+        {block.vk && (
+            <p>
+                <a href={block.vk} rel="noopener">
+                    Группа «Добромира» ВКонтакте
+                </a>
+            </p>
+        )}
+    </div>
+    <div class="stack">
+        {block.phones.map((phone) => (
+            <p>
+                <span class="muted">{phone.label}:</span>
+                <br />
+                <a class="tel" href={tel(phone.number)}>
+                    {phone.number}
+                </a>
+            </p>
+        ))}
+    </div>
+</div>
+
+<style>
+    .contacts {
+        display: grid;
+        gap: var(--space-6);
+    }
+    @media (min-width: 48rem) {
+        .contacts {
+            grid-template-columns: 3fr 2fr;
+        }
+    }
+    .lead {
+        font-size: var(--text-lead);
+        font-weight: 600;
+    }
+    .muted {
+        color: var(--color-text-muted);
+    }
+    .tel {
+        font-size: var(--text-h4);
+        font-weight: 650;
+    }
+</style>

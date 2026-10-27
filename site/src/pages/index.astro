@@ -1,23 +1,58 @@
 ---
-// Заглушка главной: содержание страниц еще не утверждено (OPEN-QUESTIONS, О3).
+// Лендинг (решено 2026-10-25): блоки в порядке site/content/page.json, содержимое - в
+// site/content/blocks/<блок>/block.json (формат - docs/pages.md). Фон секций чередуется,
+// у секции с фоном сверху волна. id секции - имя папки блока: на него ведут пункты меню.
 import Base from "../layouts/Base.astro";
+import Card from "../components/Card.astro";
+import Carousel from "../components/Carousel.astro";
+import Facts from "../components/Facts.astro";
+import Section from "../components/Section.astro";
+import CardsBlock from "../components/blocks/CardsBlock.astro";
+import ContactsBlock from "../components/blocks/ContactsBlock.astro";
+import HeroBlock from "../components/blocks/HeroBlock.astro";
+import NewsBlock from "../components/blocks/NewsBlock.astro";
+import QuotesBlock from "../components/blocks/QuotesBlock.astro";
+import TextBlock from "../components/blocks/TextBlock.astro";
+import { loadPage, specialistCard } from "../lib/content";
+
+const blocks = loadPage();
 ---
 
 <Base
     title="Добромир"
-    description="Республиканский центр коррекционной педагогики «Добромир», Симферополь."
+    description="Республиканский центр коррекционной педагогики «Добромир» в Симферополе: диагностика, ABA-терапия, логопеды и психологи для детей с аутизмом от 0 до 18 лет."
 >
-    <div class="container placeholder stack">
-        <h1>Добромир</h1>
-        <p>Сайт в разработке.</p>
-        <p>
-            <a href="/news/">Новости центра</a>
-        </p>
-    </div>
+    {blocks.map(({ id, block }, n) => (
+        <Section
+            id={id}
+            title={block.type === "hero" ? undefined : block.title}
+            alt={n % 2 === 0}
+        >
+            {block.type === "hero" && <HeroBlock block={block} />}
+            {block.type === "text" && <TextBlock block={block} />}
+            {block.type === "cards" && <CardsBlock block={block} />}
+            {block.type === "facts" && <Facts items={block.items} />}
+            {block.type === "news" && <NewsBlock block={block} />}
+            {block.type === "quotes" && <QuotesBlock block={block} />}
+            {block.type === "contacts" && <ContactsBlock block={block} />}
+            {block.type === "specialists" && (
+                <>
+                    {block.intro && (
+                        <p class="container intro">{block.intro}</p>
+                    )}
+                    <Carousel label={block.title} align="center">
+                        {block.items.map((p) => (
+                            <Card as="li" {...specialistCard(p)} />
+                        ))}
+                    </Carousel>
+                </>
+            )}
+        </Section>
+    ))}
 </Base>
 
 <style>
-    .placeholder {
-        padding-block: var(--space-8);
+    .intro {
+        margin-bottom: var(--space-5);
     }
 </style>

@@ -5,7 +5,16 @@
 import type { ImageMetadata } from "astro";
 import { z } from "zod";
 
+import pageJson from "../../content/page.json";
 import specialistsJson from "../../content/blocks/specialists/block.json";
+
+const blockFiles = import.meta.glob<unknown>(
+    "../../content/blocks/*/block.json",
+    {
+        eager: true,
+        import: "default",
+    },
+);
 
 const specialistPhotos = import.meta.glob<ImageMetadata>(
     "../../content/blocks/specialists/photos/*",
@@ -53,12 +62,181 @@ export type SpecialistsBlock = Omit<
     items: Specialist[];
 };
 
+// Остальные типы блоков лендинга (docs/pages.md). Специалисты - выше, у них свои фото.
+const Action = z.object({
+    label: text("label (надпись)"),
+    href: text("href (ссылка)"),
+});
+const HeroSchema = z.object({
+    type: z.literal("hero"),
+    title: text("title (заголовок)"),
+    lead: text("lead (подзаголовок)").optional(),
+    actions: z
+        .array(Action)
+        .max(2, "actions: не больше двух кнопок")
+        .default([]),
+});
+const TextSchema = z.object({
+    type: z.literal("text"),
+    title: text("title (заголовок)"),
+    quote: z
+        .object({
+            text: text("quote.text (цитата)"),
+            author: text("quote.author (автор)").optional(),
+        })
+        .optional(),
+    paragraphs: z.array(text("paragraphs (абзац)"), {
+        error: "paragraphs: нужен список абзацев",
+    }),
+});
+const CardsSchema = z.object({
+    type: z.literal("cards"),
+    title: text("title (заголовок)"),
+    intro: text("intro (вводный абзац)").optional(),
+    items: z
+        .array(
+            z.object({
+                title: text("title (заголовок карточки)"),
+                subtitle: text("subtitle (подзаголовок)").optional(),
+                text: text("text (текст)").optional(),
+                list: z.array(text("list (пункт)")).optional(),
+            }),
+        )
+        .min(1, "items: нужна хотя бы одна карточка"),
+});
+const FactsSchema = z.object({
+    type: z.literal("facts"),
+    title: text("title (заголовок)"),
+    items: z
+        .array(
+            z.object({
+                value: text("value (число)"),
+                label: text("label (подпись)"),
+                source: z
+                    .object({
+                        title: text("source.title (источник)"),
+                        url: z.url("source.url: нужна ссылка").optional(),
+                    })
+                    .optional(),
+            }),
+        )
+        .min(1, "items: нужна хотя бы одна цифра"),
+});
+const NewsBlockSchema = z.object({
+    type: z.literal("news"),
+    title: text("title (заголовок)"),
+    count: z.number().int().min(1).max(30, "count: не больше 30").default(12),
+});
+const QuotesSchema = z.object({
+    type: z.literal("quotes"),
+    title: text("title (заголовок)"),
+    items: z
+        .array(
+            z.object({
+                text: text("text (отзыв)"),
+                author: text("author (кто)").optional(),
+            }),
+        )
+        .min(1, "items: нужен хотя бы один отзыв"),
+});
+const ContactsSchema = z.object({
+    type: z.literal("contacts"),
+    title: text("title (заголовок)"),
+    address: text("address (адрес)"),
+    text: text("text (как добраться)").optional(),
+    map: z.url("map: нужна ссылка на карту").optional(),
+    phones: z
+        .array(
+            z.object({
+                label: text("label (подпись)"),
+                number: text("number (номер)"),
+            }),
+        )
+        .min(1, "phones: нужен хотя бы один телефон"),
+    vk: z.url("vk: нужна ссылка").optional(),
+});
+const SpecialistsRef = z.object({ type: z.literal("specialists") });
+
+const BlockSchema = z.discriminatedUnion(
+    "type",
+    [
+        HeroSchema,
+        TextSchema,
+        CardsSchema,
+        FactsSchema,
+        NewsBlockSchema,
+        QuotesSchema,
+        ContactsSchema,
+        SpecialistsRef,
+    ],
+    {
+        error: "неизвестный тип блока; есть hero, text, cards, facts, news, specialists, quotes, contacts",
+    },
+);
+const PageSchema = z.object({
+    blocks: z
+        .array(
+            z
+                .string()
+                .regex(
+                    /^[a-z][a-z0-9-]*$/u,
+                    "blocks: имя папки блока латиницей, например services",
+                ),
+        )
+        .min(1, "blocks: нужен хотя бы один блок"),
+});
+
+export type Block =
+    | z.infer<typeof HeroSchema>
+    | z.infer<typeof TextSchema>
+    | z.infer<typeof CardsSchema>
+    | z.infer<typeof FactsSchema>
+    | z.infer<typeof NewsBlockSchema>
+    | z.infer<typeof QuotesSchema>
+    | z.infer<typeof ContactsSchema>
+    | ({ type: "specialists" } & SpecialistsBlock);
+
 /** Ошибка содержимого: какой файл, какое место, что не так. */
 function fail(file: string, problems: string[]): never {
     throw new Error(
         `Ошибка в ${file}:\n${problems.map((p) => `  - ${p}`).join("\n")}\n` +
             "Формат блоков - docs/pages.md.",
     );
+}
+
+function issues(error: z.ZodError): string[] {
+    return error.issues.map((i) => {
+        const where = i.path.length ? `${i.path.join(".")}: ` : "";
+        return `${where}${i.message}`;
+    });
+}
+
+/** Лендинг: блоки в порядке site/content/page.json; id блока - имя его папки (якорь меню). */
+export function loadPage(): { id: string; block: Block }[] {
+    const page = PageSchema.safeParse(pageJson);
+    if (!page.success) fail("site/content/page.json", issues(page.error));
+    const seen = new Set<string>();
+    return page.data.blocks.map((id) => {
+        if (seen.has(id))
+            fail("site/content/page.json", [
+                `blocks: блок ${id} указан дважды`,
+            ]);
+        seen.add(id);
+        const file = `site/content/blocks/${id}/block.json`;
+        const raw = blockFiles[`../../content/blocks/${id}/block.json`];
+        if (raw === undefined)
+            fail("site/content/page.json", [`blocks: нет файла ${file}`]);
+        const parsed = BlockSchema.safeParse(raw);
+        if (!parsed.success) fail(file, issues(parsed.error));
+        if (parsed.data.type !== "specialists")
+            return { id, block: parsed.data };
+        if (id !== "specialists")
+            fail(file, ["блок специалистов должен лежать в папке specialists"]);
+        return {
+            id,
+            block: loadSpecialists(),
+        };
+    });
 }
 
 let specialistsCache: SpecialistsBlock | undefined;
@@ -68,13 +246,7 @@ export function loadSpecialists(): SpecialistsBlock {
     const file = "site/content/blocks/specialists/block.json";
     const parsed = SpecialistsBlockSchema.safeParse(specialistsJson);
     if (!parsed.success) {
-        fail(
-            file,
-            parsed.error.issues.map((i) => {
-                const where = i.path.length ? `${i.path.join(".")}: ` : "";
-                return `${where}${i.message}`;
-            }),
-        );
+        fail(file, issues(parsed.error));
     }
     const block = parsed.data;
     const problems: string[] = [];

@@ -1,0 +1,48 @@
+---
+// Ряд карточек в карусели: заголовок, подзаголовок, текст и список пунктов.
+// Без раскрытия: все содержимое карточки видно сразу.
+import Card from "../Card.astro";
+import Carousel from "../Carousel.astro";
+import type { Block } from "../../lib/content";
+
+interface Props {
+    block: Extract<Block, { type: "cards" }>;
+}
+
+const { block } = Astro.props;
+---
+
+{block.intro && <p class="container intro">{block.intro}</p>}
+<Carousel label={block.title}>
+    {block.items.map((item) => (
+        <Card
+            as="li"
+            title={item.title}
+            subtitle={item.subtitle}
+            text={item.text}
+        >
+            {item.list && (
+                <ul class="points">
+                    {item.list.map((point) => (
+                        <li>{point}</li>
+                    ))}
+                </ul>
+            )}
+        </Card>
+    ))}
+</Carousel>
+
+<style>
+    .intro {
+        margin-bottom: var(--space-5);
+        max-width: var(--measure);
+        margin-inline: auto;
+    }
+    .points {
+        padding-inline-start: var(--space-5);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        display: grid;
+        gap: var(--space-1);
+    }
+</style>

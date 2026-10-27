@@ -1,0 +1,37 @@
+---
+// Последние новости из VK (news.json воркера): свежая - первой, по центру; в конце -
+// карточка на архив. Новостей нет - короткая строка со ссылкой на группу.
+import Card from "../Card.astro";
+import Carousel from "../Carousel.astro";
+import { loadNews, newsCard } from "../../lib/news";
+import type { Block } from "../../lib/content";
+
+interface Props {
+    block: Extract<Block, { type: "news" }>;
+}
+
+const { block } = Astro.props;
+const news = loadNews().slice(0, block.count).map(newsCard);
+---
+
+{news.length > 0 ? (
+    <Carousel label="Последние новости">
+        {news.map((n) => (
+            <Card as="li" {...n} />
+        ))}
+        <Card
+            as="li"
+            title="Все новости"
+            text="Новости центра за последний месяц"
+            href="/news/"
+        />
+    </Carousel>
+) : (
+    <p class="container">
+        Свежие новости - в{" "}
+        <a href="https://vk.com/dobromir.crimea" rel="noopener">
+            группе ВКонтакте
+        </a>
+        .
+    </p>
+)}

@@ -1,0 +1,55 @@
+---
+// Текстовый блок: цитата (если есть) и абзацы; строки «— ...» собираются в список.
+import { descriptionParts, type Block } from "../../lib/content";
+
+interface Props {
+    block: Extract<Block, { type: "text" }>;
+}
+
+const { block } = Astro.props;
+const parts = descriptionParts(block.paragraphs);
+---
+
+<div class="container stack">
+    {block.quote && (
+        <blockquote class="quote">
+            <p>{block.quote.text}</p>
+            {block.quote.author && <footer>{block.quote.author}</footer>}
+        </blockquote>
+    )}
+    {parts.map((part) =>
+        part.type === "p" ? (
+            <p>{part.text}</p>
+        ) : (
+            <ul>
+                {part.items.map((item) => (
+                    <li>{item}</li>
+                ))}
+            </ul>
+        ),
+    )}
+</div>
+
+<style>
+    .stack > :first-child:not(.quote) {
+        font-size: var(--text-lead);
+    }
+    .quote {
+        border-inline-start: 4px solid var(--color-accent-soft);
+        padding: var(--space-2) 0 var(--space-2) var(--space-5);
+        max-width: var(--measure);
+    }
+    .quote p {
+        font-size: var(--text-lead);
+        font-style: italic;
+    }
+    .quote footer {
+        margin-top: var(--space-2);
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+    }
+    ul {
+        max-width: var(--measure);
+        padding-inline-start: var(--space-5);
+    }
+</style>

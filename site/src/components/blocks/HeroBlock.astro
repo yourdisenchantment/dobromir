@@ -1,0 +1,59 @@
+---
+// Первый экран: заголовок страницы (единственный h1), подзаголовок, до двух кнопок
+// (первая - основная, вторая - контур) и логотип.
+import Button from "../Button.astro";
+import type { Block } from "../../lib/content";
+
+interface Props {
+    block: Extract<Block, { type: "hero" }>;
+}
+
+const { block } = Astro.props;
+---
+
+<div class="container hero">
+    <div class="stack">
+        <h1>{block.title}</h1>
+        {block.lead && <p class="lead">{block.lead}</p>}
+        {block.actions.length > 0 && (
+            <div class="actions">
+                {block.actions.map((a, n) => (
+                    <Button
+                        href={a.href}
+                        variant={n === 0 ? "primary" : "secondary"}
+                    >
+                        {a.label}
+                    </Button>
+                ))}
+            </div>
+        )}
+    </div>
+    <img class="logo" src="/logo.svg" width="568" height="232" alt="" />
+</div>
+
+<style>
+    .hero {
+        display: grid;
+        gap: var(--space-7);
+        align-items: center;
+    }
+    @media (min-width: 60rem) {
+        .hero {
+            grid-template-columns: 3fr 2fr;
+        }
+    }
+    .lead {
+        font-size: var(--text-lead);
+    }
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-top: var(--space-3);
+    }
+    .logo {
+        width: 100%;
+        max-width: 28rem;
+        justify-self: center;
+    }
+</style>
