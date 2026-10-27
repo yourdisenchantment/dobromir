@@ -9,6 +9,7 @@ import example from "../sample/news.example.json";
 
 import { newsJsonPath, siteEnv } from "./env";
 import { formatDate } from "./date";
+import { restAfterTitle } from "./cardtext";
 import { plainVkText } from "./vktext";
 
 const Rendition = z.object({
@@ -90,10 +91,15 @@ export function displayTitle(post: NewsPost): string {
 
 /** Краткое описание для meta description и RSS: первые ~160 символов текста. */
 export function summary(post: NewsPost, max = 160): string {
-    const text = plainVkText(post.text || post.repost?.text || "")
-        .replace(/\s+/gu, " ")
-        .trim();
-    if (text.length <= max) return text || displayTitle(post);
+    return (
+        shorten(post.text || post.repost?.text || "", max) || displayTitle(post)
+    );
+}
+
+/** Текст без разметки VK одной строкой, не длиннее max (обрезка по слову с «…»). */
+function shorten(raw: string, max: number): string {
+    const text = plainVkText(raw).replace(/\s+/gu, " ").trim();
+    if (text.length <= max) return text;
     return `${text.slice(0, max).replace(/\s+\S*$/u, "")}…`;
 }
 
@@ -108,7 +114,15 @@ export function newsCard(post: NewsPost) {
         title: displayTitle(post),
         subtitle: formatDate(post.date),
         datetime: post.date,
-        text: post.text || post.repost?.text ? summary(post, 140) : undefined,
+        // без повтора заголовка: под ним - продолжение текста (lib/cardtext.ts)
+        text:
+            shorten(
+                restAfterTitle(
+                    post.text || post.repost?.text || "",
+                    post.title,
+                ),
+                140,
+            ) || undefined,
         href: `/news/${post.slug}/`,
         modal: true,
         image: cover
