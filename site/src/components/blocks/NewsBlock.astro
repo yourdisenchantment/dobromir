@@ -1,6 +1,8 @@
 ---
 // Последние новости из VK (news.json воркера): свежая - первой, по центру; в конце -
-// карточка на архив. Новостей нет - короткая строка со ссылкой на группу.
+// карточка на архив. Новостей нет - короткая строка со ссылкой на группу. Фото в карусели -
+// в рамке 16:9 (решено 2026-10-27: высокие афиши растягивали карточку на весь экран); в
+// архиве /news/ фото в своих пропорциях.
 import Card from "../Card.astro";
 import Carousel from "../Carousel.astro";
 import { loadNews, newsCard } from "../../lib/news";
@@ -17,7 +19,7 @@ const news = loadNews().slice(0, block.count).map(newsCard);
 {news.length > 0 ? (
     <Carousel label="Последние новости">
         {news.map((n) => (
-            <Card as="li" {...n} />
+            <Card as="li" {...n} ratio="16/9" />
         ))}
         <Card
             as="li"
