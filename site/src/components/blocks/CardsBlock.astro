@@ -1,8 +1,7 @@
 ---
-// Ряд карточек в карусели: заголовок, подзаголовок, текст и список пунктов.
-// Без раскрытия: все содержимое карточки видно сразу.
+// Карточки «черепицей», как архив новостей (с 2026-10-27, было каруселью): заголовок,
+// подзаголовок, текст и список пунктов. Без раскрытия: все содержимое видно сразу.
 import Card from "../Card.astro";
-import Carousel from "../Carousel.astro";
 import type { Block } from "../../lib/content";
 
 interface Props {
@@ -12,31 +11,32 @@ interface Props {
 const { block } = Astro.props;
 ---
 
-{block.intro && <p class="container intro">{block.intro}</p>}
-<Carousel label={block.title}>
-    {block.items.map((item) => (
-        <Card
-            as="li"
-            title={item.title}
-            subtitle={item.subtitle}
-            text={item.text}
-        >
-            {item.list && (
-                <ul class="points">
-                    {item.list.map((point) => (
-                        <li>{point}</li>
-                    ))}
-                </ul>
-            )}
-        </Card>
-    ))}
-</Carousel>
+<div class="container">
+    {block.intro && <p class="intro">{block.intro}</p>}
+    <ul class="masonry">
+        {block.items.map((item) => (
+            <Card
+                as="li"
+                title={item.title}
+                subtitle={item.subtitle}
+                text={item.text}
+            >
+                {item.list && (
+                    <ul class="points">
+                        {item.list.map((point) => (
+                            <li>{point}</li>
+                        ))}
+                    </ul>
+                )}
+            </Card>
+        ))}
+    </ul>
+</div>
 
 <style>
     .intro {
         margin-bottom: var(--space-5);
         max-width: var(--measure);
-        margin-inline: auto;
     }
     .points {
         padding-inline-start: var(--space-5);
