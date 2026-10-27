@@ -341,7 +341,7 @@ const photos = [
             </Section>
 
             <Section id="specialists" title="Специалисты" alt>
-                <Carousel label="Специалисты центра">
+                <Carousel label="Специалисты центра" align="center">
                     {loadSpecialists().items.map((p) => (
                         <Card as="li" {...specialistCard(p)} />
                     ))}
