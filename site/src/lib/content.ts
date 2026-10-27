@@ -310,7 +310,7 @@ export function loadSpecialists(): SpecialistsBlock {
     return specialistsCache;
 }
 
-/** Специалист как карточка (components/Card.astro): фото в рамке 4:5 по лицу,
+/** Специалист как карточка (components/Card.astro): фото в квадратной рамке по лицу (было 4:5; ближе к квадрату - 2026-10-27),
  *  имя, должность, «кратко»; открывается во всплывающем окне. */
 export function specialistCard(person: Specialist) {
     return {
@@ -319,8 +319,8 @@ export function specialistCard(person: Specialist) {
         text: person.short,
         href: `/specialisty/${person.slug}/`,
         modal: true,
-        ratio: "4/5" as const,
-        focus: "50% 15%",
+        ratio: "1/1" as const,
+        focus: "50% 20%",
         image: {
             src: person.image.src,
             width: person.image.width,

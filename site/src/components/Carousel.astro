@@ -82,7 +82,8 @@ const { label, align = "start" } = Astro.props;
         scroll-behavior: smooth;
         /* Первая и последняя карточки встают по центру: слева от свежей - пусто */
         padding-inline: max(var(--gutter), calc(50% - var(--card-w) / 2));
-        padding-block: var(--space-2) var(--space-5);
+        /* место сверху и снизу: увеличенная карточка не должна обрезаться краем ряда */
+        padding-block: var(--space-6) var(--space-7);
         scrollbar-width: thin;
         scrollbar-color: var(--color-border) transparent;
     }
@@ -94,7 +95,7 @@ const { label, align = "start" } = Astro.props;
         scroll-snap-align: center;
         max-width: none;
     }
-    /* Текущая карточка (по центру) - яркая и в полный размер, соседние меньше и тусклее
+    /* Текущая карточка (по центру) - яркая и крупнее, соседние заметно меньше и тусклее
        (решено 2026-10-27). Анимация от прокрутки, без JS; где браузер ее не умеет, все
        карточки одинаковые. Карточка с фокусом клавиатуры - всегда яркая. */
     @supports (animation-timeline: view()) {
@@ -112,11 +113,11 @@ const { label, align = "start" } = Astro.props;
             60%,
             100% {
                 opacity: 0.5;
-                scale: 0.92;
+                scale: 0.8;
             }
             50% {
                 opacity: 1;
-                scale: 1;
+                scale: 1.08;
             }
         }
         /* «Уменьшить движение»: только яркость, без изменения размера */

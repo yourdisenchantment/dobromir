@@ -118,6 +118,8 @@ const phone = { href: tel(booking.number), label: booking.number };
         border-bottom: 1px solid var(--color-border);
     }
     .bar {
+        /* шире основного контейнера: восемь пунктов меню, логотип и телефон в одну строку */
+        width: min(100% - 2 * var(--gutter), var(--container-wide));
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -147,7 +149,7 @@ const phone = { href: tel(booking.number), label: booking.number };
         padding: 0;
         display: flex;
         flex-wrap: wrap;
-        gap: var(--space-1) var(--space-5);
+        gap: var(--space-1) var(--space-4);
     }
     .nav a,
     .nav a:visited {
@@ -230,8 +232,9 @@ const phone = { href: tel(booking.number), label: booking.number };
         font-size: var(--text-lead);
     }
 
-    /* Шире телефона: меню в строку, телефон справа */
-    @media (min-width: 60rem) {
+    /* Широкий экран: меню в строку, телефон справа. Порог - по ширине восьми пунктов
+       (2026-10-27); уже - кнопка «Меню», как на телефоне. */
+    @media (min-width: 80rem) {
         .logo img {
             height: 44px;
         }

@@ -2,10 +2,10 @@
     "blocks": [
         "hero",
         "center",
+        "facts",
         "news",
         "services",
         "directions",
-        "facts",
         "specialists",
         "about",
         "reviews",

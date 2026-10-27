@@ -35,13 +35,20 @@ const {
 
 <Tag class="card">
     {image && (
-        <div class="media" style={ratio ? `aspect-ratio: ${ratio}` : undefined}>
+        <div class="media">
             <img
                 src={image.src}
                 width={image.width}
                 height={image.height}
                 alt={image.alt}
-                style={focus ? `object-position: ${focus}` : undefined}
+                style={
+                    [
+                        ratio && `aspect-ratio: ${ratio}`,
+                        focus && `object-position: ${focus}`,
+                    ]
+                        .filter(Boolean)
+                        .join("; ") || undefined
+                }
                 loading="lazy"
                 decoding="async"
             />
@@ -85,9 +92,10 @@ const {
     .media {
         background: var(--color-surface-alt);
     }
+    /* Пропорции (ratio) - на самой картинке: на обертке их перебивала высота картинки */
     .media img {
         width: 100%;
-        height: 100%;
+        height: auto;
         object-fit: cover; /* только при заданном ratio; иначе картинка в своих пропорциях */
     }
     .body {
