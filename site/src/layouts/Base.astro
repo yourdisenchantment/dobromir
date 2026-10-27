@@ -1,7 +1,7 @@
 ---
 // Общая обертка страницы: язык, заголовок, описание, canonical, запрет индексации для
 // тестовой копии, подтверждение прав для поисковиков; стили дизайна (утвержден по
-// стайлбуку 2026-10-26), шапка, подвал и всплывающее окно карточек.
+// стайлбуку 2026-10-26), шапка, подвал, кнопка «Наверх» и всплывающее окно карточек.
 import "../styles/base.css";
 import "../styles/tokens.css";
 import "../styles/fonts.css";
@@ -9,6 +9,7 @@ import "../styles/post.css";
 import Modal from "../components/Modal.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import ToTop from "../components/ToTop.astro";
 import { siteEnv, siteUrl, verification } from "../lib/env";
 
 interface Props {
@@ -60,6 +61,7 @@ const fullTitle = title === "Добромир" ? title : `${title} - Добро�
             <slot />
         </main>
         <SiteFooter />
+        <ToTop />
         <Modal />
     </body>
 </html>
