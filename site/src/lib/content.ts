@@ -27,7 +27,10 @@ const text = (what: string) =>
         .trim()
         .min(1, `${what}: пусто`);
 
-const SpecialistSchema = z.object({
+/** Пункт меню в шапке: блок с этим полем попадает в меню, порядок - как в page.json. */
+const menu = text("menu (пункт меню)").max(20, "menu: не длиннее 20 знаков");
+
+const SpecialistSchema = z.strictObject({
     slug: z
         .string({ error: "slug: нужен адрес латиницей" })
         .regex(
@@ -43,8 +46,9 @@ const SpecialistSchema = z.object({
     }),
 });
 
-const SpecialistsBlockSchema = z.object({
+const SpecialistsBlockSchema = z.strictObject({
     type: z.literal("specialists"),
+    menu: menu.optional(),
     title: text("title (заголовок блока)"),
     intro: text("intro (вводный абзац)").optional(),
     items: z
@@ -63,12 +67,13 @@ export type SpecialistsBlock = Omit<
 };
 
 // Остальные типы блоков лендинга (docs/pages.md). Специалисты - выше, у них свои фото.
-const Action = z.object({
+const Action = z.strictObject({
     label: text("label (надпись)"),
     href: text("href (ссылка)"),
 });
-const HeroSchema = z.object({
+const HeroSchema = z.strictObject({
     type: z.literal("hero"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     lead: text("lead (подзаголовок)").optional(),
     actions: z
@@ -76,8 +81,9 @@ const HeroSchema = z.object({
         .max(2, "actions: не больше двух кнопок")
         .default([]),
 });
-const TextSchema = z.object({
+const TextSchema = z.strictObject({
     type: z.literal("text"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     quote: z
         .object({
@@ -89,13 +95,14 @@ const TextSchema = z.object({
         error: "paragraphs: нужен список абзацев",
     }),
 });
-const CardsSchema = z.object({
+const CardsSchema = z.strictObject({
     type: z.literal("cards"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     intro: text("intro (вводный абзац)").optional(),
     items: z
         .array(
-            z.object({
+            z.strictObject({
                 title: text("title (заголовок карточки)"),
                 subtitle: text("subtitle (подзаголовок)").optional(),
                 text: text("text (текст)").optional(),
@@ -104,12 +111,13 @@ const CardsSchema = z.object({
         )
         .min(1, "items: нужна хотя бы одна карточка"),
 });
-const FactsSchema = z.object({
+const FactsSchema = z.strictObject({
     type: z.literal("facts"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     items: z
         .array(
-            z.object({
+            z.strictObject({
                 value: text("value (число)"),
                 label: text("label (подпись)"),
                 source: z
@@ -122,32 +130,35 @@ const FactsSchema = z.object({
         )
         .min(1, "items: нужна хотя бы одна цифра"),
 });
-const NewsBlockSchema = z.object({
+const NewsBlockSchema = z.strictObject({
     type: z.literal("news"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     count: z.number().int().min(1).max(30, "count: не больше 30").default(12),
 });
-const QuotesSchema = z.object({
+const QuotesSchema = z.strictObject({
     type: z.literal("quotes"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     items: z
         .array(
-            z.object({
+            z.strictObject({
                 text: text("text (отзыв)"),
                 author: text("author (кто)").optional(),
             }),
         )
         .min(1, "items: нужен хотя бы один отзыв"),
 });
-const ContactsSchema = z.object({
+const ContactsSchema = z.strictObject({
     type: z.literal("contacts"),
+    menu: menu.optional(),
     title: text("title (заголовок)"),
     address: text("address (адрес)"),
     text: text("text (как добраться)").optional(),
     map: z.url("map: нужна ссылка на карту").optional(),
     phones: z
         .array(
-            z.object({
+            z.strictObject({
                 label: text("label (подпись)"),
                 number: text("number (номер)"),
             }),
@@ -155,7 +166,11 @@ const ContactsSchema = z.object({
         .min(1, "phones: нужен хотя бы один телефон"),
     vk: z.url("vk: нужна ссылка").optional(),
 });
-const SpecialistsRef = z.object({ type: z.literal("specialists") });
+// Только тип: остальное проверяет SpecialistsBlockSchema в loadSpecialists.
+const SpecialistsRef = z.looseObject({
+    type: z.literal("specialists"),
+    menu: menu.optional(),
+});
 
 const BlockSchema = z.discriminatedUnion(
     "type",
@@ -173,7 +188,7 @@ const BlockSchema = z.discriminatedUnion(
         error: "неизвестный тип блока; есть hero, text, cards, facts, news, specialists, quotes, contacts",
     },
 );
-const PageSchema = z.object({
+const PageSchema = z.strictObject({
     blocks: z
         .array(
             z
@@ -200,13 +215,16 @@ export type Block =
 function fail(file: string, problems: string[]): never {
     throw new Error(
         `Ошибка в ${file}:\n${problems.map((p) => `  - ${p}`).join("\n")}\n` +
-            "Формат блоков - docs/pages.md.",
+            "Формат блоков - docs/HOWTO-add-content.md.",
     );
 }
 
 function issues(error: z.ZodError): string[] {
     return error.issues.map((i) => {
         const where = i.path.length ? `${i.path.join(".")}: ` : "";
+        // Опечатка в имени поля не должна теряться молча: такого поля нет в справочнике.
+        if (i.code === "unrecognized_keys")
+            return `${where}лишнее поле ${i.keys.join(", ")} - такого нет в docs/HOWTO-add-content.md`;
         return `${where}${i.message}`;
     });
 }
@@ -237,6 +255,30 @@ export function loadPage(): { id: string; block: Block }[] {
             block: loadSpecialists(),
         };
     });
+}
+
+/** Пункты меню шапки: блоки с полем menu в порядке page.json. */
+export function menuLinks(): { id: string; label: string }[] {
+    return loadPage().flatMap(({ id, block }) =>
+        block.menu ? [{ id, label: block.menu }] : [],
+    );
+}
+
+/** Контакты для шапки, подвала и страниц: блок contacts лендинга - единственное место
+ *  адреса и телефонов. Первый телефон блока - для записи. */
+export function siteContacts() {
+    const found = loadPage().find(({ block }) => block.type === "contacts");
+    if (!found || found.block.type !== "contacts")
+        fail("site/content/page.json", [
+            "blocks: нужен блок типа contacts - из него шапка и подвал берут телефон",
+        ]);
+    const { address, phones, vk } = found.block;
+    return { address, phones, vk, booking: phones[0] };
+}
+
+/** Ссылка tel: из номера в любом написании: «+7 978 229-48-54» -> tel:+79782294854. */
+export function tel(number: string): string {
+    return `tel:${number.replace(/[^+\d]/gu, "")}`;
 }
 
 let specialistsCache: SpecialistsBlock | undefined;

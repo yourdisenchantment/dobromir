@@ -6,20 +6,19 @@
 // остальное работает. На телефоне меню и телефон спрятаны в <details> (методичка 7.3).
 // Ссылки повторены в двух навигациях, но видна всегда одна: вторая скрыта display: none
 // и для экранных дикторов.
+import { menuLinks, siteContacts, tel } from "../lib/content";
+
 interface Props {
     /** Начало ссылок меню: "/" на всех страницах, "" - на самом лендинге-образце. */
     base?: string;
 }
 
 const { base = "/" } = Astro.props;
-const links = [
-    { id: "services", label: "Услуги" },
-    { id: "specialists", label: "Специалисты" },
-    { id: "news", label: "Новости" },
-    { id: "about", label: "О нас" },
-    { id: "contacts", label: "Контакты" },
-].map((l) => ({ ...l, href: `${base}#${l.id}` }));
-const phone = { href: "tel:+79782294854", label: "+7 978 229-48-54" };
+// Пункты меню - блоки лендинга с полем menu, в порядке site/content/page.json
+// (решено 2026-10-27): меню и блоки на странице идут в одном порядке.
+const links = menuLinks().map((l) => ({ ...l, href: `${base}#${l.id}` }));
+const { booking } = siteContacts();
+const phone = { href: tel(booking.number), label: booking.number };
 ---
 
 <header class="header" data-header>

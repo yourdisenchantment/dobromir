@@ -1,14 +1,13 @@
 ---
 // Контакты: адрес, как добраться, ссылка на карту (не встроенная карта, решено
 // 2026-10-27), телефоны и группа VK.
-import type { Block } from "../../lib/content";
+import { tel, type Block } from "../../lib/content";
 
 interface Props {
     block: Extract<Block, { type: "contacts" }>;
 }
 
 const { block } = Astro.props;
-const tel = (number: string) => `tel:${number.replace(/[^+\d]/gu, "")}`;
 ---
 
 <div class="container contacts">

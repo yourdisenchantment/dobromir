@@ -1,6 +1,10 @@
 ---
 // Подвал: контакты на одном и том же месте на всех страницах (WCAG 3.2.6, методичка 7.12).
-// Часы работы и почта - при наполнении из VK (решено 2026-10-25).
+// Часы работы и почта - при наполнении из VK (решено 2026-10-25). Адрес, телефон и VK -
+// из блока contacts лендинга (site/content/blocks/contacts/block.json).
+import { siteContacts, tel } from "../lib/content";
+
+const { address, booking, vk } = siteContacts();
 const year = new Date().getFullYear();
 ---
 
@@ -11,16 +15,18 @@ const year = new Date().getFullYear();
             <p>Республиканский центр коррекционной педагогики, Симферополь</p>
         </div>
         <div class="stack">
-            <p>ул. Желябова, 44</p>
+            <p>{address}</p>
             <p>
                 Запись по телефону:{" "}
-                <a href="tel:+79782294854">+7 978 229-48-54</a>
+                <a href={tel(booking.number)}>{booking.number}</a>
             </p>
-            <p>
-                <a href="https://vk.com/dobromir.crimea" rel="noopener">
-                    Группа ВКонтакте
-                </a>
-            </p>
+            {vk && (
+                <p>
+                    <a href={vk} rel="noopener">
+                        Группа ВКонтакте
+                    </a>
+                </p>
+            )}
         </div>
     </div>
     <p class="container copy">© {year} «Добромир»</p>
