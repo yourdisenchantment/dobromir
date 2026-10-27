@@ -94,6 +94,46 @@ const { label, align = "start" } = Astro.props;
         scroll-snap-align: center;
         max-width: none;
     }
+    /* Текущая карточка (по центру) - яркая и в полный размер, соседние меньше и тусклее
+       (решено 2026-10-27). Анимация от прокрутки, без JS; где браузер ее не умеет, все
+       карточки одинаковые. Карточка с фокусом клавиатуры - всегда яркая. */
+    @supports (animation-timeline: view()) {
+        .track > :global(*) {
+            animation: carousel-focus linear both;
+            animation-timeline: view(inline);
+            animation-range: cover;
+        }
+        .track > :global(*:focus-within) {
+            animation: none;
+        }
+        @keyframes carousel-focus {
+            0%,
+            40%,
+            60%,
+            100% {
+                opacity: 0.5;
+                scale: 0.92;
+            }
+            50% {
+                opacity: 1;
+                scale: 1;
+            }
+        }
+        /* «Уменьшить движение»: только яркость, без изменения размера */
+        @media (prefers-reduced-motion: reduce) {
+            @keyframes carousel-focus {
+                0%,
+                40%,
+                60%,
+                100% {
+                    opacity: 0.5;
+                }
+                50% {
+                    opacity: 1;
+                }
+            }
+        }
+    }
     .controls {
         display: flex;
         justify-content: center;
