@@ -4,6 +4,7 @@
 // общие классы post-* (styles/post.css): разметка показывается и во всплывающем окне.
 import PostText from "./PostText.astro";
 import { mediaUrl, type NewsPhoto } from "../lib/news";
+import { safeHref } from "../lib/vktext";
 
 interface Props {
     text: string;
@@ -16,6 +17,9 @@ interface Props {
 
 const { text, photos, links, media, sourceUrl, alt } = Astro.props;
 const kinds = { doc: "Документ", video: "Видео" };
+// Ссылки-вложения из VK - только http(s), как ссылки в тексте: адрес вида javascript:
+// в href - это XSS (найдено при обзоре 2026-10-27). Неподходящая ссылка - просто текст.
+const safeLinks = links.map((l) => ({ ...l, href: safeHref(l.url) }));
 ---
 
 {text && (
@@ -39,11 +43,15 @@ const kinds = { doc: "Документ", video: "Видео" };
 )}
 {(links.length > 0 || media.length > 0) && (
     <ul class="post-links">
-        {links.map((l) => (
+        {safeLinks.map((l) => (
             <li>
-                <a href={l.url} rel="nofollow noopener">
-                    {l.title || l.url}
-                </a>
+                {l.href ? (
+                    <a href={l.href} rel="nofollow noopener">
+                        {l.title || l.url}
+                    </a>
+                ) : (
+                    l.title || l.url
+                )}
             </li>
         ))}
         {media.map((m) => (
