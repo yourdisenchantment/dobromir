@@ -223,7 +223,7 @@ def test_build_env_has_no_vk_keys_and_passes_site_settings(tmp_path: Path) -> No
     assert f"NEWS_JSON={s.data.news_json}" in env and "SITE_ENV=production" in env
     assert "ASTRO_TELEMETRY_DISABLED=1" in env and "YANDEX_VERIFICATION=ya123" in env
     assert f"ASTRO_OUT_DIR={rel}" in env
-    # На сервере сборка содержимое только проверяет: клон на теге не должен меняться.
+    # На сервере сборка содержимое только проверяет: клон на сервере не должен меняться.
     assert "CONTENT_CHECK_ONLY=1" in env
 
 

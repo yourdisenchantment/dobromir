@@ -82,7 +82,12 @@ def single_instance(settings: Settings) -> Iterator[bool]:
     """fcntl-блокировка на файле в каталоге данных (не shell-flock, требование отчета).
 
     Возвращает False, если другой запуск еще идет. Блокировку снимает ОС, даже если процесс упал.
+    DOBROMIR_LOCK_HELD=1 - блокировку уже держит родитель (deploy/locked.py под deploy.sh):
+    lockf не наследуется, и без этого шаги деплоя мешали бы сами себе.
     """
+    if os.environ.get("DOBROMIR_LOCK_HELD") == "1":
+        yield True
+        return
     settings.data.root.mkdir(parents=True, exist_ok=True)
     fh: IO[str] = open(settings.data.lock_file, "a")  # noqa: SIM115 - держим открытым до конца запуска
     try:

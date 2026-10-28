@@ -160,6 +160,12 @@ python3 -c "import fcntl,time; f=open('/home/a/a978879k/lock-test','w'); fcntl.l
 
 # 5. CP на сборку: три сборки подряд, в панели записать CP до и через 10-30 минут
 time npm run build
+
+# 6. Обновление из GitVerse (с 2026-10-28, docs/server.md): ключ только на чтение,
+# deploy.sh руками и из cron (--cron молчит без нового), письмо «Сайт обновлен»;
+# сломанный push - письмо, сайт на прежнем релизе, код вернулся (git log -1)
+ssh -T git@gitverse.ru
+cd ~/dobromir && ./deploy/deploy.sh && ./deploy/deploy.sh --cron; echo "код $?"
 ```
 
 Дополнительно руками: проверить, что веб-сервер отдает страницу через ссылку `public_html -> releases/<ts>` в тестовом сайте и картинку через `releases/<ts>/media -> ../../media`; проверить, что `.htaccess` с 301 работает; проверить SSL и автопродление; проверить, что `git clone` с хостинга работает по SSH deploy-ключу (GitVerse).

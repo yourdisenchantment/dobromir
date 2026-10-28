@@ -84,7 +84,7 @@ site/content/ (ручное: блоки, специалисты) ---------> site
 | Хочу | Где | Что еще обновить |
 |---|---|---|
 | Первичную подготовку хостинга | `deploy/bootstrap.sh` (без `--apply` только проверяет) | `docs/README-for-hosting-admin.md` |
-| Выкладку новой версии | `deploy/deploy.sh <тег>` | то же |
+| Выкладку новой версии: шаги, откат при ошибке, письма | `deploy/deploy.sh` (руками и `--cron`), блокировка - `deploy/locked.py` | тесты `pipeline/tests/test_deploy.py`, `docs/server.md` (таблица писем), `deploy/crontab.example` |
 | Расписание cron | `deploy/crontab.example` (сами строки вставляются в панели Beget) | `AGENTS.md` («Воркер и сервер») |
 | Резервную копию базы | `deploy/backup-db.sh`, `pipeline/src/pipeline/backup.py` | `tests/test_backup.py` |
 | Раскладку каталогов на сервере | `deploy/*.sh` и `settings.py` вместе | `AGENTS.md` («Раскладка на сервере»), README для администратора |

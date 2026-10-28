@@ -25,6 +25,7 @@ from pipeline.worker import (
     file_logging,
     log,
     run_worker,
+    single_instance,
 )
 
 TZ = ZoneInfo("Europe/Simferopol")
@@ -103,6 +104,28 @@ def test_second_run_while_first_holds_lock_exits_0_and_touches_nothing(tmp_path:
     assert wall.calls == []  # в VK не ходил
     assert not s.data.db.exists() and not s.data.status_json.exists()
     assert "предыдущий запуск не закончен" in s.data.worker_log.read_text(encoding="utf-8")
+
+
+def test_lock_held_by_deploy_parent_lets_its_steps_through(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """deploy/locked.py держит блокировку и передает DOBROMIR_LOCK_HELD=1 шагам деплоя;
+    без этой переменной (воркер из cron) блокировка по-прежнему занята."""
+    s = settings_at(tmp_path)
+    s.data.root.mkdir(parents=True)
+    holder = subprocess.Popen(
+        [sys.executable, "-c", HOLD_LOCK, str(s.data.lock_file)], stdout=subprocess.PIPE, text=True
+    )
+    try:
+        assert holder.stdout is not None and holder.stdout.readline().strip() == "locked"
+        with single_instance(s) as acquired:
+            assert acquired is False
+        monkeypatch.setenv("DOBROMIR_LOCK_HELD", "1")
+        with single_instance(s) as acquired:
+            assert acquired is True
+    finally:
+        holder.kill()
+        holder.wait()
+        if holder.stdout is not None:
+            holder.stdout.close()
 
 
 def test_lock_released_after_run(tmp_path: Path) -> None:
