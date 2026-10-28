@@ -1,18 +1,17 @@
-# Secrets
+# Секреты
 .env
 .env.*
 !.env.example
 
-# Data about children never goes into git: raw VK responses, the database,
-# downloaded media. The real data lives in $DOBROMIR_DATA outside the repo;
-# these entries guard against a data directory set inside it by mistake.
+# Данные о детях никогда не попадают в git: сырые ответы VK, база, скачанные
+# фото. Настоящие данные лежат в $DOBROMIR_DATA вне репозитория; эти строки -
+# страховка, если каталог данных по ошибке задали внутри него.
 data/
 *.sqlite
 *.sqlite3
 *.db
-spike/out/
 
-# Session artifacts (working notes, commit drafts)
+# Рабочие файлы агента (заметки, черновики коммитов)
 tmp/
 
 # Python
@@ -28,15 +27,15 @@ node_modules/
 dist/
 .astro/
 
-# Editors and OS
+# Редакторы и ОС
 .idea/
 .vscode/
 *~
 *.swp
 .DS_Store
 
-# Local agent tooling. AGENTS.md and the CLAUDE.md pointer are tracked on
-# purpose, everything else a local setup creates stays out.
+# Локальные настройки агентов. AGENTS.md и указатель CLAUDE.md в git нарочно,
+# все остальное, что создает локальная установка, - нет.
 .claude/
 .opencode/
 .cursor/

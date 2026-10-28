@@ -7,7 +7,7 @@
 #   uv run --project pipeline pre-commit install --hook-type commit-msg
 #   uv run --project pipeline pre-commit install --hook-type pre-push
 
-exclude: "^(spike/out/|tmp/)"
+exclude: "^tmp/"
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
