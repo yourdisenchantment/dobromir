@@ -31,9 +31,9 @@ site/content/ (ручное: блоки, специалисты) ---------> site
 | Цвет, размер шрифта, отступы, скругления, ширину страницы | `site/src/styles/tokens.css` - единственное место цветов и размеров | проверить контраст текста (в комментариях у цветов указан), посмотреть стайлбук `/stylebook/` |
 | Общие правила: ссылки, заголовки, «черепица» `.masonry`, фокус | `site/src/styles/base.css` | - |
 | Шрифт | `site/src/assets/fonts/` и `site/src/styles/fonts.css` | лицензия шрифта рядом с файлами |
-| Иконку (новую или другую) | файл `<имя>.svg` (Material Symbols, стиль Rounded, с fonts.google.com/icons) в `site/src/assets/icons/`; встраивает `src/lib/icons.ts`, выводит `components/Icon.astro` | список иконок в `HOWTO-add-content.md` (блок `facts`) |
+| Иконку (новую или другую) | файл `<имя>.svg` (Material Symbols, стиль Rounded, с fonts.google.com/icons) в `site/src/assets/icons/`; встраивает `src/lib/icons.ts`, выводит `components/Icon.astro` | список иконок в `docs/content/facts.md` |
 | Логотип, фавиконки | `site/public/` | вырезать метаданные (C2PA, EXIF) перед тем, как класть |
-| Шапку, меню, порог «Меню» под кнопкой | `site/src/components/SiteHeader.astro` | пункты меню - не здесь, а полем `menu` у блока (HOWTO-add-content) |
+| Шапку, меню, порог «Меню» под кнопкой | `site/src/components/SiteHeader.astro` | пункты меню - не здесь, а полем `menu` у блока (`docs/content/menu-and-order.md`) |
 | Подвал | `site/src/components/SiteFooter.astro` | адрес и телефоны - не здесь, а в блоке `contacts` |
 | Кнопку «Наверх» | `site/src/components/ToTop.astro` | - |
 | Карточку (рамка фото, текст, ссылка) | `site/src/components/Card.astro` | - |
@@ -46,8 +46,10 @@ site/content/ (ручное: блоки, специалисты) ---------> site
 
 | Хочу | Где | Что еще обновить |
 |---|---|---|
-| Новое поле у существующего блока | схема блока в `site/src/lib/content.ts` (`z.strictObject`: без записи в схеме поле - ошибка сборки), затем компонент блока | `HOWTO-add-content.md` (справочник), `docs/pages.md` |
-| Новый тип блока | 1) схема в `content.ts` и в общем списке типов (там же текст ошибки «неизвестный тип блока»); 2) компонент `site/src/components/blocks/<Тип>Block.astro`; 3) строка выбора в `site/src/pages/index.astro`; 4) пример `block.json` в `site/content/blocks/` | `HOWTO-add-content.md`, `docs/pages.md` |
+| Новое поле у существующего блока | схема блока в `site/src/lib/content.ts` (`z.strictObject`: без записи в схеме поле - ошибка сборки), затем компонент блока | документ раздела в `docs/content/` (таблица полей), `docs/pages.md` |
+| Новый тип блока | 1) схема в `content.ts` и в общем списке типов (там же текст ошибки «неизвестный тип блока»); 2) компонент `site/src/components/blocks/<Тип>Block.astro`; 3) строка выбора в `site/src/pages/index.astro`; 4) пример `block.json` в `site/content/blocks/` | `HOWTO-add-content.md` (таблица разделов), новый `docs/content/<раздел>.md`, `docs/pages.md` |
+| Что сборка доводит в содержимом сама: размер и качество фото, какие форматы принимает | `site/scripts/prepare-content.ts` (`MAX_SIDE`, `QUALITY`, `SOURCES`; первый шаг `npm run build`, режим проверки - `--check` и `CONTENT_CHECK_ONLY=1` на сервере) | `docs/content/specialists.md`, `HOWTO-add-content.md` («Что сборка делает сама»); исходники фото в `.gitignore` |
+| Правила типографики (пробелы, тире, кавычки) и поля, которые она не трогает | `site/src/lib/typography.ts` (`RAW_KEYS` - ссылки, телефоны, имена файлов) | тест `typography.test.ts`, `HOWTO-add-content.md` |
 | Новую страницу | файл в `site/src/pages/` (адрес = путь, со слэшем в конце) | попадет в sitemap сама; ссылку на нее - в шапку или подвал |
 | Страницу специалиста | `site/src/pages/specialisty/[slug].astro`, `components/SpecialistArticle.astro` | - |
 | Архив и страницу новости | `site/src/pages/news/index.astro`, `news/[slug].astro`, `components/PostArticle.astro`, `PostContent.astro` (фото, ссылки, документы), общие классы - `styles/post.css` | - |
