@@ -18,6 +18,8 @@ PY="$REPO/pipeline/.venv/bin/python"
 # У cron свое, почти пустое окружение: PATH задается явно (Node для сборки сайта).
 export PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin"
 export ASTRO_TELEMETRY_DISABLED=1
+# Сборка на сервере содержимое только проверяет, файлы клона не правит.
+export CONTENT_CHECK_ONLY=1
 export PYTHONIOENCODING=utf-8
 
 if [ ! -x "$PY" ]; then

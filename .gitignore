@@ -22,6 +22,12 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 
+# Исходники фото содержимого (JPEG, PNG с телефона) - с геометками и моделью телефона.
+# Сборка (site/scripts/prepare-content.ts) делает из них WebP без метаданных; в git
+# попадает только он.
+site/content/**/photos/*
+!site/content/**/photos/*.webp
+
 # Node / Astro
 node_modules/
 dist/

@@ -66,6 +66,8 @@ UV="$HOME/.local/share/dobromir-uv/bin/uv"
 VENV_PY="$REPO/pipeline/.venv/bin/python"
 export PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin"
 export ASTRO_TELEMETRY_DISABLED=1
+# Сборка на сервере содержимое только проверяет, файлы клона не правит.
+export CONTENT_CHECK_ONLY=1
 export PYTHONIOENCODING=utf-8
 export UV_PYTHON_DOWNLOADS=never # только системный Python, свой интерпретатор uv не качает
 

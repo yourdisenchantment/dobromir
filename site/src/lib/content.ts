@@ -1,6 +1,7 @@
 // Ручное содержимое лендинга: site/content/blocks/<блок>/block.json и картинки рядом
 // (решено 2026-10-25). Проверяется схемой при сборке: ошибка в JSON или нет файла фото -
-// сборка падает с понятным сообщением по-русски, сломанный сайт не выходит.
+// сборка падает с понятным сообщением по-русски, сломанный сайт не выходит. Фото (WebP) и
+// типографику до этого доводит scripts/prepare-content.ts - первый шаг npm run build.
 
 import type { ImageMetadata } from "astro";
 import { z } from "zod";
@@ -19,7 +20,7 @@ const blockFiles = import.meta.glob<unknown>(
 );
 
 const specialistPhotos = import.meta.glob<ImageMetadata>(
-    "../../content/blocks/specialists/photos/*",
+    "../../content/blocks/specialists/photos/*.webp",
     { eager: true, import: "default" },
 );
 
@@ -223,7 +224,7 @@ export type Block =
 function fail(file: string, problems: string[]): never {
     throw new Error(
         `Ошибка в ${file}:\n${problems.map((p) => `  - ${p}`).join("\n")}\n` +
-            "Формат блоков - docs/HOWTO-add-content.md.",
+            "Поля раздела - docs/content/<раздел>.md, общие правила - docs/HOWTO-add-content.md.",
     );
 }
 
@@ -232,7 +233,7 @@ function issues(error: z.ZodError): string[] {
         const where = i.path.length ? `${i.path.join(".")}: ` : "";
         // Опечатка в имени поля не должна теряться молча: такого поля нет в справочнике.
         if (i.code === "unrecognized_keys")
-            return `${where}лишнее поле ${i.keys.join(", ")} - такого нет в docs/HOWTO-add-content.md`;
+            return `${where}лишнее поле ${i.keys.join(", ")} - такого нет в docs/content/<раздел>.md`;
         return `${where}${i.message}`;
     });
 }
@@ -310,7 +311,11 @@ export function loadSpecialists(): SpecialistsBlock {
                 `../../content/blocks/specialists/photos/${item.photo}`
             ];
         if (!image)
-            problems.push(`items.${n}.photo: нет файла photos/${item.photo}`);
+            problems.push(
+                item.photo.endsWith(".webp")
+                    ? `items.${n}.photo: нет файла photos/${item.photo}`
+                    : `items.${n}.photo: фото ${item.photo} не обработано - запустите npm run build у себя`,
+            );
         return { ...item, image: image as ImageMetadata };
     });
     if (problems.length) fail(file, problems);

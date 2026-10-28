@@ -8,10 +8,11 @@
     },
     "scripts": {
         "dev": "astro dev",
-        "build": "astro build",
+        "build": "node scripts/prepare-content.ts && astro build",
         "preview": "astro preview",
         "astro": "astro",
         "check": "astro check",
+        "content:check": "node scripts/prepare-content.ts --check",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "lint": "eslint .",
@@ -21,6 +22,7 @@
         "@astrojs/rss": "latest",
         "@astrojs/sitemap": "latest",
         "astro": "latest",
+        "sharp": "latest",
         "zod": "latest"
     },
     "devDependencies": {

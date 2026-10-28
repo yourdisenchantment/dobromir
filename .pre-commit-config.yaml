@@ -50,6 +50,13 @@ repos:
         files: ^site/
         pass_filenames: false
 
+      - id: site-content
+        name: site - фото и тексты содержимого
+        entry: npm --prefix site run content:check
+        language: system
+        files: ^site/(content|scripts)/
+        pass_filenames: false
+
       - id: site-format
         name: site - prettier --check
         entry: npm --prefix site run format:check

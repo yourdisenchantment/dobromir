@@ -49,6 +49,8 @@ UV_HOME="$HOME/.local/share/dobromir-uv"
 UV="$UV_HOME/bin/uv"
 export PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin"
 export ASTRO_TELEMETRY_DISABLED=1
+# Сборка на сервере содержимое только проверяет, файлы клона не правит.
+export CONTENT_CHECK_ONLY=1
 
 errors=0
 ok() { echo "  ok    $*"; }

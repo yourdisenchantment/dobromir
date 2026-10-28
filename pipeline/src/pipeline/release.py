@@ -172,6 +172,8 @@ def build_env(settings: Settings, out_dir: Path) -> dict[str, str]:
         "PATH": f"{settings.node_bin}{os.pathsep}{os.environ.get('PATH', '/usr/bin:/bin')}",
         "HOME": os.environ.get("HOME", str(Path.home())),
         "ASTRO_TELEMETRY_DISABLED": "1",
+        # На сервере сборка содержимое только проверяет, файлы клона не правит.
+        "CONTENT_CHECK_ONLY": "1",
         "ASTRO_OUT_DIR": str(out_dir),
         "NEWS_JSON": str(settings.data.news_json),
         "SITE_URL": settings.site_url,
