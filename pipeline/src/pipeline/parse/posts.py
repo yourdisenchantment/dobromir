@@ -7,14 +7,24 @@ from typing import Any
 from pipeline.parse.model import DISPLAY_MAX, Link, Photo, Post, Repost, VkMedia
 
 HASHTAG = re.compile(r"#([^\s#@]+)")
+URL = re.compile(r"https?://\S+")
 TITLE_MAX = 120
 MEDIA_KINDS = ("doc", "video")
 
 
+def title_line(line: str) -> str:
+    """Строка для заголовка без ссылок: адрес в заголовке не читается (пост «Специалисты
+    ЦКП : ,,Добромир"https://vk.ru/album-...», 2026-10-27). В тексте поста ссылка остается.
+    То же делает сайт в site/src/lib/cardtext.ts - менять вместе."""
+    if not URL.search(line):
+        return line.strip()
+    return " ".join(URL.sub(" ", line).split()).rstrip(",.;:- ")
+
+
 def make_title(text: str) -> str:
-    """Первая непустая строка; если длиннее лимита - обрезка по слову с многоточием."""
-    for line in text.splitlines():
-        line = line.strip()
+    """Первая непустая строка без ссылок; если длиннее лимита - обрезка по слову с многоточием."""
+    for raw in text.splitlines():
+        line = title_line(raw)
         if line:
             break
     else:

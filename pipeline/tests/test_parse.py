@@ -43,6 +43,13 @@ def test_title_truncated_on_word_boundary() -> None:
     assert make_title("\n\n  \n") == ""
 
 
+def test_title_without_links() -> None:
+    assert make_title('Специалисты ЦКП : ,,Добромир"https://vk.ru/album-1_2') == 'Специалисты ЦКП : ,,Добромир"'
+    assert make_title("Фото: https://vk.ru/album-1_2 и видео") == "Фото: и видео"
+    assert make_title("https://vk.ru/album-1_2\nВторая строка") == "Вторая строка"
+    assert make_title("Итоги года.") == "Итоги года."  # знаки в конце без ссылки не трогаем
+
+
 @pytest.mark.parametrize(
     ("over", "expected"),
     [
