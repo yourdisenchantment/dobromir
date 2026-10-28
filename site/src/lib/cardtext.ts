@@ -32,3 +32,13 @@ export function restAfterTitle(text: string, title: string): string {
     const tail = line.slice(cut.length).replace(/^[\s,.;:-]+/u, "");
     return [tail && `…${tail}`, rest].filter(Boolean).join("\n").trim();
 }
+
+/** Строка не длиннее max: обрезка по слову с «…». Для <title> новости - поисковики
+ *  показывают около 60-70 знаков, а заголовок поста бывает до 120 (2026-10-28). */
+export function clip(raw: string, max: number): string {
+    const text = raw.replace(/\s+/gu, " ").trim(); // в постах VK бывают двойные пробелы
+    if (text.length <= max) return text;
+    const head = text.slice(0, max - 1);
+    const cut = head.replace(/\s+\S*$/u, "") || head;
+    return `${cut.replace(/[\s,.;:—-]+$/u, "")}…`;
+}

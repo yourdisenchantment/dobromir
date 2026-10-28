@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { restAfterTitle } from "./cardtext.ts";
+import { clip, restAfterTitle } from "./cardtext.ts";
 
 test("заголовок - вся первая строка: в карточке следующие строки", () => {
     assert.equal(
@@ -54,4 +54,18 @@ test("ссылка в строке заголовка: воркер ее выр�
         ),
         "Третья",
     );
+});
+
+test("clip: короткое как есть, длинное - по слову с многоточием", () => {
+    assert.equal(clip("Новости центра", 60), "Новости центра");
+    assert.equal(clip("Осень-  это\u00a0пора ", 60), "Осень- это пора");
+    const long =
+        "Осень - это замечательная пора, когда дети могут получить много положительных эмоций";
+    const short = clip(long, 60);
+    assert.ok(short.length <= 60, short);
+    assert.equal(
+        short,
+        "Осень - это замечательная пора, когда дети могут получить…",
+    );
+    assert.equal(clip("Одноооооооооченьдлинноеслово", 10), "Одноооооо…");
 });

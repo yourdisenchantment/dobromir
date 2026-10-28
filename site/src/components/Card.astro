@@ -17,6 +17,8 @@ interface Props {
     datetime?: string;
     /** Что держать в кадре при обрезке до ratio, например "50% 15%" - лица на портретах. */
     focus?: string;
+    /** Уровень заголовка: 3 под заголовком раздела (h2), 2 - сразу под h1 (архив новостей). */
+    level?: 2 | 3;
 }
 
 const {
@@ -30,7 +32,9 @@ const {
     modal = false,
     datetime,
     focus,
+    level = 3,
 } = Astro.props;
+const Heading = level === 2 ? "h2" : "h3";
 ---
 
 <Tag class="card">
@@ -55,7 +59,7 @@ const {
         </div>
     )}
     <div class="body">
-        <h3>
+        <Heading class="title">
             {href ? (
                 <a href={href} data-modal-link={modal ? "" : undefined}>
                     {title}
@@ -63,7 +67,7 @@ const {
             ) : (
                 title
             )}
-        </h3>
+        </Heading>
         {subtitle && (
             <p class="subtitle">
                 {datetime ? (
@@ -104,29 +108,30 @@ const {
         gap: var(--space-2);
         padding: var(--space-5);
     }
-    h3 {
+    .title {
         font-size: var(--text-h4);
+        font-weight: 650;
     }
-    h3 a,
-    h3 a:visited {
+    .title a,
+    .title a:visited {
         color: var(--color-text);
         text-decoration: none;
     }
     /* Вся карточка - цель ссылки */
-    h3 a::after {
+    .title a::after {
         content: "";
         position: absolute;
         inset: 0;
         border-radius: var(--radius-lg);
     }
-    h3 a:focus-visible {
+    .title a:focus-visible {
         outline: none;
     }
-    h3 a:focus-visible::after {
+    .title a:focus-visible::after {
         outline: 3px solid var(--color-focus);
         outline-offset: 3px;
     }
-    .card:has(h3 a:hover) h3 a {
+    .card:has(.title a:hover) .title a {
         text-decoration: underline;
         text-underline-offset: 0.2em;
     }

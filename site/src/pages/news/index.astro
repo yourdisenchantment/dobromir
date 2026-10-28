@@ -35,7 +35,7 @@ const ordered = [
         ) : (
             <ul class="masonry">
                 {ordered.map((post) => (
-                    <Card as="li" {...newsCard(post)} />
+                    <Card as="li" level={2} {...newsCard(post)} />
                 ))}
             </ul>
         )}

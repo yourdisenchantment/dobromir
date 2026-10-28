@@ -4,6 +4,7 @@
 import Base from "../../layouts/Base.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import PostArticle from "../../components/PostArticle.astro";
+import { clip } from "../../lib/cardtext";
 import { displayTitle, loadNews, summary, type NewsPost } from "../../lib/news";
 
 export function getStaticPaths() {
@@ -20,7 +21,11 @@ interface Props {
 const { post } = Astro.props;
 ---
 
-<Base title={displayTitle(post)} description={summary(post)} type="article">
+<Base
+    title={clip(displayTitle(post), 60)}
+    description={summary(post)}
+    type="article"
+>
     <div class="container page">
         <Breadcrumbs
             items={[
