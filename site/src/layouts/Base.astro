@@ -73,7 +73,7 @@ const fullTitle = title === "Добромир" ? title : `${title} - Добро�
             jsonLd.map((item) => (
                 <script
                     type="application/ld+json"
-                    set:html={JSON.stringify(item)}
+                    set:html={JSON.stringify(item).replace(/</g, "\\u003c")}
                 />
             ))}
     </head>

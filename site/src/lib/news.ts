@@ -104,7 +104,10 @@ function shorten(raw: string, max: number): string {
 }
 
 export function mediaUrl(file: string): string {
-    return `/media/${file}`;
+    // Защита от path traversal: только имя файла без путей
+    const name = file.split("/").pop() ?? file;
+    if (!/^[a-zA-Z0-9._-]+\.webp$/u.test(name)) return "/media/";
+    return `/media/${name}`;
 }
 
 /** Новость как карточка (components/Card.astro): лента лендинга, архив, стайлбук. */
