@@ -135,7 +135,9 @@ else
         umask 077
         # Папку сайта знаем - подставляем; ключи VK и SITE_ENV остаются пустыми - их вносит человек.
         # DOBROMIR_DATA в файл не пишем: каталог данных код берет из окружения или по умолчанию.
-        sed -e "s|^SITE_ROOT=.*|SITE_ROOT=$SITE_DIR|" "$REPO/.env.example" >"$DATA_DIR/.env"
+        # Экранируем \, & и | в пути, чтобы sed не сломался на нестандартных путях.
+        escaped_site_dir="$(printf '%s' "$SITE_DIR" | sed 's/[\\&|]/\\&/g')"
+        sed -e "s|^SITE_ROOT=.*|SITE_ROOT=$escaped_site_dir|" "$REPO/.env.example" >"$DATA_DIR/.env"
         chmod 600 "$DATA_DIR/.env"
         echo "  >     создан из .env.example (права 600). Заполнить: SITE_ENV, VK_SERVICE_TOKEN, VK_GROUP_ID"
     else
