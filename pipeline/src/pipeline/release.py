@@ -225,12 +225,12 @@ def build_release(settings: Settings, now: int, command: Sequence[str] | None = 
             raise ReleaseError(f"сборка сайта завершилась с кодом {proc.returncode}")
         os.symlink(os.path.relpath(site.media, release), release / "media")
         pages = check_release(release, site, slugs)
-        if switch:
-            switch_to(site, release)
     except BaseException:
         if release.exists():
             shutil.rmtree(release)
         raise
+    if switch:
+        switch_to(site, release)
     removed = cleanup(site)
     log.info(
         "релиз %s: страниц %s; public_html %s; удалены старые: %s",

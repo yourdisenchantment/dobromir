@@ -206,9 +206,16 @@ def run_worker(
             status["errors"] = [entry, *(status.get("errors") or [])][:STATUS_ERRORS_KEPT]
         finally:
             if store is not None:
-                _fill_counts(status, store, settings, now)
-                store.close()
-            write_status(settings, status)
+                try:
+                    _fill_counts(status, store, settings, now)
+                except Exception:
+                    log.warning("не удалось обновить счетчики для status.json", exc_info=True)
+                finally:
+                    store.close()
+            try:
+                write_status(settings, status)
+            except OSError:
+                log.warning("не удалось записать status.json", exc_info=True)
         return code
 
 

@@ -23,9 +23,12 @@ def migrations() -> list[tuple[int, str]]:
 
 
 def schema_version(conn: sqlite3.Connection) -> int:
-    conn.execute("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)")
-    row = conn.execute("SELECT MAX(version) FROM schema_version").fetchone()
-    return int(row[0] or 0)
+    try:
+        row = conn.execute("SELECT MAX(version) FROM schema_version").fetchone()
+        return int(row[0] or 0)
+    except sqlite3.OperationalError:
+        conn.execute("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)")
+        return 0
 
 
 def migrate(conn: sqlite3.Connection) -> int:
@@ -63,7 +66,12 @@ def _statements(sql: str) -> list[str]:
 def open_db(path: Path) -> sqlite3.Connection:
     """Открывает базу (создает каталог при надобности) и доводит схему до последней версии."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path)
-    conn.row_factory = sqlite3.Row
-    migrate(conn)
+    conn = sqlite3.connect(path, timeout=30.0)
+    try:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
+        migrate(conn)
+    except BaseException:
+        conn.close()
+        raise
     return conn
