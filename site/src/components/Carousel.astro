@@ -29,6 +29,7 @@ const { label } = Astro.props;
     // Кнопки «назад/вперед»: прокрутка на одну карточку. Скрипт только добавляет удобство:
     // без него ряд листается пальцем и колесом, а кнопок просто не видно.
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const scrollAnimation = CSS.supports("animation-timeline: view()");
     for (const root of document.querySelectorAll<HTMLElement>(
         "[data-carousel]",
     )) {
@@ -60,6 +61,45 @@ const { label } = Astro.props;
         track.addEventListener("scroll", update, { passive: true });
         controls.hidden = false;
         update();
+        if (!scrollAnimation && !reduce.matches) focusByScript(track);
+    }
+
+    // Где нет анимации от прокрутки (Firefox, 2026-10-28) - то же выделение центральной
+    // карточки скриптом, по тем же числам, что @keyframes carousel-focus ниже: в пределах
+    // 10% пути карточки через ряд (40-60% диапазона cover) - от 1.06 к 0.85 и от 1 к 0.5.
+    function focusByScript(track: HTMLElement) {
+        let frame = 0;
+        const paint = () => {
+            frame = 0;
+            const box = track.getBoundingClientRect();
+            const center = box.left + box.width / 2;
+            for (const item of track.children as HTMLCollectionOf<HTMLElement>) {
+                if (item.matches(":focus-within")) {
+                    item.style.opacity =
+                        item.style.scale =
+                        item.style.translate =
+                            "";
+                    continue;
+                }
+                const r = item.getBoundingClientRect();
+                const offset = r.left + r.width / 2 - center;
+                const t = Math.min(
+                    Math.abs(offset) / (0.1 * (box.width + r.width)),
+                    1,
+                );
+                item.style.opacity = String(1 - 0.5 * t);
+                item.style.scale = String(1.06 - 0.21 * t);
+                item.style.translate = `${-Math.sign(offset) * 4.5 * t}% 0`;
+            }
+        };
+        const schedule = () => {
+            frame ||= requestAnimationFrame(paint);
+        };
+        track.addEventListener("scroll", schedule, { passive: true });
+        track.addEventListener("focusin", schedule);
+        track.addEventListener("focusout", schedule);
+        window.addEventListener("resize", schedule);
+        paint();
     }
 </script>
 
@@ -89,8 +129,8 @@ const { label } = Astro.props;
         max-width: none;
     }
     /* Текущая карточка (по центру) - яркая и крупнее, соседние меньше и тусклее
-       (решено 2026-10-27). Анимация от прокрутки, без JS; где браузер ее не умеет, все
-       карточки одинаковые. Карточка с фокусом клавиатуры - всегда яркая. При «уменьшить
+       (решено 2026-10-27). Анимация от прокрутки, без JS; где браузер ее не умеет
+       (Firefox) - то же скриптом выше, без скрипта карточки одинаковые. Карточка с фокусом клавиатуры - всегда яркая. При «уменьшить
        движение» анимацию выключает общее правило base.css - карточки тоже одинаковые. */
     @supports (animation-timeline: view()) {
         .track > :global(*) {
