@@ -14,13 +14,32 @@ import NewsBlock from "../components/blocks/NewsBlock.astro";
 import QuotesBlock from "../components/blocks/QuotesBlock.astro";
 import TextBlock from "../components/blocks/TextBlock.astro";
 import { loadPage, specialistCard } from "../lib/content";
-
+import { siteUrl } from "../lib/env";
 const blocks = loadPage();
+const site = siteUrl();
+const jsonLd = [
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "Республиканский центр коррекционной педагогики «Добромир»",
+        url: site,
+        logo: `${site}/logo.svg`,
+        address: {
+            "@type": "PostalAddress",
+            addressLocality: "Симферополь",
+            addressCountry: "RU",
+        },
+        description:
+            "Республиканский центр коррекционной педагогики «Добромир» в Симферополе: диагностика, ABA-терапия, логопеды и психологи для детей с аутизмом от 0 до 18 лет.",
+    },
+];
 ---
 
 <Base
     title="Добромир"
     description="Республиканский центр коррекционной педагогики «Добромир» в Симферополе: диагностика, ABA-терапия, логопеды и психологи для детей с аутизмом от 0 до 18 лет."
+    ogImage={`${site}/logo.svg`}
+    jsonLd={jsonLd}
 >
     {blocks.map(({ id, block }, n) => (
         <Section

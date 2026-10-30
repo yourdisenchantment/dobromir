@@ -5,6 +5,7 @@ import Base from "../../layouts/Base.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import SpecialistArticle from "../../components/SpecialistArticle.astro";
 import { loadSpecialists, type Specialist } from "../../lib/content";
+import { siteUrl } from "../../lib/env";
 
 export function getStaticPaths() {
     return loadSpecialists().items.map((person) => ({
@@ -21,9 +22,51 @@ const { person } = Astro.props;
 const description = person.short
     ? `${person.position}: ${person.short.toLowerCase()}. Центр «Добромир», Симферополь.`
     : `${person.position}, центр «Добромир», Симферополь.`;
+const ogImage = new URL(person.image.src, `${siteUrl()}/`).href;
+
+const jsonLd = [
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: person.name,
+        jobTitle: person.position,
+        description: person.short || person.description.join(" "),
+        worksFor: {
+            "@type": "Organization",
+            name: "Республиканский центр коррекционной педагогики «Добромир»",
+            url: siteUrl(),
+        },
+        url: new URL(`/specialisty/${person.slug}/`, `${siteUrl()}/`).href,
+        image: ogImage,
+    },
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            {
+                "@type": "ListItem",
+                position: 1,
+                name: "Главная",
+                item: `${siteUrl()}/`,
+            },
+            {
+                "@type": "ListItem",
+                position: 2,
+                name: "Специалисты",
+                item: `${siteUrl()}/#specialists`,
+            },
+            { "@type": "ListItem", position: 3, name: person.name },
+        ],
+    },
+];
 ---
 
-<Base title={person.name} description={description}>
+<Base
+    title={person.name}
+    description={description}
+    ogImage={ogImage}
+    jsonLd={jsonLd}
+>
     <div class="container page">
         <Breadcrumbs
             items={[

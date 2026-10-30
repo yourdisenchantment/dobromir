@@ -5,7 +5,14 @@ import Base from "../../layouts/Base.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import PostArticle from "../../components/PostArticle.astro";
 import { clip } from "../../lib/cardtext";
-import { displayTitle, loadNews, summary, type NewsPost } from "../../lib/news";
+import {
+    displayTitle,
+    loadNews,
+    mediaUrl,
+    summary,
+    type NewsPost,
+} from "../../lib/news";
+import { siteUrl } from "../../lib/env";
 
 export function getStaticPaths() {
     return loadNews().map((post) => ({
@@ -19,12 +26,61 @@ interface Props {
 }
 
 const { post } = Astro.props;
+const title = clip(displayTitle(post), 60);
+const desc = summary(post);
+const cover = post.photos[0] ?? post.repost?.photos[0];
+const ogImage = cover
+    ? new URL(mediaUrl(cover.preview?.file ?? cover.file), `${siteUrl()}/`).href
+    : undefined;
+
+const jsonLd = [
+    {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        headline: displayTitle(post),
+        description: desc,
+        datePublished: post.date,
+        dateModified: post.edited_date ?? post.date,
+        author: {
+            "@type": "Organization",
+            name: "Республиканский центр коррекционной педагогики «Добромир»",
+        },
+        publisher: {
+            "@type": "Organization",
+            name: "Республиканский центр коррекционной педагогики «Добромир»",
+            url: siteUrl(),
+        },
+        url: new URL(`/news/${post.slug}/`, `${siteUrl()}/`).href,
+        ...(ogImage ? { image: ogImage } : {}),
+    },
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            {
+                "@type": "ListItem",
+                position: 1,
+                name: "Главная",
+                item: `${siteUrl()}/`,
+            },
+            {
+                "@type": "ListItem",
+                position: 2,
+                name: "Новости",
+                item: `${siteUrl()}/news/`,
+            },
+            { "@type": "ListItem", position: 3, name: displayTitle(post) },
+        ],
+    },
+];
 ---
 
 <Base
-    title={clip(displayTitle(post), 60)}
-    description={summary(post)}
+    title={title}
+    description={desc}
     type="article"
+    ogImage={ogImage}
+    jsonLd={jsonLd}
 >
     <div class="container page">
         <Breadcrumbs

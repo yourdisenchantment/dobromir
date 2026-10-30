@@ -18,9 +18,20 @@ interface Props {
     type?: "website" | "article";
     /** Страница не для поисковиков (404): без canonical, с noindex. */
     noindex?: boolean;
+    /** Абсолютный или относительный URL картинки для og:image и Twitter. */
+    ogImage?: string;
+    /** JSON-LD объекты для поисковиков (Organization, Person, NewsArticle, BreadcrumbList). */
+    jsonLd?: Record<string, unknown>[];
 }
 
-const { title, description, type = "website", noindex = false } = Astro.props;
+const {
+    title,
+    description,
+    type = "website",
+    noindex = false,
+    ogImage,
+    jsonLd,
+} = Astro.props;
 const canonical = new URL(Astro.url.pathname, `${siteUrl()}/`).href;
 const staging = siteEnv() === "staging";
 const { yandex, google } = verification();
@@ -45,6 +56,9 @@ const fullTitle = title === "Добромир" ? title : `${title} - Добро�
         <meta property="og:description" content={description} />
         {!noindex && <meta property="og:url" content={canonical} />}
         <meta property="og:locale" content="ru_RU" />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        {ogImage && <meta name="twitter:card" content="summary_large_image" />}
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -55,6 +69,13 @@ const fullTitle = title === "Добромир" ? title : `${title} - Добро�
             href="/rss.xml"
         />
         <link rel="sitemap" href="/sitemap-index.xml" />
+        {jsonLd &&
+            jsonLd.map((item) => (
+                <script
+                    type="application/ld+json"
+                    set:html={JSON.stringify(item)}
+                />
+            ))}
     </head>
     <body>
         <a class="skip-link" href="#main">
