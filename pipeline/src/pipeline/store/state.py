@@ -1,3 +1,4 @@
+# pipeline/src/pipeline/store/state.py
 """Работа с базой воркера: посты, скачанные фото, отметки."""
 
 import json

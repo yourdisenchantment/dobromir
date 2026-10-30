@@ -1,3 +1,4 @@
+// site/src/lib/news.ts
 // Чтение news.json, который пишет воркер. Формат - docs/content-contract.md; схема здесь
 // и экспорт в pipeline/src/pipeline/export/news.py меняются вместе. Ошибка схемы валит
 // сборку: лучше не выпустить релиз, чем выпустить сломанный.

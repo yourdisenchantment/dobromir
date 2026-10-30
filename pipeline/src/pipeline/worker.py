@@ -1,3 +1,4 @@
+# pipeline/src/pipeline/worker.py
 """Точка входа воркера для cron: `python -m pipeline worker`.
 
 Правила (отчет о хостинге, разд. 6 и 9):

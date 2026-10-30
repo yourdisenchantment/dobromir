@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# deploy/deploy.sh
 # Обновление сайта на сервере из GitVerse (ветка main), решено 2026-10-28. Руками по SSH
 # или из cron - одинаково; инструкция - docs/server.md.
 #

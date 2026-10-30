@@ -1,3 +1,4 @@
+# pipeline/tests/test_deploy.py
 """deploy/deploy.sh на временных репозиториях, как на сервере (решено 2026-10-28).
 
 Настоящие git, bash и deploy/locked.py; вместо uv, npm и `python -m pipeline` - заглушки,
