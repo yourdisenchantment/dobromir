@@ -91,15 +91,40 @@ def save_photo(media_dir: Path, photo: Photo, data: bytes) -> PhotoFiles:
     return PhotoFiles(full=full, preview=renditions[1] if len(renditions) > 1 else full)
 
 
+def _is_safe_photo_url(url: str) -> bool:
+    """URL фото должен быть HTTPS. Проверка на внутренние адреса - защита от SSRF."""
+    from urllib.parse import urlparse
+
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme != "https":
+        return False
+    # Блокируем внутренние адреса (SSRF-защита)
+    is_internal = (
+        host in ("localhost", "127.0.0.1", "0.0.0.0")
+        or host.startswith("10.")
+        or host.startswith("192.168.")
+        or host.startswith("172.")
+    )
+    return not is_internal
+
+
 def fetch_photo(http: httpx.Client, photo: Photo) -> bytes | None:
     """Скачивает фото из VK. При сбое - None (попробуем на следующем запуске)."""
+    if not _is_safe_photo_url(photo.url):
+        log.warning("фото %s пропущено: недопустимый адрес", photo.uid)
+        return None
     try:
-        resp = http.get(photo.url, timeout=60)
+        resp = http.get(photo.url, timeout=60, follow_redirects=False)
         resp.raise_for_status()
     except httpx.HTTPError as exc:
         # Адрес фото в лог не пишем: в нем подпись доступа. Код ответа - пишем: по нему видно,
         # временный ли сбой (429, 5xx) или ссылка больше не годится (403, 404).
         status = f" {exc.response.status_code}" if isinstance(exc, httpx.HTTPStatusError) else ""
         log.warning("фото %s не скачано (%s%s)", photo.uid, type(exc).__name__, status)
+        return None
+    # Защита от OOM: фото VK не бывают больше 10 МБ
+    if len(resp.content) > 10 * 1024 * 1024:
+        log.warning("фото %s слишком большое (%d байт), пропущено", photo.uid, len(resp.content))
         return None
     return resp.content

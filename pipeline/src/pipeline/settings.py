@@ -186,6 +186,14 @@ def load_env(environ: Mapping[str, str] | None = None, home: Path | None = None)
     return values
 
 
+def _vk_api_url(value: str) -> str:
+    """VK API только по HTTPS: токен уходит в заголовке, открытый HTTP его раскроет."""
+    url = value.rstrip("/") + "/"
+    if not url.startswith("https://"):
+        raise RuntimeError(f"VK_API_URL должен начинаться с https://, получено {value!r}")
+    return url
+
+
 def _abs_path(env: Mapping[str, str], name: str, default: Path | None = None) -> Path:
     value = env.get(name) or (str(default) if default is not None else None)
     if not value:
@@ -239,7 +247,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     return Settings(
         data=DataDirs(_abs_path(env, DATA_VAR, default=default_data_root())),
         site=SiteDirs(_abs_path(env, SITE_ROOT_VAR)),
-        vk_api_url=env.get("VK_API_URL") or DEFAULT_VK_API_URL,
+        vk_api_url=_vk_api_url(env.get("VK_API_URL") or DEFAULT_VK_API_URL),
         vk_group_id=None if group is None else int(group),
         vk_service_token=env.get(SERVICE_TOKEN_VAR) or None,
         vk_community_token=env.get(COMMUNITY_TOKEN_VAR) or None,
