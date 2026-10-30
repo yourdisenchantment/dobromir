@@ -83,7 +83,10 @@ export ASTRO_TELEMETRY_DISABLED=1
 export CONTENT_CHECK_ONLY=1
 export PYTHONIOENCODING=utf-8
 export UV_PYTHON_DOWNLOADS=never # только системный Python, свой интерпретатор uv не качает
-umask 077 # файлы в DATA_DIR (логи, бэкапы, deploy-state) - только для владельца
+# Файлы в DATA_DIR (логи, бэкапы, deploy-state) - только для владельца.
+# Сборка и git должны использовать стандартную маску 022, иначе веб-сервер
+# не прочитает статику из releases/<timestamp>/ (403 Forbidden).
+umask 022
 
 [ -x "$PYTHON" ] || {
     echo "Обновление не запущено: нет $PYTHON (задайте PYTHON=путь)" >&2
@@ -104,6 +107,7 @@ if [ "${DOBROMIR_LOCK_HELD:-}" != "1" ]; then
 fi
 
 mkdir -p "$(dirname "$LOG")"
+chmod 700 "$DATA_DIR" 2>/dev/null || true
 LOG_START=1
 [ ! -f "$LOG" ] || LOG_START=$(($(wc -l <"$LOG") + 1)) # в письмо - строки только этого запуска
 printf '\n=== %s deploy.sh %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${ARGS[*]:-}" >>"$LOG"
@@ -122,7 +126,7 @@ die() {
 }
 short() { git -C "$REPO" rev-parse --short "$1"; }
 state_get() { [ -f "$STATE" ] && sed -n "s/^$1=//p" "$STATE" | tail -n 1 || true; }
-state_set() { printf 'failed=%s\n' "$1" >"$STATE"; }
+state_set() { printf 'failed=%s\n' "$1" >"$STATE"; chmod 600 "$STATE" 2>/dev/null || true; }
 lock_changed() { [ "$OLD" != "$NEW" ] && ! git -C "$REPO" diff --quiet "$OLD" "$NEW" -- "$@"; }
 
 STAGE=""
