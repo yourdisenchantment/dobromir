@@ -116,6 +116,16 @@ def test_broken_image_skipped(tmp_path: Path) -> None:
     store.close()
 
 
+def test_failed_photo_logs_status_without_url(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    """Код ответа - чтобы отличить временный сбой VK от мертвой ссылки; адреса (подписи) - нет."""
+    store = store_at(tmp_path)
+    ingest(store, [response(post_obj(101))], NOW)
+    with photo_http(403) as http, caplog.at_level("WARNING"):
+        assert download_photos(store, http, tmp_path / "media", NOW) == 0
+    assert "HTTPStatusError 403" in caplog.text and "http" not in caplog.text.replace("HTTPStatusError", "")
+    store.close()
+
+
 def test_end_to_end_news_json(tmp_path: Path) -> None:
     store = store_at(tmp_path)
     media = tmp_path / "site" / "media"

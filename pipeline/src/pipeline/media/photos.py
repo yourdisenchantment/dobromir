@@ -97,7 +97,9 @@ def fetch_photo(http: httpx.Client, photo: Photo) -> bytes | None:
         resp = http.get(photo.url, timeout=60)
         resp.raise_for_status()
     except httpx.HTTPError as exc:
-        # Адрес фото в лог не пишем: в нем подпись доступа.
-        log.warning("фото %s не скачано (%s)", photo.uid, type(exc).__name__)
+        # Адрес фото в лог не пишем: в нем подпись доступа. Код ответа - пишем: по нему видно,
+        # временный ли сбой (429, 5xx) или ссылка больше не годится (403, 404).
+        status = f" {exc.response.status_code}" if isinstance(exc, httpx.HTTPStatusError) else ""
+        log.warning("фото %s не скачано (%s%s)", photo.uid, type(exc).__name__, status)
         return None
     return resp.content
