@@ -175,8 +175,8 @@ fi
 
 step "Сайт"
 if [ "$APPLY" -eq 1 ]; then
-    (cd "$REPO/site" && npm ci --no-fund --no-audit)
-    echo "  >     npm ci"
+    (cd "$REPO/site" && npm ci --ignore-scripts --no-fund --no-audit)
+    echo "  >     npm ci --ignore-scripts"
     (cd "$REPO/site" && npm run build >/dev/null)
     ok "пробная сборка прошла (в site/dist, не в public_html)"
 else

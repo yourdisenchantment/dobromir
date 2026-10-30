@@ -19,21 +19,21 @@
         "test": "node --test \"src/**/*.test.ts\""
     },
     "dependencies": {
-        "@astrojs/rss": "latest",
-        "@astrojs/sitemap": "latest",
-        "astro": "latest",
-        "sharp": "latest",
-        "zod": "latest"
+        "@astrojs/rss": "^4.0.19",
+        "@astrojs/sitemap": "^3.7.4",
+        "astro": "^7.4.1",
+        "sharp": "^0.35.5",
+        "zod": "^4.6.7"
     },
     "devDependencies": {
-        "@astrojs/check": "latest",
-        "@eslint/js": "latest",
-        "@typescript-eslint/parser": "latest",
-        "eslint": "latest",
-        "eslint-plugin-astro": "latest",
-        "eslint-plugin-jsx-a11y": "latest",
-        "prettier": "latest",
-        "prettier-plugin-astro": "latest",
+        "@astrojs/check": "^0.9.11",
+        "@eslint/js": "^10.0.1",
+        "@typescript-eslint/parser": "^8.72.0",
+        "eslint": "^10.13.0",
+        "eslint-plugin-astro": "^3.2.1",
+        "eslint-plugin-jsx-a11y": "^6.10.2",
+        "prettier": "^3.9.10",
+        "prettier-plugin-astro": "^1.1.1",
         "typescript": "^6.0.3"
     },
     "overrides": {

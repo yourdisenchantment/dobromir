@@ -4,11 +4,11 @@ version = "0.0.0"
 description = "Сбор контента из VK для сайта Добромир: fetch, parse, export, уведомления"
 requires-python = ">=3.10"
 dependencies = [
-    "httpx",
-    "pillow",
-    "pydantic",
+    "httpx>=0.28,<1",
+    "pillow>=12.3,<13",
+    "pydantic>=2.13,<3",
     # База часовых поясов для zoneinfo: на хосте ее наличие не проверено.
-    "tzdata",
+    "tzdata>=2026.1",
 ]
 
 [build-system]

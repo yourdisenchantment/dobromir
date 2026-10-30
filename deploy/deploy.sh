@@ -145,8 +145,8 @@ python_deps() {
 site_deps() {
     if [ "$FORCE_NPM" -eq 1 ] || [ ! -f "$REPO/site/node_modules/.package-lock.json" ] ||
         lock_changed site/package-lock.json; then
-        (cd "$REPO/site" && npm ci --no-fund --no-audit)
-        echo "  ok    npm ci"
+        (cd "$REPO/site" && npm ci --ignore-scripts --no-fund --no-audit)
+        echo "  ok    npm ci --ignore-scripts"
     else
         echo "  ok    package-lock.json не изменился - node_modules остаются"
     fi
@@ -163,7 +163,7 @@ revert_code() {
     if [ "$ok" -eq 1 ]; then
         python_deps >/dev/null 2>&1 || ok=0
         if lock_changed site/package-lock.json; then
-            (cd "$REPO/site" && npm ci --no-fund --no-audit >/dev/null 2>&1) || ok=0
+            (cd "$REPO/site" && npm ci --ignore-scripts --no-fund --no-audit >/dev/null 2>&1) || ok=0
         fi
     fi
     if [ "$ok" -eq 1 ]; then
