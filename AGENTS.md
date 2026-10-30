@@ -28,7 +28,7 @@ BACKLOG, если у нее стоит пометка «заблокирован
 Бэкенд в работе (2026-10-23): клиент VK, разбор постов и хэш, база SQLite,
 экспорт `news.json` (формат - `docs/content-contract.md`), скачивание фото.
 Сверка с VK (окно, суточная сверка, удаления, лимит сборок) - P1-4. Команды
-`python -m pipeline survey | import | photos | export | backfill | sync | worker | rollback | build | migrate | backup | media-cleanup`;
+`python -m pipeline survey | import | photos | export | backfill | sync [--full] | worker | rollback | build | migrate | backup | media-cleanup`;
 `worker` - для cron (P1-5): блокировка, коды выхода, `status.json`, лог, сборка
 релиза и переключение `public_html` (P1-6, `pipeline/src/pipeline/release.py`); `rollback` -
 вернуть ссылку на прежний релиз (или включить любой) без пересборки; `build`,

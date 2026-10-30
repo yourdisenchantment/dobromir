@@ -52,9 +52,13 @@ def backfill(store: Store, vk: VkClient, settings: Settings, now: int) -> Counte
     return changes
 
 
-def run_sync(store: Store, vk: VkClient, http: httpx.Client, settings: Settings, now: int) -> SyncResult:
+def run_sync(
+    store: Store, vk: VkClient, http: httpx.Client, settings: Settings, now: int, *, force_full: bool = False
+) -> SyncResult:
     """Повод к сборке один: изменился news.json. Счетчики лайков его не меняют, правки, удаления,
-    закреп и докачанные фото - меняют. Несколько изменений за запуск - одна сборка."""
+    закреп и докачанные фото - меняют. Несколько изменений за запуск - одна сборка.
+
+    force_full - полная сверка сейчас, не дожидаясь суточной (ручная проверка, `sync --full`)."""
     tz = settings.tz
     result = SyncResult()
     since = retention_start(settings, now)
@@ -67,7 +71,7 @@ def run_sync(store: Store, vk: VkClient, http: httpx.Client, settings: Settings,
     window = reconcile_window(store, vk, settings.vk_window, settings.vk_page_size, now, since)
     result.changes += window.changes
     result.deleted = window.deleted
-    if full_reconcile_due(store, now, tz, settings.reconcile_after_hour):
+    if force_full or full_reconcile_due(store, now, tz, settings.reconcile_after_hour):
         full = full_reconcile(store, vk, settings.vk_by_id_batch, now, since)  # SyncError/VkError - наружу
         result.changes += full.changes
         result.deleted += full.deleted

@@ -180,6 +180,19 @@ def test_old_deletion_found_by_daily_reconcile(store: Store, tmp_path: Path) -> 
     assert r.full_reconcile and r.deleted == 1 and 2 not in live_ids(store) and r.build_now
 
 
+def test_forced_full_reconcile_runs_now_and_again(store: Store, tmp_path: Path) -> None:
+    """sync --full: полная сверка сразу и повторно в те же сутки (ручная проверка архива)."""
+    wall = FakeWall(10)
+    s = settings_at(tmp_path)
+    backfill(store, wall, at(23, 4))
+    assert sync(store, wall, s, at(23, 4)).full_reconcile  # суточная
+    wall.delete(2)
+    assert not sync(store, wall, s, at(23, 5)).full_reconcile  # второй раз за сутки - нет
+    with no_photos() as http:
+        r = run_sync(store, wall.client(), http, s, at(23, 6), force_full=True)
+    assert r.full_reconcile and r.deleted == 1 and 2 not in live_ids(store)
+
+
 def test_old_pinned_post_does_not_stretch_window(store: Store, tmp_path: Path) -> None:
     """Закреп VK отдает первым; если бы его дата задавала границу окна, все посты между ним
     и окном считались бы удаленными."""

@@ -33,7 +33,7 @@ def main() -> None:
         "survey",
         help="разведка стены: какие поля отдает VK и сколько постов видит ключ (только чтение)",
     )
-    survey.add_argument("--key", choices=["community", "service", "both"], default="both")
+    survey.add_argument("--key", choices=["community", "service", "both"], default="service")
     survey.add_argument(
         "--token-in",
         choices=["header", "body"],
@@ -46,7 +46,8 @@ def main() -> None:
     sub.add_parser("photos", help="скачать фото живых постов, которых еще нет")
     sub.add_parser("export", help="записать news.json из базы")
     sub.add_parser("backfill", help="первичная загрузка: посты стены VK за срок хранения (NEWS_RETENTION_DAYS)")
-    sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
+    sync = sub.add_parser("sync", help="один проход: окно VK, суточная сверка, фото, news.json; без сборки")
+    sync.add_argument("--full", action="store_true", help="полная сверка через wall.getById сейчас, не раз в сутки")
     sub.add_parser("worker", help="запуск из cron: блокировка, синк, сборка, status.json, коды выхода")
     back = sub.add_parser("rollback", help="вернуть public_html на предыдущий релиз без пересборки")
     back.add_argument("--to", help="имя релиза из releases/ (любого, не только старого); по умолчанию - предыдущий")
@@ -97,7 +98,7 @@ def main() -> None:
                     changes = backfill(store, vk, settings, now)
                     logging.info("записано: %s", {c.value: n for c, n in changes.items()} or "ничего")
                 else:
-                    r = run_sync(store, vk, http, settings, now)
+                    r = run_sync(store, vk, http, settings, now, force_full=args.full)
                     logging.info(
                         "посты: %s; удалено: %s; по сроку: %s; полная сверка: %s; фото: %s; news.json %s; сборка: %s",
                         {c.value: n for c, n in r.changes.items()} or "нет",
