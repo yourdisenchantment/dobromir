@@ -132,9 +132,11 @@ def window_missing(store: Store, response: dict[str, Any]) -> set[tuple[int, int
     regular = [p for p in items if not p.get("is_pinned") and isinstance(p.get("date"), int)]
     if not response.get("complete") or not regular:
         return set()
-    oldest = min(p["date"] for p in regular)
+    oldest_post = min(regular, key=lambda p: (p["date"], p["id"]))
     present = {(p.get("owner_id"), p.get("id")) for p in items if not _marked_deleted(p)}
-    return {key for key in store.live_keys_since(oldest) if key not in present}
+    return {
+        key for key in store.live_keys_since(oldest_post["date"]) if key not in present and key[1] >= oldest_post["id"]
+    }
 
 
 def _guard(missing: set[Any], live: int, where: str) -> None:
@@ -177,11 +179,14 @@ def full_reconcile(store: Store, vk: VkClient, batch: int, now: int, since: int 
     того, как что-то записано. Если к удалению больше max(3, 20% живых) - ничего не
     применяется и поднимается SyncError: скорее сбой VK, чем массовое удаление.
     """
-    keys = store.live_keys()
-    if not keys:
+    live_keys = store.live_keys()
+    deleted_keys = store.deleted_keys()
+    all_keys = live_keys + deleted_keys
+    if not all_keys:
         return ReconcileResult()
-    owner = keys[0][0]
-    ids = [post_id for _, post_id in keys]
+    owner = all_keys[0][0]
+    live_ids = {post_id for _, post_id in live_keys}
+    ids = [post_id for _, post_id in all_keys]
     batches: list[tuple[list[int], dict[str, Any]]] = []
     for start in range(0, len(ids), batch):
         chunk = ids[start : start + batch]
@@ -189,10 +194,12 @@ def full_reconcile(store: Store, vk: VkClient, batch: int, now: int, since: int 
     missing = classify_missing(batches)
     responses = [resp for _, resp in batches]
 
-    _guard(missing, len(ids), "суточная сверка")
+    # Только живые посты могут быть помечены удаленными; удаленные - для восстановления.
+    to_delete = missing & live_ids
+    _guard(to_delete, len(live_keys) or 1, "суточная сверка")
     result = ReconcileResult(checked=len(ids))
     result.changes = ingest(store, responses, now, since)
-    result.deleted = store.mark_deleted([(owner, i) for i in sorted(missing)], now)
+    result.deleted = store.mark_deleted([(owner, i) for i in sorted(to_delete)], now)
     return result
 
 

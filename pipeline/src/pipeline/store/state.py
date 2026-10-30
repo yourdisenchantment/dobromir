@@ -163,6 +163,16 @@ class Store:
             )
         ]
 
+    def deleted_keys(self) -> list[tuple[int, int]]:
+        """Посты, помеченные удаленными, но еще в пределах срока хранения.
+        Нужны для суточной сверки: если пост вернулся в VK, восстановить его."""
+        return [
+            (r["owner_id"], r["id"])
+            for r in self._db.execute(
+                "SELECT owner_id, id FROM posts WHERE deleted_at IS NOT NULL ORDER BY date DESC, id DESC"
+            )
+        ]
+
     # --- фото ---
 
     def record_photo(self, photo: Photo, files: PhotoFiles, now: int) -> None:
