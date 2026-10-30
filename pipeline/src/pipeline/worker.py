@@ -68,6 +68,9 @@ def file_logging(settings: Settings, max_bytes: int = LOG_MAX_BYTES) -> Iterator
     log.addHandler(handler)
     log.setLevel(logging.INFO)
     log.propagate = False
+    # httpx/httpcore могут писать дампы запросов в обход _scrub - глушим их
+    for name in ("httpx", "httpcore"):
+        logging.getLogger(name).setLevel(logging.WARNING)
     try:
         yield
     finally:
