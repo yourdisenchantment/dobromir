@@ -21,9 +21,14 @@ function devMedia() {
         configureServer(server) {
             if (!root) return;
             server.middlewares.use("/media/", (req, res, next) => {
-                const name = decodeURIComponent(
-                    (req.url ?? "").split("?")[0],
-                ).replace(/\/+$/, "");
+                let name;
+                try {
+                    name = decodeURIComponent(
+                        (req.url ?? "").split("?")[0],
+                    ).replace(/\/+$/, "");
+                } catch {
+                    return next();
+                }
                 const file = resolve(root, `.${name}`);
                 // Не выпускать за пределы каталога: ../ в адресе
                 if (!file.startsWith(root + sep) || !file.endsWith(".webp"))
