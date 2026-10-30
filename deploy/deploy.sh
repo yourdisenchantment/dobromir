@@ -82,6 +82,7 @@ export ASTRO_TELEMETRY_DISABLED=1
 export CONTENT_CHECK_ONLY=1
 export PYTHONIOENCODING=utf-8
 export UV_PYTHON_DOWNLOADS=never # только системный Python, свой интерпретатор uv не качает
+umask 077 # файлы в DATA_DIR (логи, бэкапы, deploy-state) - только для владельца
 
 [ -x "$PYTHON" ] || {
     echo "Обновление не запущено: нет $PYTHON (задайте PYTHON=путь)" >&2

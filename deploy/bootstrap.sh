@@ -125,11 +125,12 @@ step "Каталоги"
 for d in "$DATA_DIR" "$DATA_DIR/db" "$DATA_DIR/export" "$DATA_DIR/logs" "$SITE_DIR/media" "$SITE_DIR/releases"; do
     if [ -d "$d" ]; then ok "есть $d"; else run mkdir -p "$d"; fi
 done
-[ -d "$DATA_DIR" ] && run chmod 700 "$DATA_DIR"
+run chmod 700 "$DATA_DIR"
 
 step "Настройки ($DATA_DIR/.env)"
 if [ -e "$DATA_DIR/.env" ]; then
-    ok "уже есть, не трогаю"
+    run chmod 600 "$DATA_DIR/.env"
+    ok "уже есть, не трогаю (права 600 проверены)"
 else
     if [ "$APPLY" -eq 1 ]; then
         umask 077
