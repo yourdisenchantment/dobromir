@@ -166,7 +166,7 @@ def test_new_commit_is_built_checked_switched_and_reported(server: Server) -> No
 def test_new_package_lock_runs_npm_ci(server: Server) -> None:
     server.push("build(site): обновить зависимости", **{"site/package-lock.json": "2\n"})
     assert server.deploy("--cron").returncode == 0
-    assert "npm ci --no-fund --no-audit" in server.calls()
+    assert "npm ci --ignore-scripts --no-fund --no-audit" in server.calls()
 
 
 def test_build_failure_keeps_site_reverts_code_and_reports(server: Server) -> None:
@@ -185,7 +185,7 @@ def test_build_failure_keeps_site_reverts_code_and_reports(server: Server) -> No
     assert "migrate" not in " ".join(server.calls())  # до миграций не дошли
     assert (server.data / "deploy-state").read_text(encoding="utf-8") == f"failed={bad}\n"
     # Зависимости вернули к прежнему lock: npm ci второй раз - уже для старого.
-    assert server.calls().count("npm ci --no-fund --no-audit") == 2
+    assert server.calls().count("npm ci --ignore-scripts --no-fund --no-audit") == 2
 
 
 def test_failed_commit_not_retried_by_cron_but_retried_by_hand(server: Server) -> None:
