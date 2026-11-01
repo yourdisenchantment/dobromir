@@ -204,3 +204,74 @@ cd ~/dobromir && git log --oneline -10       # выбрать коммит
 - Не трогать `bprof.a978879k.beget.tech` и не запускать ничего фоном (`nohup`, демоны):
   Beget это запрещает.
 - Не показывать и не пересылать `~/dobromir-data/.env`.
+
+## Настройка файла .env (добавлено 2026-11-02)
+
+
+## Настройка файла .env (добавлено 2026-11-02)
+
+После клонирования и `./deploy/bootstrap.sh --apply` файл `~/dobromir-data/.env` заполняется так:
+
+```txt
+SITE_ROOT=/home/a/a978879k/a978879k.beget.tech
+SITE_ENV=production
+VK_SERVICE_TOKEN=<ваш_сервисный_ключ_VK>
+VK_GROUP_ID=49938199
+NEWS_RETENTION_DAYS=90
+```
+
+- Путь к `.env`: `~/dobromir-data/.env` (права 600). Другие файлы (например `~/.env.local`, `~/.env`) не читаются.
+- Из перечисленного только `VK_SERVICE_TOKEN` вводится вручную (секрет, привязан к аккаунту владельца VK-приложения на dev.vk.com).
+- `SITE_ENV`: `production` для реального сайта, `staging` для тестовой публикации (добавляет noindex).
+- `VK_GROUP_ID` (без минуса) — id группы-источника новостей:
+  - Боевая: `49938199` (vk.com/dobromir.crimea) — только production
+  - Тестовая: `242263522` (vk.com/antarctic.test) — только локальные проверки
+- `VK_COMMUNITY_TOKEN` оставить пустым: сервисный ключ читает стену полностью, ключ сообщества не требуется.
+- `SITE_ROOT` — абсолютный путь (без `~`).
+- `NEWS_RETENTION_DAYS` по умолчанию 90.
+
+
+## Настройка файла .env (добавлено 2026-11-02)
+
+После клонирования и `./deploy/bootstrap.sh --apply` файл `~/dobromir-data/.env` заполняется так:
+
+```txt
+SITE_ROOT=/home/a/a978879k/a978879k.beget.tech
+SITE_ENV=production
+VK_SERVICE_TOKEN=<ваш_сервисный_ключ_VK>
+VK_GROUP_ID=49938199
+NEWS_RETENTION_DAYS=90
+```
+
+- Путь к `.env`: `~/dobromir-data/.env` (права 600). Другие файлы (например `~/.env.local`, `~/.env`) не читаются.
+- Из перечисленного только `VK_SERVICE_TOKEN` вводится вручную (секрет, привязан к аккаунту владельца VK-приложения на dev.vk.com).
+- `SITE_ENV`: `production` для реального сайта, `staging` для тестовой публикации (добавляет noindex).
+- `VK_GROUP_ID` (без минуса) — id группы-источника новостей:
+  - Боевая: `49938199` (vk.com/dobromir.crimea) — только production
+  - Тестовая: `242263522` (vk.com/antarctic.test) — только локальные проверки
+- `VK_COMMUNITY_TOKEN` оставить пустым: сервисный ключ читает стену полностью, ключ сообщества не требуется.
+- `SITE_ROOT` — абсолютный путь (без `~`).
+- `NEWS_RETENTION_DAYS` по умолчанию 90.
+
+
+## Настройка файла .env (добавлено 2026-11-02)
+
+После клонирования и `./deploy/bootstrap.sh --apply` файл `~/dobromir-data/.env` заполняется так:
+
+```txt
+SITE_ROOT=/home/a/a978879k/a978879k.beget.tech
+SITE_ENV=production
+VK_SERVICE_TOKEN=<ваш_сервисный_ключ_VK>
+VK_GROUP_ID=49938199
+NEWS_RETENTION_DAYS=90
+```
+
+- Путь к `.env`: `~/dobromir-data/.env` (права 600). Другие файлы (например `~/.env.local`, `~/.env`) не читаются.
+- Из перечисленного только `VK_SERVICE_TOKEN` вводится вручную (секрет, привязан к аккаунту владельца VK-приложения на dev.vk.com).
+- `SITE_ENV`: `production` для реального сайта, `staging` для тестовой публикации (добавляет noindex).
+- `VK_GROUP_ID` (без минуса) — id группы-источника новостей:
+  - Боевая: `49938199` (vk.com/dobromir.crimea) — только production
+  - Тестовая: `242263522` (vk.com/antarctic.test) — только локальные проверки
+- `VK_COMMUNITY_TOKEN` оставить пустым: сервисный ключ читает стену полностью, ключ сообщества не требуется.
+- `SITE_ROOT` — абсолютный путь (без `~`).
+- `NEWS_RETENTION_DAYS` по умолчанию 90.

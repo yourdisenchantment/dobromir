@@ -57,7 +57,7 @@ cp .env.example ~/dobromir-data/.env
 SITE_ROOT=/абсолютный/путь/к/site
 SITE_ENV=staging (или production)
 VK_SERVICE_TOKEN=ваш_сервисный_ключ
-VK_GROUP_ID=id_группы_без_минуса
+VK_GROUP_ID=49938199   # боевая (dobromir.crimea); тестовая 242263522 (antarctic.test)
 NEWS_RETENTION_DAYS=90
 ```
 
