@@ -45,13 +45,14 @@ jobs:
           SITE_BASE: /dobromir
 
       - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
 
   deploy:
-    # У GitHub Pages те же экшены, что и у GitVerse Pages (они их форкнули),
-    # но токен публикации здесь выдает сам GitHub.
+    # Токен публикации здесь выдает сам GitHub. Версии выше, чем в gitverse форке:
+    # у GitHub actions/upload-artifact v3 отключен (deprecation 2024-04-16), поэтому
+    # нужны upload-pages-artifact v3 / deploy-pages v4.
     needs: build
     if: startsWith(github.server_url, 'https://github.com')
     runs-on: ubuntu-latest
@@ -61,4 +62,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
