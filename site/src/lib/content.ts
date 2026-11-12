@@ -6,6 +6,7 @@
 import type { ImageMetadata } from "astro";
 import { z } from "zod";
 
+import { withBase } from "./env";
 import { iconNames, icons } from "./icons";
 
 import pageJson from "../../content/page.json";
@@ -330,7 +331,7 @@ export function specialistCard(person: Specialist) {
         title: person.name,
         subtitle: person.position,
         text: person.short,
-        href: `/specialisty/${person.slug}/`,
+        href: withBase(`/specialisty/${person.slug}/`),
         modal: true,
         ratio: "1/1" as const,
         focus: "50% 20%",

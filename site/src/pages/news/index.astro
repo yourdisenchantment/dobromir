@@ -7,6 +7,7 @@ import Base from "../../layouts/Base.astro";
 import Button from "../../components/Button.astro";
 import Card from "../../components/Card.astro";
 import { loadNews, newsCard } from "../../lib/news";
+import { withBase } from "../../lib/env";
 
 const posts = loadNews();
 const ordered = [
@@ -21,7 +22,7 @@ const ordered = [
 >
     <div class="container page">
         <div>
-            <Button href="/#news" variant="secondary">
+            <Button href={withBase("/#news")} variant="secondary">
                 <span aria-hidden="true">←</span> На главную
             </Button>
         </div>
@@ -40,7 +41,7 @@ const ordered = [
             </ul>
         )}
         <div class="bottom">
-            <Button href="/#news" variant="secondary">
+            <Button href={withBase("/#news")} variant="secondary">
                 <span aria-hidden="true">←</span> На главную
             </Button>
             <a href="https://vk.com/dobromir.crimea" rel="noopener">

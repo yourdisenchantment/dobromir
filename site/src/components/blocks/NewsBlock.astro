@@ -7,6 +7,7 @@ import Card from "../Card.astro";
 import Carousel from "../Carousel.astro";
 import { loadNews, newsCard } from "../../lib/news";
 import type { Block } from "../../lib/content";
+import { withBase } from "../../lib/env";
 
 interface Props {
     block: Extract<Block, { type: "news" }>;
@@ -25,7 +26,7 @@ const news = loadNews().slice(0, block.count).map(newsCard);
             as="li"
             title="Все новости"
             text="Новости центра за последние три месяца"
-            href="/news/"
+            href={withBase("/news/")}
         />
     </Carousel>
 ) : (

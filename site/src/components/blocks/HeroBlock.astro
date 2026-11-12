@@ -3,6 +3,7 @@
 // (первая - основная, вторая - контур) и логотип.
 import Button from "../Button.astro";
 import type { Block } from "../../lib/content";
+import { withBase } from "../../lib/env";
 
 interface Props {
     block: Extract<Block, { type: "hero" }>;
@@ -28,7 +29,13 @@ const { block } = Astro.props;
             </div>
         )}
     </div>
-    <img class="logo" src="/logo.svg" width="568" height="232" alt="" />
+    <img
+        class="logo"
+        src={withBase("/logo.svg")}
+        width="568"
+        height="232"
+        alt=""
+    />
 </div>
 
 <style>

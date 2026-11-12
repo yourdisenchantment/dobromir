@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import example from "../sample/news.example.json";
 
-import { newsJsonPath, siteEnv } from "./env";
+import { newsJsonPath, siteEnv, withBase } from "./env";
 import { formatDate } from "./date";
 import { restAfterTitle } from "./cardtext";
 import { plainVkText } from "./vktext";
@@ -110,9 +110,9 @@ export function mediaUrl(file: string): string {
         file.includes("..") ||
         !/^(?:photos\/)?[a-zA-Z0-9._-]+\.webp$/u.test(file)
     ) {
-        return "/media/";
+        return withBase("/media/");
     }
-    return `/media/${file}`;
+    return withBase(`/media/${file}`);
 }
 
 /** Новость как карточка (components/Card.astro): лента лендинга, архив, стайлбук. */
@@ -131,7 +131,7 @@ export function newsCard(post: NewsPost) {
                 ),
                 140,
             ) || undefined,
-        href: `/news/${post.slug}/`,
+        href: withBase(`/news/${post.slug}/`),
         modal: true,
         image: cover
             ? {

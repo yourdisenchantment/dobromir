@@ -10,7 +10,7 @@ import Modal from "../components/Modal.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import ToTop from "../components/ToTop.astro";
-import { siteEnv, siteUrl, verification } from "../lib/env";
+import { siteEnv, siteUrl, verification, withBase } from "../lib/env";
 
 interface Props {
     title: string;
@@ -59,16 +59,16 @@ const fullTitle = title === "Добромир" ? title : `${title} - Добро�
         {ogImage && <meta property="og:image" content={ogImage} />}
         {ogImage && <meta name="twitter:card" content="summary_large_image" />}
         {ogImage && <meta name="twitter:image" content={ogImage} />}
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href={withBase("/favicon.ico")} sizes="32x32" />
+        <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
+        <link rel="apple-touch-icon" href={withBase("/apple-touch-icon.png")} />
         <link
             rel="alternate"
             type="application/rss+xml"
             title="Новости Добромира"
-            href="/rss.xml"
+            href={withBase("/rss.xml")}
         />
-        <link rel="sitemap" href="/sitemap-index.xml" />
+        <link rel="sitemap" href={withBase("/sitemap-index.xml")} />
         {jsonLd &&
             jsonLd.map((item) => (
                 <script

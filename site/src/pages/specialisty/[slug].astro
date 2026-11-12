@@ -5,7 +5,7 @@ import Base from "../../layouts/Base.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import SpecialistArticle from "../../components/SpecialistArticle.astro";
 import { loadSpecialists, type Specialist } from "../../lib/content";
-import { siteUrl } from "../../lib/env";
+import { siteUrl, withBase } from "../../lib/env";
 
 export function getStaticPaths() {
     return loadSpecialists().items.map((person) => ({
@@ -34,9 +34,10 @@ const jsonLd = [
         worksFor: {
             "@type": "Organization",
             name: "Республиканский центр коррекционной педагогики «Добромир»",
-            url: siteUrl(),
+            url: new URL(withBase("/"), `${siteUrl()}/`).href,
         },
-        url: new URL(`/specialisty/${person.slug}/`, `${siteUrl()}/`).href,
+        url: new URL(withBase(`/specialisty/${person.slug}/`), `${siteUrl()}/`)
+            .href,
         image: ogImage,
     },
     {
@@ -47,13 +48,13 @@ const jsonLd = [
                 "@type": "ListItem",
                 position: 1,
                 name: "Главная",
-                item: `${siteUrl()}/`,
+                item: new URL(withBase("/"), `${siteUrl()}/`).href,
             },
             {
                 "@type": "ListItem",
                 position: 2,
                 name: "Специалисты",
-                item: `${siteUrl()}/#specialists`,
+                item: new URL(withBase("/#specialists"), `${siteUrl()}/`).href,
             },
             { "@type": "ListItem", position: 3, name: person.name },
         ],
@@ -70,8 +71,8 @@ const jsonLd = [
     <div class="container page">
         <Breadcrumbs
             items={[
-                { href: "/", label: "Главная" },
-                { href: "/#specialists", label: "Специалисты" },
+                { href: withBase("/"), label: "Главная" },
+                { href: withBase("/#specialists"), label: "Специалисты" },
             ]}
         />
         <SpecialistArticle person={person} />

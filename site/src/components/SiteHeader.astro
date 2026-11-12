@@ -7,13 +7,14 @@
 // Ссылки повторены в двух навигациях, но видна всегда одна: вторая скрыта display: none
 // и для экранных дикторов.
 import { menuLinks, siteContacts, tel } from "../lib/content";
+import { withBase } from "../lib/env";
 
 interface Props {
     /** Начало ссылок меню: "/" на всех страницах, "" - на самом лендинге-образце. */
     base?: string;
 }
 
-const { base = "/" } = Astro.props;
+const { base = withBase("/") } = Astro.props;
 // Пункты меню - блоки лендинга с полем menu, в порядке site/content/page.json
 // (решено 2026-10-27): меню и блоки на странице идут в одном порядке.
 const links = menuLinks().map((l) => ({ ...l, href: `${base}#${l.id}` }));
@@ -23,8 +24,8 @@ const phone = { href: tel(booking.number), label: booking.number };
 
 <header class="header" data-header>
     <div class="bar container">
-        <a class="logo" href="/" aria-label="Добромир, на главную">
-            <img src="/logo.svg" width="568" height="232" alt="" />
+        <a class="logo" href={withBase("/")} aria-label="Добромир, на главную">
+            <img src={withBase("/logo.svg")} width="568" height="232" alt="" />
             <span class="name">Добромир</span>
         </a>
         <nav aria-label="Основное меню" class="nav wide">

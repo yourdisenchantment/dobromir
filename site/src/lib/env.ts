@@ -19,6 +19,18 @@ export function siteUrl(): string {
     return (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, "");
 }
 
+/** Подпапка публикации ("" для корня), без завершающих слэшей. */
+export function siteBase(): string {
+    return (process.env.SITE_BASE ?? "").replace(/\/+$/, "");
+}
+
+/** Добавляет подпапку только к внутреннему абсолютному пути. */
+export function withBase(path: string): string {
+    const base = siteBase();
+    if (!base || !path.startsWith("/")) return path;
+    return `${base}${path}`;
+}
+
 export function newsJsonPath(): string | undefined {
     return process.env.NEWS_JSON || undefined;
 }

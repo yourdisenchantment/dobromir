@@ -11,6 +11,7 @@ import { resolve, sep } from "node:path";
 const site = (
     process.env.SITE_URL || "https://xn----9sbirljdkbtdc7l.xn--p1ai"
 ).replace(/\/+$/, "");
+const base = (process.env.SITE_BASE || "").replace(/\/+$/, "");
 
 // Только для сервера разработки: фото новостей из MEDIA_DIR (на хостинге их отдает
 // ссылка media рядом с релизом, в сборку они не попадают). Без MEDIA_DIR - 404, как раньше.
@@ -48,6 +49,7 @@ function devMedia() {
 
 export default defineConfig({
     site,
+    base: base || undefined,
     outDir: process.env.ASTRO_OUT_DIR || "./dist",
     // Адреса со слэшем в конце, как у старого WordPress: старые ссылки совпадут.
     trailingSlash: "always",
