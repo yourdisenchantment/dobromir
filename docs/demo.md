@@ -10,11 +10,11 @@
 |---|---|---|
 | [GitVerse Pages](https://yourdisenchantment.gitverse.site/dobromir) - основная | `yourdisenchantment.gitverse.site/dobromir` | Само, на каждый push в `main` |
 | [GitHub Pages](https://yourdisenchantment.github.io/dobromir/) | `yourdisenchantment.github.io/dobromir/` | На push в зеркальный репозиторий GitHub |
-| [Cloudflare Pages](https://dobromir-demo.pages.dev) | `dobromir-demo.pages.dev` | На push в зеркальный репозиторий GitHub |
+| [Cloudflare Pages](https://dobromir.pages.dev) | `dobromir.pages.dev` | На push в зеркальный репозиторий GitHub |
 
-Подпапки `/dobromir` у GitVerse и GitHub - обязательны: оба сервиса публикуют
-сайт проекта в поддомене с путем по названию репозитория. Подпапка задается
-`SITE_BASE`, Cloudflare свой путь в корень отдает, поэтому там `SITE_BASE` нет.
+GitVerse и GitHub публикуют сайт проекта по подпапке `/dobromir` (путь в поддомене
+равен имени репозитория): подпапку для сборки задает `SITE_BASE`. Cloudflare отдает
+демо из корня своего поддомена, поэтому там `SITE_BASE` не нужен.
 
 ## Зеркальный репозиторий GitHub
 
@@ -22,8 +22,9 @@ Cloudflare Pages и GitHub Actions подключаются только к GitH
 зеркальный репозиторий нужен только ради этих сборок; GitVerse остается единственным
 местом правок, боевой деплой на Beget не меняется.
 
-1. создать пустой публичный репозиторий `dobromir` на GitHub (публичности GitVerse
-   уже открыт, ничего не открывается дополнительно);
+1. создать пустой публичный репозиторий `dobromir` на GitHub. Публичность нужна:
+   GitHub Pages бесплатно работает только в публичных репозиториях, а код и так
+   открыт в GitVerse - зеркалом ничего не раскрываем нового;
 2. добавить remote и отправить один раз:
 
    ```bash
@@ -47,7 +48,7 @@ Cloudflare Pages и GitHub Actions подключаются только к GitH
 
 ## GitHub Pages
 
-1. Push в зеркальный репозиторий GitHub с `.github/workflows/gh-pages.yml`.
+1. Push в зеркальный репозиторий GitHub с `.github/workflows/pages.yaml`.
 2. В GitHub: **Settings -> Pages -> Build and deployment -> Source: GitHub Actions**.
 3. Workflow **Demo on GitHub Pages** запустится после следующего `git push github main`.
 
@@ -59,22 +60,22 @@ Cloudflare Pages и GitHub Actions подключаются только к GitH
 
 1. Cloudflare Dashboard: **Workers & Pages -> Create -> Pages -> Connect to Git**.
 2. Выбрать GitHub-репозиторий `dobromir`.
-3. Настройки: Project name `dobromir-demo`, Production branch `main`,
+3. Настройки: Project name `dobromir`, Production branch `main`,
    Root directory `/site`, Build command `npm ci && npm run build`,
    Build output directory `dist`, Branch deployments включены.
 4. Environment variables (Production и Preview):
    - `NODE_VERSION` = `24`;
    - `SITE_ENV` = `staging`;
-   - `SITE_URL` = `https://dobromir-demo.pages.dev`;
+   - `SITE_URL` = `https://dobromir.pages.dev`;
    - `ASTRO_TELEMETRY_DISABLED` = `1`.
 
 `SITE_BASE` здесь не задавать: Cloudflare отдает сайт из корня своего поддомена.
-Адрес появится после первого деплоя (`https://dobromir-demo.pages.dev`).
+Адрес появится после первого деплоя: `https://dobromir.pages.dev`.
 
 ## Снятие с публикации
 
 - GitVerse: **Настройки -> Страницы -> выключить Pages**.
 - GitHub: **Settings -> Pages** - «unpublish site» либо удалить workflow.
-- Cloudflare: удалить проект `dobromir-demo` (Settings -> Delete project).
+- Cloudflare: удалить проект `dobromir` (Settings -> Delete project).
 
 Все эти действия не затрагивают боевой сайт на Beget и ветку `main`.

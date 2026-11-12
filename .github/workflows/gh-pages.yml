@@ -25,10 +25,10 @@ jobs:
     if: startsWith(github.server_url, 'https://github.com')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
 
@@ -45,14 +45,16 @@ jobs:
           SITE_BASE: /dobromir
 
       - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+        # v5 внутри использует upload-artifact v7 (Node 24); v3 тянул v4 - предупреждение.
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site/dist
 
   deploy:
-    # Токен публикации здесь выдает сам GitHub. Версии выше, чем в gitverse форке:
-    # у GitHub actions/upload-artifact v3 отключен (deprecation 2024-04-16), поэтому
-    # нужны upload-pages-artifact v3 / deploy-pages v4.
+    # Токен публикации здесь выдает сам GitHub. Актуальные major-версии экшенов
+    # (на ноябрь 2026): checkout/setup-node/upload-pages-artifact - v7/v7/v5,
+    # у них рантайм на Node 24; v3 upload-pages-artifact тянул upload-artifact v4
+    # и давал предупреждение про устаревший Node 20.
     needs: build
     if: startsWith(github.server_url, 'https://github.com')
     runs-on: ubuntu-latest

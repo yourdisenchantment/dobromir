@@ -12,7 +12,7 @@
 
 - [GitVerse Pages](https://yourdisenchantment.gitverse.site/dobromir)
 - [GitHub Pages](https://yourdisenchantment.github.io/dobromir/)
-- [Cloudflare Pages](https://dobromir-demo.pages.dev)
+- [Cloudflare Pages](https://dobromir.pages.dev)
 
 ## Как это работает
 
@@ -45,6 +45,7 @@ npm run dev        # http://localhost:4321/, новости - из пример�
 |---|---|
 | Поменять тексты, блоки, специалистов, телефоны (без программирования) | [docs/HOWTO-add-content.md](docs/HOWTO-add-content.md) |
 | Поменять код: какой файл за что отвечает | [docs/HOWTO-change.md](docs/HOWTO-change.md) |
+| Демо-адреса для показа и как их включить | [docs/demo.md](docs/demo.md) |
 | Как предложить правку, проверки, коммиты | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Правила работы и принятые решения (главный документ, в том числе для нейросетей) | [AGENTS.md](AGENTS.md) |
 | Страницы и блоки сайта | [docs/pages.md](docs/pages.md) |
