@@ -1,0 +1,64 @@
+# Демо сайта на GitHub Pages: примеры новостей из site/src/sample, noindex.
+# Репозиторий в GitVerse - основной, здесь (в зеркале GitHub) workflow публикует
+# site/dist как GitHub Pages. В GitVerse шаги пропускаются (guard по server_url).
+# Включение: в GitHub Настройки -> Pages -> Source: GitHub Actions.
+name: Demo on GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Основной репозиторий - GitVerse, этот workflow нужен только там, где он
+    # запускается GitHub'ом: у GitVerse свои экшены в .gitverse/workflows/pages.yml.
+    if: startsWith(github.server_url, 'https://github.com')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install
+        run: npm ci
+        working-directory: site
+
+      - name: Build
+        run: npm run build
+        working-directory: site
+        env:
+          SITE_ENV: staging
+          SITE_URL: https://yourdisenchantment.github.io
+          SITE_BASE: /dobromir
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: site/dist
+
+  deploy:
+    # У GitHub Pages те же экшены, что и у GitVerse Pages (они их форкнули),
+    # но токен публикации здесь выдает сам GitHub.
+    needs: build
+    if: startsWith(github.server_url, 'https://github.com')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v1

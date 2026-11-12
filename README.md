@@ -4,6 +4,16 @@
 `добромир-крым.рф`. Главная страница рассказывает о центре, услугах и специалистах,
 новости сами приходят из группы [ВКонтакте](https://vk.com/dobromir.crimea).
 
+## Демо
+
+Работающий сайт собирается на Beget и пока не запущен; до запуска центр можно
+показывать по демо-адресам. В демо новости - примеры из `site/src/sample/`, все
+страницы закрыты от поисковиков (`noindex`). Инструкция - [docs/demo.md](docs/demo.md).
+
+- [GitVerse Pages](https://yourdisenchantment.gitverse.site/dobromir)
+- [GitHub Pages](https://yourdisenchantment.github.io/dobromir/)
+- [Cloudflare Pages](https://dobromir-demo.pages.dev)
+
 ## Как это работает
 
 - **`site/`** - статичный сайт на [Astro](https://astro.build/). Тексты, блоки главной и
