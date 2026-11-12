@@ -31,7 +31,7 @@ jobs:
           SITE_BASE: /dobromir
 
       - name: Upload pages artifact
-        uses: gitverse/upload-pages-artifact@v1.0.0
+        uses: actions/upload-pages-artifact@v1
         with:
           path: site/dist
 
@@ -39,4 +39,4 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: gitverse/deploy-pages@v1.0.0
+      - uses: actions/deploy-pages@v1
